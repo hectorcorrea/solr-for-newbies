@@ -61,8 +61,6 @@ there are lots of predefined field types available out of the box, and each of
 them with its own configuration.
 
 
-
-
 ## Fields
 Let's look at the details the `id` field in our schema
 
@@ -79,7 +77,8 @@ $ curl localhost:8983/solr/bibdata/schema/fields/id
   #    "multiValued":false,
   #    "indexed":true,
   #    "required":true,
-  #    "stored":true}
+  #    "stored":true
+  #   }
   # }
   #
 ```
@@ -95,10 +94,11 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
   # {
   #   "responseHeader":{...},
   #   "fieldType":{
-  #   "name":"string",
-  #   "class":"solr.StrField",
-  #   "sortMissingLast":true,
-  #   "docValues":true}
+  #     "name":"string",
+  #     "class":"solr.StrField",
+  #     "sortMissingLast":true,
+  #     "docValues":true
+  #   }
   # }
   #
 ```
@@ -116,8 +116,9 @@ $ curl localhost:8983/solr/bibdata/schema/fields/title
   # {
   #   "responseHeader":{...}
   #   "field":{
-  #   "name":"title",
-  #   "type":"text_general"}
+  #     "name":"title",
+  #     "type":"text_general"
+  #   }
   # }
   #
 ```
@@ -126,7 +127,7 @@ That looks innocent enough: our `title` field points to the type `text_general`
 so let's see what does `text_general` means:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
+$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
 
   # {
   #   "responseHeader":{...}
@@ -148,7 +149,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
   #         {
   #           "class":"solr.LowerCaseFilterFactory"
   #         }
-  #      ]
+  #       ]
   #     },
   #     "queryAnalyzer":{
   #       "tokenizer":{
@@ -176,16 +177,35 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
 ```
 
 This is obviously a much more complex definition than the ones that we saw
-before. The basic are the same, the field type points to a `class` and it
-indicates that it is a multi-value type. However, notice the next two kinds
+before. The basic are the same, the field type points to a `class` (solr.TextField)
+and it also indicates that it is a multi-value type. However, notice the next two kinds
 of information defined for this field, namely the information under the
-`indexAnalyzer` and `queryAnalyzer` nodes.
+`indexAnalyzer` and `queryAnalyzer`.
 
 `indexAnalyzer` refers to the kind of transformations that will be made to
 any field of this type before the value is indexed by Solr.
 
 `queryAnalyzer` refers to the transformations that will be made to any
 value that references a field of this type when we query a `text_general` field.
+
+Notice for example how it will take into account "stop words" (e.g. words to be
+ignored) both at index and query time, but it will take into account "synonyms"
+only at querying time.
+
+
+## Tokenizers and Filters  
+Tokenizer splits words, for example if we index "hello world" a tokenizer
+will split it in two "hello" and "word".
+
+Filters to other operations on the value. For example, a "stemmer" gets the
+roots of the word
+
+In the definition of the `text_general` we see a tokenizer but not a stemmer.
+
+If we look at the `text_en` field type instead we'll see that it uses both a
+tokenizer and a stemmer (solr.PorterStemFilterFactory)
+
+TODO: elaborate on this.
 
 
 ### Adding a new field
