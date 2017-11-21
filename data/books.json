@@ -49,10 +49,16 @@
   },
   {
     "id": "b1014160",
-    "author": "Naumann, Felix",
+    "author": "Beiser, Arthur",
     "title": "The earth",
     "title_resp": "by Arthur Beiser and the editors of Life",
     "pub_year": "1962",
     "subjects": ["Earth (Planet)"]
+  },
+  {
+    "id": "b2260068",
+    "author": "Hugo, Victor,",
+    "title": "Les miserables",
+    "pub_year": "1910",
   }
 ]
