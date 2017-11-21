@@ -31,7 +31,7 @@ If you don't have the JDK installed you'll see something like
 **Note for Mac users:** After running the `java -version` command above
 if the JDK is not installed the Mac might give a prompt to install Java.
 If you follow the prompt's instructions you will be installing the Java Runtime Environment (JRE) which *it is not what you need to run Solr*. It won't hurt
-to installing the JRE but you it won't help you either. You can ignore that prompt.
+to install the JRE but you it won't help you either. You can ignore that prompt.
 
 If Java *is installed* on your machine skip the "Installing Java" section below
 and jump to the "Installing Solr" section. If Java *is not installed* on your
@@ -56,7 +56,7 @@ You can find download links for Solr at the [Apache Solr](https://lucene.apache.
 site. To make it easy, below are the steps to download and install version 7.1
 which is the one that we will using.
 
-First, download Solr with and save it to a file.
+First, download Solr and save it to a file.
 
 ```
 $ cd

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "b3799176",
+    "author": "Swanson, Vernon E.",
+    "author_other": ["Huffman, Claude."],
+    "title": "Guidelines for sample collecting and analytical methods used in the U.S. Geological Survey for determining chemical composition of coal",
+    "title_resp": "by Vernon E. Swanson and Claude Huffman, Jr.",
+    "pub_year": "1976",
+    "subjects": ["Coal", "Analysis", "Sampling"]
+  },
+  {
+    "id": "b5501343",
+    "author": "Saroyan, Aram.",
+    "title": "Coffee coffee",
+    "title_resp": "by Aram Saroyan",
+    "pub_year": "2009",
+    "subjects": ["Artists' books", "Minimal art"]
+  },
+  {
+    "id": "b7707954",
+    "author": "Decker Molina, Carlos,",
+    "title": "Soledad: novela",
+    "title_resp": "Carlos Decker-Molina.",
+    "pub_year": "2015",
+    "subjects": ["Journalists", "Yugoslavia", "Fiction", "Yugoslav War, 1991-1995"]
+  },
+  {
+    "id": "b1438940",
+    "author": "Holmes, Victor,",
+    "title": "Salt of the earth",
+    "title_resp": "by Victor Holmes [pseud.] with an introd. by William Allen White.",
+    "pub_year": "1941",
+    "subjects": ["Journalists", "Biography", "Correspondence"]
+  },
+  {
+    "id": "b7692187",
+    "author": "Mohan, Surendra.",
+    "title": "Administrating Solr.",
+    "pub_year": "2013",
+    "subjects": ["Search engines", "Programming", "Web search engines", "Database searching", "Internet searching", "Java (Computer program language)"]
+  },
+  {
+    "id": "b3242979",
+    "author": "Naumann, Felix",
+    "title": "Quality-driven query answering for integrated information systems",
+    "title_resp": "Felix Naumann",
+    "pub_year": "2002",
+    "subjects": ["Web databases", "Database searching"]
+  },
+  {
+    "id": "b1014160",
+    "author": "Naumann, Felix",
+    "title": "The earth",
+    "title_resp": "by Arthur Beiser and the editors of Life",
+    "pub_year": "1962",
+    "subjects": ["Earth (Planet)"]
+  }
+]
