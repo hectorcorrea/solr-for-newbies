@@ -10,15 +10,19 @@ $ cd ~/solr-7.1.0/bin
 $ ./solr create -c bibdata
 
   #
-  #   (ignore for now the warning that shows up here)
+  # WARNING: Using _default configset. Data driven schema functionality is enabled by default, which is
+  #          NOT RECOMMENDED for production use.
+  #
+  #          To turn it off:
+  #             curl http://localhost:8983/solr/bibdata/config -d '{"set-user-property": {"update.autoCreateFields":"false"}}'
   #
   # Created new core 'bibdata'
   #
 ```
 
-Now we have a new core available for us to store documents. For now it's empty
-(since we haven't added any thing to it) and you can check this with the
-following command from the terminal:
+Now we have a new core available for us to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
+
+For now our core is empty (since we haven't added any thing to it) and you can check this with the following command from the terminal:
 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
