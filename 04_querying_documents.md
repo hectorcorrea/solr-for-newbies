@@ -40,7 +40,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=*&fl=id,title"
 
 Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title` and not `fl=id, title`. If the parameter includes spaces Solr will not return any results and it won't give you a visible error either!
 
-Try adding and removing some other fields to this list, for example, `id=id,author,title` or `fl=id,title,author,subjects`
+Try adding and removing some other fields to this list, for example, `fl=id,author,title` or `fl=id,title,author,subjects`
 
 
 ## Filtering the documents to fetch
