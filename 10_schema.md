@@ -1,7 +1,6 @@
 # Schema
 
-The schema in Solr is the definition of the *field types* and *fields* configured
-for a given core.
+The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
 **Field Types** are the building blocks to define fields in our schema. Examples
 of field types are: `binary`, `boolean`, `pfloat`, `string`, and `text_general`.
@@ -31,12 +30,12 @@ long but it will be roughly include the following categories under the "schema"
 element:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fields
+$ curl localhost:8983/solr/bibdata/schema
 
   # {
   #   "responseHeader": {"status": 0, "QTime": 2},
   #   "schema": {
-  #     "fieldTypes":   [lots of types defined],
+  #     "fieldTypes":   [lots of field types defined],
   #     "fields":       [lots of fields defined],
   #     "dynamicFields":[lots of dynamic fields defined],
   #     "copyFields":   [a few copy fields defined]
@@ -46,7 +45,8 @@ $ curl localhost:8983/solr/bibdata/schema/fields
 ```
 
 You can request each of these categories individually with the following commands
-(notice that the words are not capitalized in the URLs):
+(notice that combined words like `fieldTypes` and `dynamicFields` are *not*
+capitalized in the URLs below):
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes
