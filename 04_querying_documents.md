@@ -91,6 +91,28 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+te
 
 The result for this query will include a new book with title "Aids to teachers of School chemistry" which includes both terms (school and teachers) but the order does not matter as long as they are close to each other.
 
+One other thing. When searching multi-word keywords for a given field make sure the keywords are surrounded by quotes, for example make sure to use `q=title:"school teachers"` and not `q=title:school teachers`. The later will execute a search for "school" in the `title` field and "teachers" in the `_text_` field.
+
+You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. In this example we surround both search terms in quotes:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:"school+teachers"' | grep parsedquery
+
+  # will show
+  # "parsedquery":"PhraseQuery(title:\"school teachers\")",
+  #
+```
+
+whereas in the following query we don't:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:school+teachers' | grep parsedquery
+
+    # will show
+    # "parsedquery":"title:school _text_:teachers",
+    #
+```
+
 
 ## Ranking of documents
 
@@ -111,6 +133,49 @@ $ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
 
 This kind of field boosting is key when providing a single textbox for users to enter a search value (a-la Google). In these instances the user will not explicitly indicate whether they are searching for "titles with the word West" or for books "authored by somebody called West".
+
+
+## Getting facets
+
+When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
+
+For example, to search for all documents with title "education" (`q=title:education`) and retrieve facets (`facet=on`) based on the `subjects` field (`facet.field=subjects`) we'll use a query like this:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:education&facet=on&facet.field=subjects'
+
+  # response will include something like this
+  #
+  # "subjects":[
+  #   "education",45,
+  #   "and",18,
+  #   "higher",12,
+  #   "colleges",7,
+  #   "in",7,
+  #   "universities",7,
+  #   "educational",6,
+  #   "moral",4,
+  #   "social",4,
+  #   "teachers",4,
+  #
+```
+
+You might notice a few extraneous subjects in the list (like the words "and", and "in") and you can also guess that "higher" should really be "higher education". We'll review later why we are getting the *tokenized* version of the subject rather than the actual subject values. For now, try issuing the previous command but using the `subjects_str` field instead:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:education&facet=on&facet.field=subjects_str'
+
+  # response will include something like this
+  #
+  # "subjects_str":[
+  #   "Education, Higher",10,
+  #   "Education",7,
+  #   "Universities and colleges",6,
+  #   "Educational equalization",3,
+  #   "Moral education",3,
+  #   "Women",3,
+  #
+```
 
 
 ## Other parameters
