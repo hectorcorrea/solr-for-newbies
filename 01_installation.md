@@ -28,33 +28,21 @@ If you don't have the JDK installed you'll see something like
   #
 ```
 
-**Note for Mac users:** After running the `java -version` command above
-if the JDK is not installed the Mac might give a prompt to install Java.
-If you follow the prompt's instructions you will be installing the Java Runtime Environment (JRE) which *it is not what you need to run Solr*. It won't hurt
-to install the JRE but you it won't help you either. You can ignore that prompt.
+**Note for Mac users:** After running the `java -version` command above if the JDK is not installed the Mac might give a prompt to install Java. If you follow the prompt's instructions you will be installing the Java Runtime Environment (JRE) which *it is not what you need to run Solr*. It won't hurt to install the JRE but you it won't help you either. You can ignore that prompt.
 
-If Java *is installed* on your machine skip the "Installing Java" section below
-and jump to the "Installing Solr" section. If Java *is not installed* on your
-machine follow the steps below to install it.
+If Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine follow the steps below to install it.
 
 
 ### Installing Java
-To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and
-select the option to download the "Java Platform (JDK) 9".
+To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and select the option to download the "Java Platform (JDK) 9".
 
-From there, under the "Java SE Development Kit 9.0.1" select the file
-appropriated for your operating system, accept the license agreement,
-and download it. For example, for the Mac the file would be `jdk-9.0.1_osx-x64_bin.dmg`.
+From there, under the "Java SE Development Kit 9.0.1" select the file appropriated for your operating system, accept the license agreement, and download it. For example, for the Mac the file would be `jdk-9.0.1_osx-x64_bin.dmg`.
 
-Run the installer that you downloaded. Once it has completed, go back to the
-Terminal and run the `java -version` command again. You should see the text
-with the Java version number this time.
+Run the installer that you downloaded. Once it has completed, go back to the Terminal and run the `java -version` command again. You should see the text with the Java version number this time.
 
 
 ## Installing Solr
-You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/)
-site. To make it easy, below are the steps to download and install version 7.1
-which is the one that we will using.
+You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
 
 First, download Solr and save it to a file.
 
@@ -82,14 +70,9 @@ $ unzip solr-7.1.0.zip
   #
 ```
 
-Now that Solr has been installed on your machine you will have a folder
-named `solr-7.1.0`. This folder has the files to run and configure Solr.
-The Solr binaries (i.e. the Java JAR files) are under `solr-7.1.0/dist`
-but for the most part we will use the utilities under `solr-7.1.0/bin` to
-start and stop Solr.
+Now that Solr has been installed on your machine you will have a folder named `solr-7.1.0`. This folder has the files to run and configure Solr. The Solr binaries (i.e. the Java JAR files) are under `solr-7.1.0/dist` but for the most part we will use the utilities under `solr-7.1.0/bin` to start and stop Solr.
 
-First, let's make sure we can run Solr by executing the `solr` shell script
-with the `status` parameter:
+First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
 
 ```
 $ cd ~/solr-7.1.0/bin
@@ -100,12 +83,9 @@ $ ./solr status
   #
 ```
 
-The "No Solr nodes are running" message is a bit anticlimactic but it's exactly
-what we want since it indicates that Solr is ready to be run.
+The "No Solr nodes are running" message is a bit anticlimactic but it's exactly what we want since it indicates that Solr is ready to be run.
 
-**Note for Windows users:** In Windows use the `solr.cmd` batch file instead
-of the `solr` shell script, in other words, use `./solr.cmd status` instead
-of `./solr status`.
+**Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `./solr.cmd status` instead of `./solr status`.
 
 
 ## Let's get Solr started
@@ -123,12 +103,9 @@ $ ./solr start
 
 Notice that the message says that Solr is now running on port `8983`.
 
-You can validate this by opening your browser and going to http://localhost:8983/.
-This will display the Solr Dashboard from where you can perform administrative
-tasks as well as add, update, and query data from Solr.
+You can validate this by opening your browser and going to http://localhost:8983/. This will display the Solr Dashboard from where you can perform administrative tasks as well as add, update, and query data from Solr.
 
-You can also issue the `status` command again from the Terminal and Solr will
-report something like this:
+You can also issue the `status` command again from the Terminal and Solr will report something like this:
 
 ```
 $ cd ~/solr-7.1.0/bin
@@ -150,10 +127,7 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 
 ## Adding Solr to your path (optional)
-In the previous examples we always made sure we were at the Solr `bin`
-folder in order to run the Solr commands. You can eliminate this step
-by making sure Solr is in your PATH. For example if Solr is installed
-on your home folder (`~/solr-7.1.0`) you can run the following commands:
+In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
 
 ```  
 $ cd
@@ -165,5 +139,4 @@ $ which solr
   #  
 ```
 
-If you don't do this you will need to make sure that you always refer to
-Solr with the full path, for example `~/solr-7.1.0/bin/solr`.
+If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.1.0/bin/solr`.

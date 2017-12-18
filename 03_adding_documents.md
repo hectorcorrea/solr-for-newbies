@@ -1,15 +1,13 @@
 # Adding documents to Solr
 
-In the last section we ran a query against Solr that showed use that our
-newly created code `bibdata` has no documents in it. Remember that our call to
+In the last section we ran a query against Solr that showed us that our
+newly created core `bibdata` has no documents in it. Remember that our call to
 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
 ```
 
-returned `"numFound":0`. Now let's add a few documents to our "bibdata" core.
-First, download this sample data file (if you cloned this GitHub repo the file
-is already in your data folder):
+returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, download this sample data file (if you cloned this GitHub repo the file is already in your data folder):
 
 ```
 $ curl "https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json" > books.json
@@ -29,7 +27,7 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box:
 
 ```
-$ ~/solr-7.1.0/bin/post -c bibdata books.json"
+$ ~/solr-7.1.0/bin/post -c bibdata books.json
 
   #
   # (some text here...)

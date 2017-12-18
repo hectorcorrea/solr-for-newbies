@@ -98,8 +98,7 @@ $ curl localhost:8983/solr/bibdata/schema/fields/id
   #
 ```
 
-Notice how the field is of type `string` but also it is marked as not multi-value,
-to be indexed, required, and stored.
+Notice how the field is of type `string` but also it is marked as not multi-value, to be indexed, required, and stored.
 
 The type `string` has also its own definition which we can view via:
 
@@ -118,12 +117,10 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
   #
 ```
 
-In this case the `class` value points to an internal Solr class that will be used
-to handle values of the string type.
+In this case the `class` value points to an internal Solr class that will be used to handle values of the string type.
 
 
-Now let's look at a more complex field and field type. Let's look at the definition
-for the `title` type:
+Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fields/title
@@ -191,21 +188,13 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   # }
 ```
 
-This is obviously a much more complex definition than the ones that we saw
-before. The basic are the same, the field type points to a `class` (solr.TextField)
-and it also indicates that it is a multi-value type. However, notice the next two kinds
-of information defined for this field, namely the information under the
-`indexAnalyzer` and `queryAnalyzer`.
+This is obviously a much more complex definition than the ones that we saw before. The basics are the same, the field type points to a `class` (solr.TextField) and it also indicates that it is a multi-value type. However, notice the next two kinds of information defined for this field, namely the information under the `indexAnalyzer` and `queryAnalyzer`.
 
-`indexAnalyzer` refers to the kind of transformations that will be made to
-any field of this type before the value is indexed by Solr.
+`indexAnalyzer` refers to the kind of transformations that will be made to any field of this type before the value is indexed by Solr.
 
-`queryAnalyzer` refers to the transformations that will be made to any
-value that references a field of this type when we query a `text_general` field.
+`queryAnalyzer` refers to the transformations that will be made to any value that references a field of this type when we query a `text_general` field.
 
-Notice for example how it will take into account "stop words" (e.g. words to be
-ignored) both at index and query time, but it will take into account "synonyms"
-only at querying time.
+Notice for example how it will take into account "stop words" (e.g. words to be ignored) both at index and query time, but it will take into account "synonyms" only at querying time.
 
 
 ## Tokenizers and Filters  
@@ -224,26 +213,21 @@ TODO: elaborate on this.
 
 
 ### Adding a new field
+xxx
 
-Let's add a new field
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
-     "name":"callnumbers",
-     "type":"strings",
-     "multiValued":true,
-     "stored":true,
-     "indexed":true}
+    "name":"my_new_field",
+    "type":"text_general",
+    "multiValued":true,
+    "stored":true,
+    "indexed":false
+  }
 }' http://localhost:8983/solr/bibdata/schema
-
-  #
-  # {
-  #  "responseHeader":{
-  #  "status":0,
-  #  "QTime":39}
-  # }
-  #
 ```
+
+TODO: elaborate on this
 
 
 ## More information

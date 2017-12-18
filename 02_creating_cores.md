@@ -3,7 +3,7 @@ Solr uses the concept of *cores* to represent independent environments in which
 we configure data schemas and store data. This is similar to the concept of a
 "database" in MySQL or PostgreSQL.
 
-For our purposes, let's create a core named "bibdata" via the following command:
+For our purposes, let's create a core named `bibdata` via the following command:
 
 ```
 $ cd ~/solr-7.1.0/bin
@@ -20,7 +20,7 @@ $ ./solr create -c bibdata
   #
 ```
 
-Now we have a new core available for us to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
+Now we have a new core available to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
 
 For now our core is empty (since we haven't added any thing to it) and you can check this with the following command from the terminal:
 
