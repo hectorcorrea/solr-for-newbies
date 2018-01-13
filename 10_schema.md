@@ -12,8 +12,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to do and store different transformation on the values given to us. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `biddata` core already has a schema, you can view how the details of this schema via the following command. The response will be rather long but it will be roughly include the following categories under the "schema"
-element:
+Our newly created `biddata` core already has a schema, you can view how the details of this schema via the following command. The response will be rather long but it will be roughly include the following categories under the "schema" element:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema
@@ -48,13 +47,7 @@ You might be wondering where did the fields like `title`, `author`, `subjects`, 
 
 Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match some of the fields defined in our schema.
 
-You can disable the automatic creation of fields in Solr if you don't want this behavior. To do so issue the following command:
-
-```
-$ curl http://localhost:8983/solr/bibdata/config -d '{"set-user-property": {"update.autoCreateFields":"false"}}'
-```
-
-Keep in mind that, if automatic field creation is disabled, when importing documents Solr will *reject* any documents that have fields not defined in the schema.
+You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema.
 
 Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out exact version this became available.
 
@@ -119,7 +112,6 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
 
 In this case the `class` value points to an internal Solr class that will be used to handle values of the string type.
 
-
 Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 
 ```
@@ -135,8 +127,7 @@ $ curl localhost:8983/solr/bibdata/schema/fields/title
   #
 ```
 
-That looks innocent enough: our `title` field points to the type `text_general`
-so let's see what does `text_general` means:
+That looks innocent enough: our `title` field points to the type `text_general` so let's see what does `text_general` means:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
@@ -188,26 +179,23 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   # }
 ```
 
-This is obviously a much more complex definition than the ones that we saw before. The basics are the same, the field type points to a `class` (solr.TextField) and it also indicates that it is a multi-value type. However, notice the next two kinds of information defined for this field, namely the information under the `indexAnalyzer` and `queryAnalyzer`.
+This is obviously a much more complex definition than the ones that we saw before. The basics are the same, the field type points to a `class` (solr.TextField) and it also indicates that it's a multi-value type. However, notice the next two kinds of information defined for this field, namely the information under the `indexAnalyzer` and `queryAnalyzer`.
 
-`indexAnalyzer` refers to the kind of transformations that will be made to any field of this type before the value is indexed by Solr.
+`indexAnalyzer` refers to the kind of transformations that will be made to any field of this type before the value is *indexed* by Solr.
 
-`queryAnalyzer` refers to the transformations that will be made to any value that references a field of this type when we query a `text_general` field.
+`queryAnalyzer` refers to the transformations that will be made to any value that references a field of this type when we *query* a `text_general` field.
 
 Notice for example how it will take into account "stop words" (e.g. words to be ignored) both at index and query time, but it will take into account "synonyms" only at querying time.
 
 
 ## Tokenizers and Filters  
-Tokenizer splits words, for example if we index "hello world" a tokenizer
-will split it in two "hello" and "word".
+Tokenizer splits words, for example if we index "hello world" a tokenizer will split it in two "hello" and "word".
 
-Filters to other operations on the value. For example, a "stemmer" gets the
-roots of the word
+Filters to other operations on the value. For example, a "stemmer" gets the roots of the word
 
 In the definition of the `text_general` we see a tokenizer but not a stemmer.
 
-If we look at the `text_en` field type instead we'll see that it uses both a
-tokenizer and a stemmer (solr.PorterStemFilterFactory)
+If we look at the `text_en` field type instead we'll see that it uses both a tokenizer and a stemmer (solr.PorterStemFilterFactory)
 
 TODO: elaborate on this.
 

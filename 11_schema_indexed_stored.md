@@ -1,12 +1,14 @@
-### Stored vs indexed fields
+# Stored vs indexed fields
+
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond this tutorial.
 
-For example, let's say that we add the following fields:
+For example, let's say that we add the following fields to our Solr core:
 
 * f_stored: a field stored but not indexed
 * f_indexed: a field indexed but not stored
 * f_both: a field both indexed and stored
 
+Create `f_stored` field:
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
@@ -17,7 +19,10 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
     "indexed":false
   }
 }' http://localhost:8983/solr/bibdata/schema
+```
 
+Create `f_indexed` field:
+```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
     "name":"f_indexed",
@@ -27,7 +32,10 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
     "indexed":true
   }
 }' http://localhost:8983/solr/bibdata/schema
+```
 
+Create `f_both` field:
+```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
     "name":"f_both",
@@ -51,7 +59,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '[{
 }]' http://localhost:8983/solr/bibdata/update?commit=true
 ```
 
-If we query for this document notice how `f_stored` and `f_both` will be fetched but *not* `f_indexed` (even though we list it in the `fl` parameter) because that field is not stored.
+If we query for this document notice how `f_stored` and `f_both` will be fetched but *not* `f_indexed` (even though we list it in the `fl` parameter) because `f_indexed` is not stored.
 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both"
@@ -64,12 +72,13 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_
 # }}
 ```
 
-Keep in mind that we can search by the indexed field `f_indexed`:
+Keep in mind that we can search by `f_indexed` because it is indexed:
 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
 
-# will find the document, but again, field f_indexed will not be included
+# will find the document, but again, the value of field f_indexed
+# will not be included in results.
 ```
 
 Notice that even though we are able to fetch the value for the `f_stored` field we cannot use it for searches:
@@ -84,7 +93,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=f_stored:stored"
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
 
 
-### Indexed, stored, and docValues
+## Indexed, stored, and docValues
 
 In the previous example we declared three fields with different indexed/stored settings and all of them were of type `text_general`. However, if you set the indexed/stored setting in fields of type `string` the default behavior is slightly different because Solr stores and handles `string` fields different from `text_general` fields.
 
