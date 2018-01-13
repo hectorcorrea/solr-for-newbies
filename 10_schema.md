@@ -12,7 +12,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to do and store different transformation on the values given to us. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `biddata` core already has a schema, you can view how the details of this schema via the following command. The response will be rather long but it will be roughly include the following categories under the "schema" element:
+Our newly created `biddata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as show in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema
@@ -188,35 +188,5 @@ This is obviously a much more complex definition than the ones that we saw befor
 Notice for example how it will take into account "stop words" (e.g. words to be ignored) both at index and query time, but it will take into account "synonyms" only at querying time.
 
 
-## Tokenizers and Filters  
-Tokenizer splits words, for example if we index "hello world" a tokenizer will split it in two "hello" and "word".
-
-Filters to other operations on the value. For example, a "stemmer" gets the roots of the word
-
-In the definition of the `text_general` we see a tokenizer but not a stemmer.
-
-If we look at the `text_en` field type instead we'll see that it uses both a tokenizer and a stemmer (solr.PorterStemFilterFactory)
-
-TODO: elaborate on this.
-
-
-### Adding a new field
-xxx
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-    "name":"my_new_field",
-    "type":"text_general",
-    "multiValued":true,
-    "stored":true,
-    "indexed":false
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-TODO: elaborate on this
-
-
-## More information
-The Solr Reference Guide https://lucene.apache.org/solr/guide/7_1/schema-api.html#schema-api
+## Note for Solr 4.x users
+In Solr 4 the default mechanism to edit the schema was via the `schema.xml` file. Starting in Solr 5 the default mechanism is now via the "Managed Schema Definition" in which fields are defined via the Schema API and without the use of a `schema.xml` file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.  
