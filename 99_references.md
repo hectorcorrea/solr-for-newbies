@@ -9,5 +9,5 @@ TODO: Do I need the larger set with 250K books?
 
 # Sources and where to find more
 
-* The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/)
+* [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/)
 * [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) by Trey Grainger and Timothy Potter

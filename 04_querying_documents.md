@@ -83,7 +83,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+te
   #
 ```
 
-Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title` but they can be 3 words apart via the `~3` in the parameter:
+Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title` but they can be 3 words apart (notice the `~3`):
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"~3'
@@ -93,7 +93,7 @@ The result for this query will include a new book with title "Aids to teachers o
 
 One other thing. When searching multi-word keywords for a given field make sure the keywords are surrounded by quotes, for example make sure to use `q=title:"school teachers"` and not `q=title:school teachers`. The later will execute a search for "school" in the `title` field and "teachers" in the `_text_` field.
 
-You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. In this example we surround both search terms in quotes:
+You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. For example in the following command we surround both search terms in quotes:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:"school+teachers"' | grep parsedquery
@@ -103,14 +103,14 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
   #
 ```
 
-whereas in the following query we don't:
+whereas in the following command we don't:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:school+teachers' | grep parsedquery
 
-    # will show
-    # "parsedquery":"title:school _text_:teachers",
-    #
+  # will show
+  # "parsedquery":"title:school _text_:teachers",
+  #
 ```
 
 
@@ -132,7 +132,13 @@ $ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 
 Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
 
-This kind of field boosting is key when providing a single textbox for users to enter a search value (a-la Google). In these instances the user will not explicitly indicate whether they are searching for "titles with the word West" or for books "authored by somebody called West".
+If want to see why Solr ranked a result higher than another you can look at the `explain` information that Solr returns when passing the `debugQuery=on` parameter, for example:
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml"
+```
+
+but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
 ## Getting facets
@@ -182,11 +188,11 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
 
 There is a large number of parameters that you can pass to Solr when querying for documents but these are some of the most common:
 
-* q: search query
+* q: search query (for user entered terms)
+* fq: filter query (for known values, e.g. when filtering by a facet value)
 * fl: list of fields to return
 * start: row to start (default to 0)
 * rows: number of documents/rows to return (default to 10)
 * sort: fields to sort the result by
-
 
 This [blog post](http://yonik.com/solr/query-syntax/) has a good intro on the basic parameters that you can use.

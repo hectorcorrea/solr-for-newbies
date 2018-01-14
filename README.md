@@ -16,6 +16,7 @@ Schema and queries
 * Facets
 
 * Document-based data model
+* Parsers 
 
 Other features
 * Replication
