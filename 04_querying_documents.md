@@ -1,22 +1,22 @@
 # Querying for documents
 
-Now that we have added a few documents to our `bibdata` core we can query Solr
-for those documents. In a subsequent section we'll explore more advanced
-searching options and how our schema definition is key to enable different
-kind of searches, but for now we'll start with a few basic searches to get
-familiar with the way querying works in Solr.
+Now that we have added a few documents to our `bibdata` core we can query Solr for those documents. In a subsequent section we'll explore more advanced searching options and how our schema definition is key to enable different kind of searches, but for now we'll start with a few basic searches to get familiar with the way querying works in Solr.
 
-If you look at the content of the `books.json` file that we imported into
-our `bibdata` core you'll notice that the documents have the following fields:
+If you look at the content of the `books.json` file that we imported into our `bibdata` core you'll notice that the documents have the following fields:
 
 * id: string to identify each document (MARC 001)
 * author: string for the main author (MARC 100a)
 * authorDate: date for the author (MARC 100d)
 * authorFuller: title of the book (MARC 100q)
+* authorsOther: list of other authors (MARC 700a)
 * title: title of the book (MARC 245ab)
 * responsibility: statement of responsibility (MARC 245c)
 * publisher: publisher name (MARC 260a)
 * subjects: an array of subjects (MARC 650a)
+* subjectsForm: (MARC 650v)
+* subjectsGeneral: (MARC 650x)
+* subjectsChrono: (MARC 650y)
+* subjectsGeo: (MARC 650z)
 
 
 ## Fetching data
