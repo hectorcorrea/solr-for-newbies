@@ -21,7 +21,7 @@ $ curl "https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/d
 ```
 
 File `books.json` contains a small sample data a set with information about a
-few books. Go ahead and take a look at it (e.g. via `cat books.json`)
+few thousand books. Go ahead and take a look at it (e.g. via `cat books.json`)
 
 Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box:

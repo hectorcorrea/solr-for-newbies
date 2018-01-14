@@ -38,7 +38,9 @@ $ curl localhost:8983/solr/bibdata/schema/dynamicfields
 $ curl localhost:8983/solr/bibdata/schema/copyfields
 ```
 
-**Note:** Unlike a relational database, where only a handful field types are available to choose from (e.g. integer, date, boolean, char, and varchar) in Solr there are lots of predefined field types available out of the box, and each of them with its own configuration.
+Notice that unlike a relational database, where only a handful field types are available to choose from (e.g. integer, date, boolean, char, and varchar) in Solr there are lots of predefined field types available out of the box, and each of them with its own configuration.
+
+**Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file  `schema.xml`. Starting in Solr 5 the default mechanism for this is through the "Managed Schema Definition" which uses the Schema API to list, add, edit, and remove fields. There is no `schema.xml` file anymore. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this. You can run `curl localhost:8983/solr/bibdata/schema > schema_def.json` to dump the schema definition to a file but changes to the schema must be made through the Schema API.
 
 
 ## Fields in our bibdata schema
@@ -110,7 +112,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
   #
 ```
 
-In this case the `class` value points to an internal Solr class that will be used to handle values of the string type.
+In this case the `class` points to an internal Solr class that will be used to handle values of the string type.
 
 Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 
@@ -179,14 +181,10 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   # }
 ```
 
-This is obviously a much more complex definition than the ones that we saw before. The basics are the same, the field type points to a `class` (solr.TextField) and it also indicates that it's a multi-value type. However, notice the next two kinds of information defined for this field, namely the information under the `indexAnalyzer` and `queryAnalyzer`.
+This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`.
 
-`indexAnalyzer` refers to the kind of transformations that will be made to any field of this type before the value is *indexed* by Solr.
+* `indexAnalyzer` refers to the transformations that will be made to the data before is *indexed* by Solr for any field of this type.
 
-`queryAnalyzer` refers to the transformations that will be made to any value that references a field of this type when we *query* a `text_general` field.
+* `queryAnalyzer` refers to the transformations that will be applied to the search terms when we *query* a field of this type.
 
-Notice for example how it will take into account "stop words" (e.g. words to be ignored) both at index and query time, but it will take into account "synonyms" only at querying time.
-
-
-## Note for Solr 4.x users
-In Solr 4 the default mechanism to edit the schema was via the `schema.xml` file. Starting in Solr 5 the default mechanism is now via the "Managed Schema Definition" in which fields are defined via the Schema API and without the use of a `schema.xml` file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.  
+Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time, but "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.
