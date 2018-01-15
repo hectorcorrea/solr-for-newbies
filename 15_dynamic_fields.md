@@ -31,7 +31,7 @@ $ curl localhost:8983/solr/bibdata/schema/dynamicfields
   #
 ```
 
-notice that one of the definitions has the pattern `*_ss` which means any field that ends with `_s` will be assigned the type `strings` and be indexed and stored. You can dig further and figure out what the definition for the field type `strings` looks like with the following command:
+notice that one of the definitions has the pattern `*_ss` which means any field that ends with `_ss` will be assigned the type `strings`, be indexed, and stored. You can dig further and figure out what the definition for the field type `strings` looks like with the following command:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes/strings

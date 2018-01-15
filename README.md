@@ -3,6 +3,7 @@ Notes for Solr for newbies workshop at Code4Lib 2018
 ## Outline
 
 Getting started
+* What is Solr? (00_what_is_solr)
 * Installing Solr (01_installation.md)
 * Creating our first core (02_creating_a_core.md)
 * Adding data (03_adding_documents.md)
@@ -16,7 +17,7 @@ Schema and queries
 * Facets
 
 * Document-based data model
-* Parsers 
+* Parsers
 
 Other features
 * Replication
