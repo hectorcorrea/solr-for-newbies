@@ -1,5 +1,7 @@
 # Searching for documents
 
+TODO: consider moving this section to the 03_add_documents.md instead and move most of the querying part to 40_searching.md and leave a rather skinny section here.
+
 Now that we have added a few documents to our `bibdata` core we can query Solr for those documents. In a subsequent section we'll explore more advanced searching options and how our schema definition is key to enable different kind of searches, but for now we'll start with a few basic searches to get familiar with the way querying works in Solr.
 
 If you look at the content of the `books.json` file that we imported into our `bibdata` core you'll notice that the documents have the following fields:
@@ -115,33 +117,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
 ```
 
 
-## Ranking of documents
-
-When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
-
-Let's say that we want documents where either the `title` or the `author` have the word "west", we would use `q=title:west author:west`
-
-```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west"
-```
-
-Now let's say that we want to boost the documents where the `author` have the word "west" ahead of the documents where "west" was found in the `title`. To this we update the `q` parameter as follow `q=title:west+author:west^5` (notice the `^5` to boost the `author` field)
-
-```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west^5"
-```
-
-Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
-
-If want to see why Solr ranked a result higher than another you can look at the `explain` information that Solr returns when passing the `debugQuery=on` parameter, for example:
-
-```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml"
-```
-
-but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
-
-
 ## Getting facets
 
 When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
@@ -183,17 +158,3 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
   #   "Women",3,
   #
 ```
-
-
-## Other parameters
-
-There is a large number of parameters that you can pass to Solr when querying for documents but these are some of the most common:
-
-* q: search query (for user entered terms)
-* fq: filter query (for known values, e.g. when filtering by a facet value)
-* fl: list of fields to return
-* start: row to start (default to 0)
-* rows: number of documents/rows to return (default to 10)
-* sort: fields to sort the result by
-
-This [blog post](http://yonik.com/solr/query-syntax/) has a good intro on the basic parameters that you can use.

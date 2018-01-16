@@ -27,7 +27,7 @@ For example, let's say that we want to search for all books where "George Washin
 
 Using the *Standard* query parser we will need to pass all this information in the `q` parameter to Solr as follows: `q=title:"george washington" authorsAll:"george washington"^10` which we could easily do as developers but it would be rather outrageous to ask an end user to enter such syntax.
 
-By using the *eDisMax* parser we could pass a much simpler `q` parameter to Solr `q="george washington"` and send a separate parameter to configure the fields to search on and their boosting value `qf=title author^10`. This is possible because the eDisMax parameter supports the `qf` parameter but the Standard parameter does not.
+By using the *eDisMax* parser we could pass a much simpler `q` parameter to Solr `q="george washington"` and send a separate parameter to configure the fields to search on and their boosting value `qf=title authorsAll^10`. This is possible because the eDisMax parameter supports the `qf` parameter but the Standard parameter does not.
 
 The rest of the examples in this section are going to use the eDisMax parser, notice the `defType=edismax` in our queries to Solr to make this selection. As we will see later on this tutorial you can also set the default query parser of your Solr core to use eDisMax by updating the `defType` parameter in your `solrconfig.xml` so that you don't have to explicitly set it on every query.
 
@@ -41,68 +41,123 @@ Below are some of the parameters that are supported by all parsers:
 
 * `defType`: Query parser to use (default is `lucene`, other possible values are `dismax` and `edismax`)
 * `q`: Search query, the basic syntax is `field:"value"`.
-* `sort`: Sorting of the results (default is `score desc`, i.e. higher ranked document first)
+* `sort`: Sorting of the results (default is `score desc`, i.e. highest ranked document first)
 * `rows`: Number of documents to return (default is `10`)
 * `start`: Index of the first document to result (default is `0`)
 * `fl`: List of fields to return in the result.
-* `fq`: Filters results without affecting the scoring.
+* `fq`: Filters results without calculating a score.
 
 Below are a few sample queries to show these parameters in action. Notice that spaces are URL encoded as `+` in the commands below, you do not need to encode them if you are submitting these queries via the [Solr Admin interface](http://localhost:8983/solr/#/bibdata/query) in your browser.
 
-* Retrieve the first 10 documents where the `title` includes the word "washington"
+* Retrieve the first 10 documents where the `title` includes the word "washington" (`q=title:washington`)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington'
 ```
 
-* The next 15 documents for the same query (notice the `start` and `rows` parameters)
+* The next 15 documents for the same query (notice the `start=10` and `rows=15` parameters)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington&start=10&rows=15'
 ```
 
-* Retrieve the `id` and `title` (notice the `fl` parameter) where the title includes the words "women writers" but allowing for a word in between (e.g. "women nature writers")
+* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~3`)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~3&fl=id,title'
 ```
 
-* Documents that have a main author (`author:*` means any author)
+* Documents that have a main author (`q=author:*` means any author)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=author:*'
 ```
 
-* Documents that do *not* have an author (notice the `NOT` before the author field to negate the expression)
+* Documents that do *not* have an author (`q=NOT author:*` means author is not present)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+author:*'
 ```
 
-* Documents where at least one of the subjects starts with "com" (notice `subjects:com*`)
+* Documents where at least one of the subjects starts with "com" (`q=subjects:com*`)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
 ```
 
-* Documents where title include "story" *and* at least one of the subjects is "women" (notice that both search conditions are indicated in the `q` parameter)
+* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story+AND+subjects:women'
 ```
 
-* Similar to the previous query, documents where title include "story" *and* at least one of the subjects is "women", but *without considering the subject in the ranking of the results* (notice that subjects is filtered via the `fq` parameter)
+* Similar to the previous query, documents where title include "story" (`q=title:story`) *and* at least one of the subjects is "women" (`fq=subjects:women`) but *without considering the subject in the ranking of the results* (notice that subjects are filtered via the `fq` parameter in this example)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story&fq=subjects:women'
 ```
 
 
-## q vs fq paramter
-q and fq
-q (query) and fq (filter query) use the same syntax but have different meanings.
+## q and fq parameters
 
-Solr uses fq to filter results, and q to filter results and provide rankings.
+Solr supports two different parameters to filter results in a query. One is the Query `q` parameter that we've been using in all our examples. The other is the Filter Query `fq` parameter that we introduced in the last query. Both parameters can be used to filter the documents to return in a query, but there is a key difference between them: `q` calculates scores for the results whereas `fq` does not.
 
-Use fq for machine generated filters (e.g. visibility:all) and f for user provided keywords (e.g. title=rome.) There can be many fq but only one q values in a search request.
+In [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) (p. 211) the authors say:
 
-fq are good candidates for caching because they are not subject to arbitrary user entered parameters. Plus they are not ranked.
+    So what is the difference between the q and fq parameters?
 
-At runtime Solr applies first the fq to get a set of documents and then applies q on top of that set to filter even more and rank.
+    fq serves a single purpose: to limit your results to a set
+    of matching documents.
 
-Source: Solr in Action, pages 210-215
+    The q parameter, in contrast, serves two purposes:
+      * To limit your results to a set of matching documents
+      * To supply the relevancy algorithm with a list of terms
+        to be used for relevancy scoring
+
+The reason this is important is because values filtered via `fq` can be cached and reused better by Solr in subsequent queries because they don't have a score assigned to them. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application)
+
+Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are `ANDed` (you cannot specify an OR operation among them).
+
+
+### the qf parameter
+
+The DisMax and eDisMax query parsers provide another parameter, Query Fields `qf`, that should not be confused with the `q` or `fq` parameters. The `qf` parameter is used to indicate the *list of fields* that the search should be executed on along with their boost values.
+
+As we saw in a previous example if we execute a search on multiple fields and give each of them a different boost value the `qf` parameter makes this relatively easily as we can indicate the search terms in the `q` parameter (`q="george washington"`) and list the fields and their boost values separately (`qf=title authorsAll^10`). Remember to select the eDisMax parser (`defType=edismax`) when using the `qf` parameter.
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="george+washington"&qf=title+authorsAll^20&defType=edismax'
+```
+
+
+## debugQuery
+
+...
+
+
+## Ranking of documents
+
+When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
+
+Let's say that we want documents where either the `title` or the `author` have the word "west", we would use `q=title:west author:west`
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west"
+```
+
+Now let's say that we want to boost the documents where the `author` have the word "west" ahead of the documents where "west" was found in the `title`. To this we update the `q` parameter as follow `q=title:west+author:west^5` (notice the `^5` to boost the `author` field)
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west^5"
+```
+
+Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
+
+If want to see why Solr ranked a result higher than another you can look at the `explain` information that Solr returns when passing the `debugQuery=on` parameter, for example:
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml"
+```
+
+but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
+
+
+
+## df parameter / configuration
+
+df: default field, default is `_text_`, only one allowed (use a copy field if you need many)
 
 
 ## Filtering with ranges
@@ -114,28 +169,9 @@ Source: Solr in Action, pages 210-215
 ...
 
 
-## edismax options
-
-
-qf
-qf (query field) used to boost the value of certain fields, for example:
-
-qf=title^100
-qf=text^10
-
-will rank higher documents where the match is in the title than when the match is in the text.
-
-https://www.triquanta.nl/blog/what-fq-short-summary-solr-query-fields
-
-
-df: default field, default is `_text_`, only one allowed (use a copy field if you need many)
-
-
-
-
 ## Facets
-...
 
+...
 
 
 ## Searching (more advanced)
@@ -143,17 +179,3 @@ pf
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
 
 The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
-
-
-
-
-
-
-
-
-## Score calculation
-
-
-http://www.openjems.com/solr-lucene-score-tutorial/ (dead link -- see internet archive)
-
-https://stackoverflow.com/questions/16126963/subquery-scoring-and-coord-in-edismax-ranking-in-solr
