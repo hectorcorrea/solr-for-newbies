@@ -25,7 +25,7 @@ Now we have a new core available to store documents. We'll ignore the warning be
 For now our core is empty (since we haven't added any thing to it) and you can check this with the following command from the terminal:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 
   #
   # {

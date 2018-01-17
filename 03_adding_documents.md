@@ -4,13 +4,13 @@ In the last section we ran a query against Solr that showed us that our
 newly created core `bibdata` has no documents in it. Remember that our call to
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 ```
 
 returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, download this sample data file (if you cloned this GitHub repo the file is already in your data folder):
 
 ```
-$ curl "https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json" > books.json
+$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json' > books.json
 
   #
   # You'll see something like this...
@@ -41,7 +41,7 @@ $ ~/solr-7.1.0/bin/post -c bibdata books.json
 Now if we run our query again we should see some results
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 
   # Response would be something like...
   # {

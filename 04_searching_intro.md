@@ -27,7 +27,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 To fetch data from Solr we make an HTTP request to the `select` handler. For example:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 ```
 
 There are many parameters that we can pass to this handler to define what documents we want to fetch and what fields we want to fetch.
@@ -38,10 +38,10 @@ There are many parameters that we can pass to this handler to define what docume
 We can use the `fl` parameter to indicate what fields we want to fetch. For example to request the `id` and the `title` of the documents we would use `fl=id,title` as in the following example:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*&fl=id,title"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title'
 ```
 
-Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title` and not `fl=id, title`. If the parameter includes spaces Solr will not return any results and it won't give you a visible error either!
+Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title` and not `fl=id,` `title`. If the parameter includes spaces Solr will not return any results and it won't give you a visible error either!
 
 Try adding and removing some other fields to this list, for example, `fl=id,author,title` or `fl=id,title,author,subjects`
 
@@ -53,19 +53,19 @@ In the previous examples you might have seen an inconspicuous `q=*` parameter in
 If we want to retrieve all the documents we can just pass `q=*`. But if we want to filter we can use the following syntax: `q=field:value` to filter documents where a specific field has a particular value. For example, to include only documents where the `title` has the word "teachers" we would use `q=title:teachers`:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers'
 ```
 
 We can request filter by many different fields, for example to request documents where the `title` includes the word "teachers" **or** the `author` includes the word "Alice" we would use `q=title:teachers author:Alice`
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+author:Alice"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+author:Alice'
 ```
 
 As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title:teachers AND author:Alice`
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teaching+AND+author:Alice"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+AND+author:Alice'
 ```
 
 Now let's try something else. Let's issue a search for books where the title says "school teachers" using `q=title:"school teachers"`
