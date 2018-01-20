@@ -7,7 +7,7 @@ newly created core `bibdata` has no documents in it. Remember that our call to
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 ```
 
-returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, download this sample data file (if you cloned this GitHub repo the file is already in your data folder):
+returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json) file (if you cloned this GitHub repo the file is already in your data folder):
 
 ```
 $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json' > books.json
@@ -24,7 +24,7 @@ File `books.json` contains a small sample data a set with information about a
 few thousand books. Go ahead and take a look at it (e.g. via `cat books.json`)
 
 Then, import this file to our `bibdata` core with the `post` utility that Solr
-provides out of the box:
+provides out of the box (Windows users see note below):
 
 ```
 $ ~/solr-7.1.0/bin/post -c bibdata books.json
@@ -58,3 +58,19 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 ```
 
 Notice how the number of documents found is greater than zero (e.g. `"numFound":1000`)
+
+**Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder that we can use in Windows. Here is what you'll need to to:
+
+```
+> cd C:\Users\you\solr-7.1.0\exampledocs
+> copy path\to\books.json .
+> java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
+
+  #
+  # you should see something along the lines of
+  #
+  # POSTing file books.json
+  # 1 files indexed
+  # COMMITting Solr index changes to http://...
+  #
+```

@@ -39,4 +39,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
   #
 ```
 
-you'll see `"numFound":0` indicating that there are no documents on it.
+(or you can also point your browser to http://localhost:8983/solr#bibdata/query and click the "Execute Query" button at the bottom of the page)
+
+in either case you'll see `"numFound":0` indicating that there are no documents on it.

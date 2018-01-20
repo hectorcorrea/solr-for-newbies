@@ -3,7 +3,7 @@
 ## Prerequisites
 To run Solr on your machine you need to have the Java Development Kit (JDK)
 installed. To verify if that the JDK is installed run the following command
-from the Terminal:
+from the Terminal (aka Command Prompt if you are on Windows):
 
 ```
 $ java --version
@@ -85,7 +85,7 @@ $ ./solr status
 
 The "No Solr nodes are running" message is a bit anticlimactic but it's exactly what we want since it indicates that Solr is ready to be run.
 
-**Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `./solr.cmd status` instead of `./solr status`.
+**Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `solr.cmd status` instead of `./solr status`.
 
 
 ## Let's get Solr started
