@@ -1,4 +1,3 @@
-## Local parameters
 ## Searching (more advanced)
 pf
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).

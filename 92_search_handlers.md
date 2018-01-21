@@ -1,5 +1,0 @@
-TODO
-
-## Spellchecker
-
-## Synonyms
