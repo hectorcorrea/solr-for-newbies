@@ -40,7 +40,7 @@ $ curl localhost:8983/solr/bibdata/schema/copyfields
 
 Notice that unlike a relational database, where only a handful field types are available to choose from (e.g. integer, date, boolean, char, and varchar) in Solr there are lots of predefined field types available out of the box, and each of them with its own configuration.
 
-**Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file  `schema.xml`. Starting in Solr 5 the default mechanism for this is through the "Managed Schema Definition" which uses the Schema API to list, add, edit, and remove fields. There is no `schema.xml` file anymore. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this. You can run `curl localhost:8983/solr/bibdata/schema > schema_def.json` to dump the schema definition to a file but changes to the schema must be made through the Schema API.
+**Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this new file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
 
 
 ## Fields in our bibdata schema
