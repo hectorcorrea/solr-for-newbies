@@ -89,6 +89,14 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:s
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story&fq=subjects:women'
 ```
 
+* Documents where title *includes* the word "american" but *does not include* the word "story" (`q=title:american AND -title:story`)
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:american+AND+-title:story'
+```
+
+The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html#the-standard-query-parser) and
+[this tutorial](http://www.solrtutorial.com/solr-query-syntax.html) are good places to check for quick reference on the query syntax.
+
 
 ## q and fq parameters
 
@@ -123,8 +131,33 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="geor
 
 
 ## debugQuery
+Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This particularly useful if the results that you get in a query are not what you were expecting. For example:
 
-...
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title:west+AND+authorsAll:nancy&fl=id,title,authorsAll&defType=edismax&debugQuery=on'
+
+  # response will include
+  # {
+  #   "responseHeader":{...}
+  #   "response":{...}
+  #   "debug":{
+  #     "querystring":"title:west AND authorsAll:nancy",
+  #     "parsedquery":"+(+title:west +authorsAll:nancy)",
+  #     "parsedquery_toString":"+(+title:west +authorsAll:nancy)",
+  #     "explain":{
+  #       ... tons of information here ...
+  #     }
+  #     "QParser":"ExtendedDismaxQParser",
+  #   }
+  # }
+  #
+```
+
+Notice the `debug` property, inside this property there is information about:
+* what value the server received for the search (`querystring`) which is useful to detect if you are not URL encoding properly the value sent to the sever
+* how the server parsed the query (`parsedquery`) which is useful to detect if the syntax on the `q` parameter was parsed as we expected (e.g. remember the example earlier when we passed two words `school teachers` without surrounding them in quotes and the parsed query showed that it was querying two different fields `title` for "school" and `_text_` for "teachers")
+* how each document was ranked (`explain`)
+* what query parser (`QParser`) was used
 
 
 ## Ranking of documents
@@ -134,13 +167,13 @@ When Solr finds documents that match the query it ranks them so that the most re
 Let's say that we want documents where either the `title` or the `author` have the word "west", we would use `q=title:west author:west`
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west'
 ```
 
 Now let's say that we want to boost the documents where the `author` have the word "west" ahead of the documents where "west" was found in the `title`. To this we update the `q` parameter as follow `q=title:west+author:west^5` (notice the `^5` to boost the `author` field)
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west^5"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west^5'
 ```
 
 Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
@@ -148,38 +181,45 @@ Notice how documents where the `author` is named "West" come first, but we still
 If want to see why Solr ranked a result higher than another you can look at the `explain` information that Solr returns when passing the `debugQuery=on` parameter, for example:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml"
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml'
 ```
 
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
+## Default Field
 
-## df parameter / configuration
+By default if you don't specify a field to search on the `q` parameter Solr will use a default field. In a typical Solr installation this would be the `_text_` field. For example if we issue a query for the word "west" without indicating a field (e.g. `q=west`) and look at the debug information we will see what Solr expanded the query into:
 
-df: default field, default is `_text_`, only one allowed (use a copy field if you need many)
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=west&debugQuery=on'
+
+  # {
+  #   "debug":{
+  #     "rawquerystring":"west",
+  #     "querystring":"west",
+  #     "parsedquery":"_text_:west",
+  #     "parsedquery_toString":"_text_:west",
+  #     ...
+  #   }
+  # }
+```
+
+notice the `parsedquery` indicates that is searching on the `_text_` field.
+
+You can overwrite the default field by passing the `df` parameter, for example to use the `title` field as the default parameter we could pass `qf=title:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
 
 
 ## Filtering with ranges
 
-...
+`id:[00000018 TO 00000028]`
 
-## AND/OR/NOT expressions
-
-...
+`id:[00009999 TO *]`
 
 
-## Facets
+`subjects:[Geography TO Heroes]` but be careful that it will match any term in the subject field between Geography and Heroes (e.g. "Mental healing")
 
-...
-
-
-## Searching (more advanced)
-pf
-pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
-
-The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
 
 
 ## Where to find more
-Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results.
+Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results. Chapter 3 on this book goes into great detail on how to read and understand the ranking of results.
