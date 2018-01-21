@@ -1,9 +1,3 @@
-## Synonyms
-
-## Hit highlighting
-
-## Spellchecker
-
 ## Local parameters
 ## Searching (more advanced)
 pf
