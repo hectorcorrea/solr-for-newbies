@@ -103,7 +103,7 @@ Trivia: "One of the upper limits in Solr is that an index cannot contain more th
 
 ## SolrCloud
 
-Solr also provides a feature known as SolrCloud that is now the preferred way to handle fault tolerance and high availability in large scale environments. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/solrcloud.html) defines it as:
+Solr also provides a set of features known as SolrCloud that is the preferred way to handle fault tolerance and high availability in large scale environments. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/solrcloud.html) defines it as:
 
     SolrCloud is flexible distributed search and indexing, without a master node
     to allocate nodes, shards and replicas. Instead, Solr uses ZooKeeper to manage
