@@ -16,7 +16,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-Run the following command to creat the `authorsOther` field as multi-value:
+Run the following command to create the `authorsOther` field as multi-value:
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{

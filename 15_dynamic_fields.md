@@ -12,7 +12,7 @@ If look at the data in the source `data/book.json` file you'll notice that some 
 }
 ```
 
-You might be wondering what's the significance of the `_ss` in the URLs field. Why didn't we just name name that property `urls`?
+You might be wondering what's the significance of the `_ss` in the URLs field. Why didn't we just name that property `urls`?
 
 Solr supports the concept of something called "dynamic fields". Dynamic fields are fields that we define in Solr without giving them a full name, instead we indicate a pattern for the name of the field and Solr will automatically use that pattern for any field that we index that matches the pattern.
 
@@ -38,14 +38,15 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/strings
 
   #
   # response will include
-  #   {
-  #     "fieldType":{
-  #       "name":"strings",
-  #       "class":"solr.StrField",
-  #       "sortMissingLast":true,
-  #       "docValues":true,
-  #       "multiValued":true}
-  #
+  # {
+  #   "fieldType": {
+  #     "name":"strings",
+  #     "class":"solr.StrField",
+  #     "sortMissingLast":true,
+  #     "docValues":true,
+  #     "multiValued":true
+  #   }
+  # }
 ```
 
 What this means for us is that, when we imported the data from our JSON file, Solr automatically assigned the type `strings` to the `urls_ss` field because it matched the `*_ss` pattern.

@@ -1,4 +1,4 @@
-# What is Solr?
+# What is Solr
 
 Solr is an open source *search engine* developed by the Apache Software Foundation. On its [home page](https://lucene.apache.org/solr/) Solr advertises itself as
 
@@ -62,7 +62,7 @@ Notice that the inverted index allow us to do searches for individual *words wit
 Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr uses inverted indexes to allow for partial matches as well as to aid with the ranking of the results.
 
 
-## What is Apache Lucene?
+## What is Lucene
 
 The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brains behind](https://lucene.apache.org/solr/guide/7_0/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
 

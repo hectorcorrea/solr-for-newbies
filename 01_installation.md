@@ -1,6 +1,7 @@
 # Installing Solr for the first time
 
 ## Prerequisites
+
 To run Solr on your machine you need to have the Java Development Kit (JDK)
 installed. To verify if that the JDK is installed run the following command
 from the Terminal (aka Command Prompt if you are on Windows):
@@ -34,6 +35,7 @@ If Java *is installed* on your machine skip the "Installing Java" section below 
 
 
 ### Installing Java
+
 To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and select the option to download the "Java Platform (JDK) 9".
 
 From there, under the "Java SE Development Kit 9.0.1" select the file appropriated for your operating system, accept the license agreement, and download it. For example, for the Mac the file would be `jdk-9.0.1_osx-x64_bin.dmg`.
@@ -42,6 +44,7 @@ Run the installer that you downloaded. Once it has completed, go back to the Ter
 
 
 ## Installing Solr
+
 You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
 
 First, download Solr and save it to a file.
@@ -89,6 +92,7 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 
 
 ## Let's get Solr started
+
 To start Solr run the `solr` script again but with the `start` parameter:
 
 ```
@@ -127,6 +131,7 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 
 ## Adding Solr to your path (optional)
+
 In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
 
 ```  
