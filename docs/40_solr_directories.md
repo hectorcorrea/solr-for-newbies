@@ -1,4 +1,4 @@
-# PART IV - MISCELLANEOUS
+# PART IV: MISCELLANEOUS
 
 ## Solr directories
 

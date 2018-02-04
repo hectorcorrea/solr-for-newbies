@@ -1,4 +1,4 @@
-# PART III - SEARCHING
+# PART III: SEARCHING
 
 When we issue a search to Solr we pass the search parameters in the query string. In previous examples we passed values in the `q` parameter to indicate the values that we want to search for and `fl` to indicate what fields we want to retrieve. For example:
 

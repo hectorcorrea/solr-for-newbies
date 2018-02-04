@@ -1,4 +1,4 @@
-# PART I - INTRODUCTION 
+# PART I: INTRODUCTION
 
 ## What is Solr
 

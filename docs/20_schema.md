@@ -1,4 +1,4 @@
-# PART II - SCHEMA
+# PART II: SCHEMA
 
 The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
