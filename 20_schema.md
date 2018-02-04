@@ -29,6 +29,8 @@ $ curl localhost:8983/solr/bibdata/schema
   #
 ```
 
+You can also view this information via the [Solr Admin](http://localhost:8983/solr/#/bibdata/schema) web page, under the *Schema* menu option or by looking at the `managed-schema` file under the *Files* menu option.
+
 You can request each of these categories individually with the following commands (notice that combined words like `fieldTypes` and `dynamicFields` are *not* capitalized in the URLs below):
 
 ```
@@ -43,35 +45,16 @@ Notice that unlike a relational database, where only a handful field types are a
 **Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this new file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
 
 
-## Fields in our bibdata schema
+## Fields in our schema
 
-You might be wondering where did the fields like `title`, `author`, `subjects`, and `subjects_str` in our `bibdata` core come from since we never explicitly defined them.
+You might be wondering where did the fields like `id`, `title`, `author`, `subjects`, and `subjects_str` in our `bibdata` core come from since we never explicitly defined them.
 
 Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match some of the fields defined in our schema.
 
-You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema.
-
-Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out exact version this became available.
-
-Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `title` and another `title_str` but we only have `title` in the JSON file. This is because Solr automatically defined a `copyField` between these two fields. You can see this via the following command:
-
-```
-$ curl localhost:8983/solr/bibdata/schema/copyfields
-
-  # response will include
-  #
-  # {
-  #   "source":"title",
-  #   "dest":"title_str",
-  #   "maxChars":256
-  # },
-  #
-```
-
-Because our `bibdata` core allows for automatic field creation Solr created the `title` field as a `text_general` field type (which is tokenized) with the data in the "title" value in our JSON file but it also created, via the `copyField` definition, a `title_str` field as a `string` field type (which is not tokenized) and stored only the first 256 characters of it in this second string field. We'll look more into what the differences of these fields are in the next sections.
+You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema. Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out the exact version this became available.
 
 
-## Fields
+### Field: id
 Let's look at the details the `id` field in our schema
 
 ```
@@ -113,6 +96,9 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
 ```
 
 In this case the `class` points to an internal Solr class that will be used to handle values of the string type.
+
+
+### Field: title
 
 Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 
@@ -187,4 +173,4 @@ This is obviously a much more complex definition than the ones we saw before. Al
 
 * `queryAnalyzer` refers to the transformations that will be applied to the search terms when we *query* a field of this type.
 
-Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time, but "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.
+Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time since the `StopFilterFactory` filter is defined in both the query and the index analyzer sections. However, "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.

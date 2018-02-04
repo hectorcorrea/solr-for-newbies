@@ -6,20 +6,20 @@ Now that we have added a few documents to our `bibdata` core we can query Solr f
 
 If you look at the content of the `books.json` file that we imported into our `bibdata` core you'll notice that the documents have the following fields:
 
-* id: string to identify each document ([MARC](https://www.loc.gov/marc/bibliographic/) 001)
-* author: string for the main author (MARC 100a)
-* authorDate: date for the author (MARC 100d)
-* authorFuller: title of the book (MARC 100q)
-* authorsOther: list of other authors (MARC 700a)
-* title: title of the book (MARC 245ab)
-* responsibility: statement of responsibility (MARC 245c)
-* publisher: publisher name (MARC 260a)
-* urls_ss: URLs (MARC 856u)
-* subjects: an array of subjects (MARC 650a)
-* subjectsForm: (MARC 650v)
-* subjectsGeneral: (MARC 650x)
-* subjectsChrono: (MARC 650y)
-* subjectsGeo: (MARC 650z)
+* **id**: string to identify each document ([MARC](https://www.loc.gov/marc/bibliographic/) 001)
+* **author**: string for the main author (MARC 100a)
+* **authorDate**: date for the author (MARC 100d)
+* **authorFuller**: title of the book (MARC 100q)
+* **authorsOther**: list of other authors (MARC 700a)
+* **title**: title of the book (MARC 245ab)
+* **responsibility**: statement of responsibility (MARC 245c)
+* **publisher**: publisher name (MARC 260a)
+* **urls_ss**: URLs (MARC 856u)
+* **subjects**: an array of subjects (MARC 650a)
+* **subjectsForm**: (MARC 650v)
+* **subjectsGeneral**: (MARC 650x)
+* **subjectsChrono**: (MARC 650y)
+* **subjectsGeo**: (MARC 650z)
 
 
 ## Fetching data
@@ -71,7 +71,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:tea
 Now let's try something else. Let's issue a search for books where the title says "school teachers" using `q=title:"school teachers"`
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers="'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"'
 
   # the results will include   
   # {
@@ -128,17 +128,20 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
 
   # response will include something like this
   #
-  # "subjects":[
-  #   "education",45,
-  #   "and",18,
-  #   "higher",12,
-  #   "colleges",7,
-  #   "in",7,
-  #   "universities",7,
-  #   "educational",6,
-  #   "moral",4,
-  #   "social",4,
-  #   "teachers",4,
+  # "facet_counts":{
+  #   "facet_queries":{},
+  #   "facet_fields":{
+  #     "subjects":[
+  #       "education",45,
+  #       "and",18,
+  #       "higher",12,
+  #       "colleges",7,
+  #       "in",7,
+  #       "universities",7,
+  #       "educational",6,
+  #       "moral",4,
+  #       "social",4,
+  #       "teachers",4,
   #
 ```
 
@@ -149,12 +152,15 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
 
   # response will include something like this
   #
-  # "subjects_str":[
-  #   "Education, Higher",10,
-  #   "Education",7,
-  #   "Universities and colleges",6,
-  #   "Educational equalization",3,
-  #   "Moral education",3,
-  #   "Women",3,
+  # "facet_counts":{
+  #   "facet_queries":{},
+  #   "facet_fields":{
+  #     "subjects_str":[
+  #       "Education, Higher",10,
+  #       "Education",7,
+  #       "Universities and colleges",6,
+  #       "Educational equalization",3,
+  #       "Moral education",3,
+  #       "Women",3,
   #
 ```

@@ -54,6 +54,9 @@ What this means for us is that, when we imported the data from our JSON file, So
 There are lots of pre-defined dynamic fields in a standard Solr installation and you can also define your own dynamic fields.
 
 Take a look at the dynamic fields defined in the `schema.xml` for these projects:
+
 * Brown (a Blacklight app): https://github.com/Brown-University-Library/bul-search/blob/master/solr_conf/blacklight-core/conf/schema.xml
 * PSU ScholarSphere (a Hydra/SamVera app): https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml
 * Princeton (a Blacklight app?): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/orangelight/conf/schema.xml
+
+Notice the `*_tesim` vs `*_sim` dynamic field definitions in the PSU repo, or the `*_sort` dynamic definition in the Princeton repo, or the `*_display` vs `*_sort` definitions in the Brown repository.

@@ -107,7 +107,7 @@ $ ./solr start
 
 Notice that the message says that Solr is now running on port `8983`.
 
-You can validate this by opening your browser and going to http://localhost:8983/. This will display the Solr Dashboard from where you can perform administrative tasks as well as add, update, and query data from Solr.
+You can validate this by opening your browser and going to http://localhost:8983/. This will display the Solr Admin page from where you can perform administrative tasks as well as add, update, and query data from Solr.
 
 You can also issue the `status` command again from the Terminal and Solr will report something like this:
 

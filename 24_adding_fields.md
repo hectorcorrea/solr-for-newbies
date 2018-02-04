@@ -1,6 +1,7 @@
 # Adding a new field
 So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Let us now add and customize some of the fields in our core to have more control on how Solr indexes and searches data.
 
+
 ## Customizing the author fields
 Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
 

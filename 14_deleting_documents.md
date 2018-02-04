@@ -8,7 +8,9 @@ $ curl "http://localhost:8983/solr/bibdata/update?commit=true" --data '<delete><
 
 The body of the request (`--data`) indicates to Solr that we want to delete all documents (notice the `*:*` query).
 
-Be aware that this will delete the documents but the schema and the core's configuration will remain intact. For example, the fields that were defined are still available even if no documents exist in the core anymore.
+You can also pass a more specific query, for example `id:00020424` to delete a single document or `title:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it).
+
+Be aware that even if you delete all documents from a Solr core the schema and the core's configuration will remain intact. For example, the fields that were defined are still available even if no documents exist in the core anymore.
 
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
