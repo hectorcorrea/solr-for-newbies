@@ -2,7 +2,7 @@ Workshop Outline
 
 
 
-* [PART I - INTRODUCTION ](#part-i-introduction)
+* [PART I: INTRODUCTION](#part-i-introduction)
   * [What is Solr](#what-is-solr)
   * [Solr's document model](#solrs-document-model)
   * [Inverted index](#inverted-index)
@@ -23,7 +23,7 @@ Workshop Outline
   * [Deleting documents](#deleting-documents)
 
 
-* [PART II - SCHEMA](#part-ii-schema)
+* [PART II: SCHEMA](#part-ii-schema)
   * [Fields in our schema](#fields-in-our-schema)
     * [Field: id](#field-id)
     * [Field: title](#field-title)
@@ -44,7 +44,7 @@ Workshop Outline
   * [title_str field](#title_str-field)
 
 
-* [PART III - SEARCHING](#part-iii-searching)
+* [PART III: SEARCHING](#part-iii-searching)
   * [Query Parsers](#query-parsers)
   * [Basic searching in Solr](#basic-searching-in-solr)
     * [q and fq parameters](#q-and-fq-parameters)
@@ -59,7 +59,7 @@ Workshop Outline
   * [Searching (more advanced)](#searching-more-advanced)
 
 
-* [PART IV - MISCELLANEOUS](#part-iv-miscellaneous)
+* [PART IV: MISCELLANEOUS](#part-iv-miscellaneous)
   * [Solr directories](#solr-directories)
     * [Your bibdata core](#your-bibdata-core)
   * [Synonyms](#synonyms)

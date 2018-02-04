@@ -2,7 +2,7 @@ Workshop Outline
 
 
 
-* [PART I - INTRODUCTION ](#part-i-introduction)
+* [PART I: INTRODUCTION](#part-i-introduction)
   * [What is Solr](#what-is-solr)
   * [Solr's document model](#solrs-document-model)
   * [Inverted index](#inverted-index)
@@ -23,7 +23,7 @@ Workshop Outline
   * [Deleting documents](#deleting-documents)
 
 
-* [PART II - SCHEMA](#part-ii-schema)
+* [PART II: SCHEMA](#part-ii-schema)
   * [Fields in our schema](#fields-in-our-schema)
     * [Field: id](#field-id)
     * [Field: title](#field-title)
@@ -44,7 +44,7 @@ Workshop Outline
   * [title_str field](#title_str-field)
 
 
-* [PART III - SEARCHING](#part-iii-searching)
+* [PART III: SEARCHING](#part-iii-searching)
   * [Query Parsers](#query-parsers)
   * [Basic searching in Solr](#basic-searching-in-solr)
     * [q and fq parameters](#q-and-fq-parameters)
@@ -59,7 +59,7 @@ Workshop Outline
   * [Searching (more advanced)](#searching-more-advanced)
 
 
-* [PART IV - MISCELLANEOUS](#part-iv-miscellaneous)
+* [PART IV: MISCELLANEOUS](#part-iv-miscellaneous)
   * [Solr directories](#solr-directories)
     * [Your bibdata core](#your-bibdata-core)
   * [Synonyms](#synonyms)
@@ -81,7 +81,7 @@ Workshop Outline
     * [Sample data](#sample-data)
 
 
-# PART I - INTRODUCTION 
+# PART I: INTRODUCTION
 
 ## What is Solr
 
@@ -614,7 +614,7 @@ $ ~/solr-7.1.0/bin/solr delete -c bibdata
 ```
 
 be aware that you will need to re-create the core if you want to re-import data to it.
-# PART II - SCHEMA
+# PART II: SCHEMA
 
 The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
@@ -1314,7 +1314,7 @@ $ curl "localhost:8983/solr/bibdata/schema/dynamicfields/*_str"
 Notice how the `*_str` dynamic field definition will create a `strings` field for any field that ends with `_str`. You can see the definition of the `strings` field type via `curl localhost:8983/solr/bibdata/schema/fieldtypes/strings`
 
 With all this information we can conclude that the first 256 characters of the `title` will be copied to a `title_str` field (via a **copyField**). The `title_str` will be created of the `*_txt` **dynamicField** definition as a `strings` type. `strings` in turn is a multi-value `string` field type.
-# PART III - SEARCHING
+# PART III: SEARCHING
 
 When we issue a search to Solr we pass the search parameters in the query string. In previous examples we passed values in the `q` parameter to indicate the values that we want to search for and `fl` to indicate what fields we want to retrieve. For example:
 
@@ -1646,7 +1646,7 @@ pf
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
 
 The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
-# PART IV - MISCELLANEOUS
+# PART IV: MISCELLANEOUS
 
 ## Solr directories
 
