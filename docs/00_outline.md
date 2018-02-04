@@ -1,12 +1,12 @@
-Workshop Outline
+Tutorial Outline
 
 
 
 * [PART I: INTRODUCTION](#part-i-introduction)
   * [What is Solr](#what-is-solr)
-  * [Solr's document model](#solrs-document-model)
-  * [Inverted index](#inverted-index)
-  * [What is Lucene](#what-is-lucene)
+    * [Solr's document model](#solrs-document-model)
+    * [Inverted index](#inverted-index)
+    * [What is Lucene](#what-is-lucene)
   * [Installing Solr for the first time](#installing-solr-for-the-first-time)
     * [Prerequisites](#prerequisites)
     * [Installing Java](#installing-java)

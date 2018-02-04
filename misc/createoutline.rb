@@ -1,3 +1,4 @@
+# Creates the outline from the individual markdown files
 files = Dir["./docs/*.md"]
 files.sort!
 
@@ -11,7 +12,7 @@ def markdown_link(text)
   "[" + text + "](#" + link_text(text) + ")"
 end
 
-puts "Workshop Outline"
+puts "Tutorial Outline"
 puts ""
 files.each do |file|
   File.readlines(file).each do |line|
