@@ -1,6 +1,6 @@
 PART I - INTRODUCTION
-* [What is Solr?]()
-* [Solr's document model](#Solr-s-document-model)
+* [What is Solr?](#what-is-solr)
+* [Solr's document model](#solrs-document-model)
 * Inverted index
 * What is Lucene
 * Installing Solr for the first time
