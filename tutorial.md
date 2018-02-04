@@ -1,6 +1,31 @@
+PART I - INTRODUCTION
+* [What is Solr?][]
+* [Solr's document model][#Solr-s-document-model]
+* Inverted index
+* What is Lucene
+* Installing Solr for the first time
+  * Prerequisites
+  * Installing Java
+  * Installing Solr
+  * Let's get Solr started
+  * Adding Solr to your path (optional)
+* Creating our first Solr core
+* Adding documents to Solr
+* Searching for documents
+  * Fetching data
+  * Selecting what fields to fetch
+  * Filtering the documents to fetch
+  * Getting facets
+* Deleting documents
+
+PART II - SCHEMA
+
+
+
+
 # PART I - INTRODUCTION
 
-## == What is Solr
+## What is Solr
 
 Solr is an open source *search engine* developed by the Apache Software Foundation. On its [home page](https://lucene.apache.org/solr/) Solr advertises itself as
 
@@ -18,7 +43,7 @@ The fact that Solr is a search engine means that there is a strong focus on spee
 Although Solr could technically be described as a NoSQL database (i.e. it allows us to store and retrieve data in a non-relational form) it is better to think of it as a search engine to emphasize the fact that it is better suited for text-centric and read-mostly environments [Solr in Action, p. 4].
 
 
-## == Solr's document model
+## Solr's document model
 
 Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://lucene.apache.org/solr/guide/7_0/overview-of-documents-fields-and-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
 
