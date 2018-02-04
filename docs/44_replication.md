@@ -1,4 +1,4 @@
-# Solr Replication
+## == Solr Replication
 
 Replication is a technique in which you "create multiple identical copies of your index and load balance traffic across each of the copies" [Solr in Action, p. 375](https://www.worldcat.org/title/solr-in-action/oclc/879605085).
 
@@ -13,7 +13,7 @@ Solr uses the *one-master, many-replica* model to handle replication in which th
 To configure replication in Solr we need to add a new request handler in our `solrconfig.xml` and by convention this handler is named `/replication`.
 
 
-## Master server configuration
+### === Master server configuration
 
 To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml`:
 
@@ -38,7 +38,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
 and look at its setting under the [Replication](http://localhost:8983/solr/#/bibdata/replication) tab in the Solr Admin web page you should see a green checkbox next to the "replication enable" setting.
 
 
-## Replica server configuration
+### === Replica server configuration
 
 For replication to work we need to have other Solr core (or cores) where the data will be replicated to. In a production setting these replica copies will typically live in a different machine from the master, but to keep things simple on this tutorial we are going to define the replica on the same machine and Solr installation that we have been using.
 
@@ -92,7 +92,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
 If we query the replica again we would see documents on it. Also, if we look at the settings under the [Replication](http://localhost:8983/solr/#/theothercore/replication) tab in the Solr Admin web page *for this new core* we would see information about the replication including the master URL and the polling interval.
 
 
-## Sharding
+### === Sharding
 
 Sharding is a different technique from replication that is used to execute *distributed queries* across multiple Solr cores. This is useful when you have too many documents to handle on a single server.
 
@@ -101,7 +101,7 @@ Sharding is beyond the scope of this tutorial but Chapter 12 of [Solr in Action]
 Trivia: "One of the upper limits in Solr is that an index cannot contain more than 2^31 documents, due to an underlying limitation in Lucene." (Solr in Action, p. 372). That's two billion documents (2,000,000,000) for those of us that use the [short scale](https://en.wikipedia.org/wiki/Long_and_short_scales).
 
 
-## SolrCloud
+### === SolrCloud
 
 Solr also provides a set of features known as SolrCloud that is the preferred way to handle fault tolerance and high availability in large scale environments. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/solrcloud.html) defines it as:
 

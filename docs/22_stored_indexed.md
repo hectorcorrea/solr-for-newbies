@@ -1,4 +1,4 @@
-# Stored vs indexed fields
+## == Stored vs indexed fields
 
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond this tutorial.
 
@@ -93,7 +93,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=f_stored:stored"
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
 
 
-## Indexed, stored, and docValues
+### === Indexed, stored, and docValues
 
 In the previous example we declared three fields with different indexed/stored settings and all of them were of type `text_general`. However, if you set the indexed/stored setting in fields of type `string` the default behavior is slightly different because Solr stores and handles `string` fields different from `text_general` fields.
 

@@ -1,4 +1,5 @@
-# Creating our first Solr core
+## == Creating our first Solr core
+
 Solr uses the concept of *cores* to represent independent environments in which
 we configure data schemas and store data. This is similar to the concept of a
 "database" in MySQL or PostgreSQL.

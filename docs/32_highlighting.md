@@ -1,4 +1,4 @@
-# Hit highlighting
+## == Hit highlighting
 
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
 ).

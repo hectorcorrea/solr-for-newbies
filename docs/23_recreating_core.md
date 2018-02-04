@@ -1,8 +1,8 @@
-# Recreating our Solr core
+## == Recreating our Solr core
 
 Before we start the next section, where we will make customizations to the schema, let's delete the current core and re-create it empty.
 
-To delete delete the `bibdata` core issue:
+To delete the `bibdata` core issue:
 
 ```
 $ solr delete -c bibdata

@@ -1,4 +1,4 @@
-# Dynamic Fields
+## == Dynamic Fields
 
 If look at the data in the source `data/book.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
 

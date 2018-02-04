@@ -1,8 +1,8 @@
-# Adding a new field
+## == Adding a new field
 So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Let us now add and customize some of the fields in our core to have more control on how Solr indexes and searches data.
 
 
-## Customizing the author fields
+### === Customizing the author fields
 Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
 
 Run the following command to create the `author` field as single value:
@@ -70,7 +70,7 @@ Having a single `authorsAll` field will allow us to find books authored by a par
 We need to re-import our data for these changes to take effect, but before we do this let's do another customization to the schema.
 
 
-## Customizing the title fields
+### === Customizing the title fields
 Most (if not all) the titles in our source JSON file are in English. Therefore let's configure the `title` field to use the `text_en` (text English) field type rather than the default `text_general` field type.
 
 Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. You can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to validate this.
@@ -87,7 +87,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 ```
 
 
-## Testing our changes
+### === Testing our changes
 Now that we have configured our schema with a few  specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
@@ -95,7 +95,7 @@ $ post -c bibdata data/books.json
 ```
 
 
-### Testing changes to the author field
+### === Testing changes to the author field
 
 Take a look at the data for this particular book that has many authors and notice how the `authorsAll` field has the combination of `author` and `authorOthers` (even though our source data didn't have an `authorsAll` field.)
 
@@ -141,7 +141,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,author,authorsAll,subjec
 notice that the result includes a book where "George" is one of the authors (even if he is not the main author.)
 
 
-### Testing changes to the title field
+### === Testing changes to the title field
 
 Now run a query for books with the title "run" (`q=title:run`):
 

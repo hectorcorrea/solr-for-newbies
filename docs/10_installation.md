@@ -1,6 +1,6 @@
-# Installing Solr for the first time
+## == Installing Solr for the first time
 
-## Prerequisites
+### === Prerequisites
 
 To run Solr on your machine you need to have the Java Development Kit (JDK)
 installed. To verify if that the JDK is installed run the following command
@@ -34,7 +34,7 @@ If you don't have the JDK installed you'll see something like
 If Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine follow the steps below to install it.
 
 
-### Installing Java
+### === Installing Java
 
 To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and select the option to download the "Java Platform (JDK) 9".
 
@@ -43,7 +43,7 @@ From there, under the "Java SE Development Kit 9.0.1" select the file appropriat
 Run the installer that you downloaded. Once it has completed, go back to the Terminal and run the `java -version` command again. You should see the text with the Java version number this time.
 
 
-## Installing Solr
+### === Installing Solr
 
 You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
 
@@ -91,7 +91,7 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 **Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `solr.cmd status` instead of `./solr status`.
 
 
-## Let's get Solr started
+### === Let's get Solr started
 
 To start Solr run the `solr` script again but with the `start` parameter:
 
@@ -130,7 +130,7 @@ $ ./solr status
 Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 
-## Adding Solr to your path (optional)
+### === Adding Solr to your path (optional)
 
 In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
 

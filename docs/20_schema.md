@@ -1,4 +1,4 @@
-# Schema
+# PART II - SCHEMA
 
 The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
@@ -45,7 +45,7 @@ Notice that unlike a relational database, where only a handful field types are a
 **Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this new file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
 
 
-## Fields in our schema
+## == Fields in our schema
 
 You might be wondering where did the fields like `id`, `title`, `author`, `subjects`, and `subjects_str` in our `bibdata` core come from since we never explicitly defined them.
 
@@ -54,7 +54,7 @@ Solr automatically created most of these fields when we imported the data from t
 You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema. Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out the exact version this became available.
 
 
-### Field: id
+### === Field: id
 Let's look at the details the `id` field in our schema
 
 ```
@@ -98,7 +98,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
 In this case the `class` points to an internal Solr class that will be used to handle values of the string type.
 
 
-### Field: title
+### === Field: title
 
 Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 

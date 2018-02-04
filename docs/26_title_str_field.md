@@ -1,4 +1,4 @@
-# title_str field
+## == title_str field
 
 Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `title` and another `title_str` but we only have `title` in the JSON file. Where does `title_str` come from?
 

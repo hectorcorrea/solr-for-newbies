@@ -1,4 +1,4 @@
-# Deleting all documents
+## == Deleting documents
 To delete all documents for the `bibdata` core we can submit a request to Solr's
 `update` endpoint (rather than the `select` endpoint) with a command like this:
 
