@@ -1,4 +1,4 @@
-## == Facets
+## Facets
 One of the most popular features of Solr is the concept of *facets*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/faceting.html) defines it as:
 
     Faceting is the arrangement of search results into categories

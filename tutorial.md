@@ -1,29 +1,87 @@
-PART I - INTRODUCTION
-* [What is Solr?](#what-is-solr)
-* [Solr's document model](#solrs-document-model)
-* Inverted index
-* What is Lucene
-* Installing Solr for the first time
-  * Prerequisites
-  * Installing Java
-  * Installing Solr
-  * Let's get Solr started
-  * Adding Solr to your path (optional)
-* Creating our first Solr core
-* Adding documents to Solr
-* Searching for documents
-  * Fetching data
-  * Selecting what fields to fetch
-  * Filtering the documents to fetch
-  * Getting facets
-* Deleting documents
-
-PART II - SCHEMA
+Workshop Outline
 
 
 
+* [PART I - INTRODUCTION ](#part-i-introduction)
+  * [What is Solr](#what-is-solr)
+  * [Solr's document model](#solrs-document-model)
+  * [Inverted index](#inverted-index)
+  * [What is Lucene](#what-is-lucene)
+  * [Installing Solr for the first time](#installing-solr-for-the-first-time)
+    * [Prerequisites](#prerequisites)
+    * [Installing Java](#installing-java)
+    * [Installing Solr](#installing-solr)
+    * [Let's get Solr started](#lets-get-solr-started)
+    * [Adding Solr to your path (optional)](#adding-solr-to-your-path-optional)
+  * [Creating our first Solr core](#creating-our-first-solr-core)
+  * [Adding documents to Solr](#adding-documents-to-solr)
+  * [Searching for documents](#searching-for-documents)
+    * [Fetching data](#fetching-data)
+    * [Selecting what fields to fetch](#selecting-what-fields-to-fetch)
+    * [Filtering the documents to fetch](#filtering-the-documents-to-fetch)
+    * [Getting facets](#getting-facets)
+  * [Deleting documents](#deleting-documents)
 
-# PART I - INTRODUCTION
+
+* [PART II - SCHEMA](#part-ii-schema)
+  * [Fields in our schema](#fields-in-our-schema)
+    * [Field: id](#field-id)
+    * [Field: title](#field-title)
+  * [Analyzers, Tokenizers, and Filters  ](#analyzers-tokenizers-and-filters)
+    * [Tokenizers](#tokenizers)
+    * [Filters](#filters)
+    * [Putting it all together](#putting-it-all-together)
+  * [Stored vs indexed fields](#stored-vs-indexed-fields)
+    * [Indexed, stored, and docValues](#indexed-stored-and-docvalues)
+  * [Recreating our Solr core](#recreating-our-solr-core)
+  * [Adding a new field](#adding-a-new-field)
+    * [Customizing the author fields](#customizing-the-author-fields)
+    * [Customizing the title fields](#customizing-the-title-fields)
+    * [Testing our changes](#testing-our-changes)
+    * [Testing changes to the author field](#testing-changes-to-the-author-field)
+    * [Testing changes to the title field](#testing-changes-to-the-title-field)
+  * [Dynamic Fields](#dynamic-fields)
+  * [title_str field](#title_str-field)
+
+
+* [PART III - SEARCHING](#part-iii-searching)
+  * [Query Parsers](#query-parsers)
+  * [Basic searching in Solr](#basic-searching-in-solr)
+    * [q and fq parameters](#q-and-fq-parameters)
+    * [the qf parameter](#the-qf-parameter)
+    * [debugQuery](#debugquery)
+    * [Ranking of documents](#ranking-of-documents)
+    * [Default Field](#default-field)
+    * [Filtering with ranges](#filtering-with-ranges)
+    * [Where to find more](#where-to-find-more)
+  * [Facets](#facets)
+  * [Hit highlighting](#hit-highlighting)
+  * [Searching (more advanced)](#searching-more-advanced)
+
+
+* [PART IV - MISCELLANEOUS](#part-iv-miscellaneous)
+  * [Solr directories](#solr-directories)
+    * [Your bibdata core](#your-bibdata-core)
+  * [Synonyms](#synonyms)
+    * [Life without synonyms](#life-without-synonyms)
+    * [Adding synonyms](#adding-synonyms)
+    * [More info](#more-info)
+  * [Core-specific configuration](#core-specific-configuration)
+    * [Request Handlers](#request-handlers)
+    * [LocalParams and dereferencing](#localparams-and-dereferencing)
+    * [Search Components](#search-components)
+    * [Solr-wide configuration](#solr-wide-configuration)
+  * [Spellchecker](#spellchecker)
+  * [Solr Replication](#solr-replication)
+    * [Master server configuration](#master-server-configuration)
+    * [Replica server configuration](#replica-server-configuration)
+    * [Sharding](#sharding)
+    * [SolrCloud](#solrcloud)
+  * [Sources and where to find more](#sources-and-where-to-find-more)
+    * [Sample data](#sample-data)
+
+
+# PART I - INTRODUCTION 
 
 ## What is Solr
 
@@ -58,7 +116,7 @@ Something important to know about documents in Solr is that they are self-contai
 This is different from other document stores, like MongoDB, that allow nested fields inside a document.
 
 
-## == Inverted index
+## Inverted index
 
 Search engines like Solr use a data structure called *inverted index* to support fast retrieval of documents even with complex query expression on large datasets. The basic idea of an inverted index is to use the *terms* inside a document as the *key* of the index rather than the *document's ID* as the key.
 
@@ -89,7 +147,7 @@ Notice that the inverted index allow us to do searches for individual *words wit
 Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr uses inverted indexes to allow for partial matches as well as to aid with the ranking of the results.
 
 
-## == What is Lucene
+## What is Lucene
 
 The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brains behind](https://lucene.apache.org/solr/guide/7_0/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
 
@@ -103,9 +161,9 @@ But Lucene is a Java Library than can only be used from other Java programs. Sol
 ```
 
 In this diagram the *client application* could be a program written in Ruby or Python. In fact, as we will see throughout this tutorial, it can also be a system utility like cURL or a web browser. Anything that can submit HTTP requests can communicate with Solr.
-## == Installing Solr for the first time
+## Installing Solr for the first time
 
-### === Prerequisites
+### Prerequisites
 
 To run Solr on your machine you need to have the Java Development Kit (JDK)
 installed. To verify if that the JDK is installed run the following command
@@ -139,7 +197,7 @@ If you don't have the JDK installed you'll see something like
 If Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine follow the steps below to install it.
 
 
-### === Installing Java
+### Installing Java
 
 To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and select the option to download the "Java Platform (JDK) 9".
 
@@ -148,7 +206,7 @@ From there, under the "Java SE Development Kit 9.0.1" select the file appropriat
 Run the installer that you downloaded. Once it has completed, go back to the Terminal and run the `java -version` command again. You should see the text with the Java version number this time.
 
 
-### === Installing Solr
+### Installing Solr
 
 You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
 
@@ -196,7 +254,7 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 **Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `solr.cmd status` instead of `./solr status`.
 
 
-### === Let's get Solr started
+### Let's get Solr started
 
 To start Solr run the `solr` script again but with the `start` parameter:
 
@@ -235,7 +293,7 @@ $ ./solr status
 Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 
-### === Adding Solr to your path (optional)
+### Adding Solr to your path (optional)
 
 In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
 
@@ -250,7 +308,7 @@ $ which solr
 ```
 
 If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.1.0/bin/solr`.
-## == Creating our first Solr core
+## Creating our first Solr core
 
 Solr uses the concept of *cores* to represent independent environments in which
 we configure data schemas and store data. This is similar to the concept of a
@@ -295,7 +353,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 (or you can also point your browser to http://localhost:8983/solr#bibdata/query and click the "Execute Query" button at the bottom of the page)
 
 in either case you'll see `"numFound":0` indicating that there are no documents on it.
-## == Adding documents to Solr
+## Adding documents to Solr
 
 In the last section we ran a query against Solr that showed us that our
 newly created core `bibdata` has no documents in it. Remember that our call to
@@ -371,7 +429,7 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
   # COMMITting Solr index changes to http://...
   #
 ```
-## == Searching for documents
+## Searching for documents
 
 Now that we have added a few documents to our `bibdata` core we can query Solr for those documents. In a subsequent section we'll explore more advanced searching options and how our schema definition is key to enable different kind of searches, but for now we'll start with a few basic searches to get familiar with the way querying works in Solr.
 
@@ -393,7 +451,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **subjectsGeo**: (MARC 650z)
 
 
-### === Fetching data
+### Fetching data
 
 To fetch data from Solr we make an HTTP request to the `select` handler. For example:
 
@@ -404,7 +462,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 There are many parameters that we can pass to this handler to define what documents we want to fetch and what fields we want to fetch.
 
 
-### === Selecting what fields to fetch
+### Selecting what fields to fetch
 
 We can use the `fl` parameter to indicate what fields we want to fetch. For example to request the `id` and the `title` of the documents we would use `fl=id,title` as in the following example:
 
@@ -417,7 +475,7 @@ Note: When issuing the commands via cURL (as in the previous example) make sure 
 Try adding and removing some other fields to this list, for example, `fl=id,author,title` or `fl=id,title,author,subjects`
 
 
-### === Filtering the documents to fetch
+### Filtering the documents to fetch
 
 In the previous examples you might have seen an inconspicuous `q=*` parameter in the URL. The `q` (query) parameter tells Solr what documents to retrieve. This is somewhat similar to the `WHERE` clause in a SQL SELECT query.
 
@@ -488,7 +546,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
 ```
 
 
-### === Getting facets
+### Getting facets
 
 When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
 
@@ -535,7 +593,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
   #       "Women",3,
   #
 ```
-## == Deleting documents
+## Deleting documents
 To delete all documents for the `bibdata` core we can submit a request to Solr's
 `update` endpoint (rather than the `select` endpoint) with a command like this:
 
@@ -603,7 +661,7 @@ Notice that unlike a relational database, where only a handful field types are a
 **Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this new file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
 
 
-## == Fields in our schema
+## Fields in our schema
 
 You might be wondering where did the fields like `id`, `title`, `author`, `subjects`, and `subjects_str` in our `bibdata` core come from since we never explicitly defined them.
 
@@ -612,7 +670,7 @@ Solr automatically created most of these fields when we imported the data from t
 You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema. Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out the exact version this became available.
 
 
-### === Field: id
+### Field: id
 Let's look at the details the `id` field in our schema
 
 ```
@@ -656,7 +714,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
 In this case the `class` points to an internal Solr class that will be used to handle values of the string type.
 
 
-### === Field: title
+### Field: title
 
 Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
 
@@ -732,7 +790,7 @@ This is obviously a much more complex definition than the ones we saw before. Al
 * `queryAnalyzer` refers to the transformations that will be applied to the search terms when we *query* a field of this type.
 
 Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time since the `StopFilterFactory` filter is defined in both the query and the index analyzer sections. However, "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.
-## == Analyzers, Tokenizers, and Filters  
+## Analyzers, Tokenizers, and Filters  
 
 When we looked at the definition of the `text_general` field type we saw a couple of values that pointed to `tokenizer` and `filters` under the `indexAnalyzer` and `queryAnalyzer` properties.
 
@@ -749,47 +807,47 @@ Below is how the analyzers for the `text_general` field type are defined in a st
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
 
-# Response includes indexAnalyzer's tokenizer and filters:
-#
-#     "indexAnalyzer":{
-#       "tokenizer":{
-#         "class":"solr.StandardTokenizerFactory"
-#       },
-#       "filters":[
-#         {
-#           "class":"solr.StopFilterFactory",
-#           "words":"stopwords.txt",
-#           "ignoreCase":"true"
-#         },
-#         {
-#           "class":"solr.LowerCaseFilterFactory"
-#         }
-#       ]
-#     },
-#
-# and queryAnalyzer's tokenizer and filters:
-#
-#     "queryAnalyzer":{
-#       "tokenizer":{
-#         "class":"solr.StandardTokenizerFactory"
-#       },
-#       "filters":[
-#         {
-#           "class":"solr.StopFilterFactory",
-#           "words":"stopwords.txt",
-#           "ignoreCase":"true"
-#         },
-#         {
-#           "class":"solr.SynonymGraphFilterFactory",
-#           "expand":"true",
-#           "ignoreCase":"true",
-#           "synonyms":"synonyms.txt"
-#         },
-#         {
-#           "class":"solr.LowerCaseFilterFactory"
-#         }
-#       ]
-#     }
+  # Response includes indexAnalyzer's tokenizer and filters:
+  #
+  #     "indexAnalyzer":{
+  #       "tokenizer":{
+  #         "class":"solr.StandardTokenizerFactory"
+  #       },
+  #       "filters":[
+  #         {
+  #           "class":"solr.StopFilterFactory",
+  #           "words":"stopwords.txt",
+  #           "ignoreCase":"true"
+  #         },
+  #         {
+  #           "class":"solr.LowerCaseFilterFactory"
+  #         }
+  #       ]
+  #     },
+  #
+  # and queryAnalyzer's tokenizer and filters:
+  #
+  #     "queryAnalyzer":{
+  #       "tokenizer":{
+  #         "class":"solr.StandardTokenizerFactory"
+  #       },
+  #       "filters":[
+  #         {
+  #           "class":"solr.StopFilterFactory",
+  #           "words":"stopwords.txt",
+  #           "ignoreCase":"true"
+  #         },
+  #         {
+  #           "class":"solr.SynonymGraphFilterFactory",
+  #           "expand":"true",
+  #           "ignoreCase":"true",
+  #           "synonyms":"synonyms.txt"
+  #         },
+  #         {
+  #           "class":"solr.LowerCaseFilterFactory"
+  #         }
+  #       ]
+  #     }
 ```
 
 When a value is *indexed* for a particular field the value is first passed to the `tokenizer` and then to the `filters` defined in the `indexAnalyzer` section for that field type. Similarly, when we *query* for a value in a given field the value is first processed by the `tokenizer` and then by the `filters` defined in the `queryAnalyzer` section for that field.
@@ -797,7 +855,7 @@ When a value is *indexed* for a particular field the value is first passed to th
 Notice that the tokenizer and filters applied at index time can be different from the ones applied at query time, as it is the case in the `text_general` field type above (notice the extra filter on the `queryAnalyzer` section.)
 
 
-### === Tokenizers
+### Tokenizers
 
 For most purposes we can think of a tokenizer as something that splits a given text into individual tokens or words. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/tokenizers.html) defines Tokenizers as follows:
 
@@ -811,7 +869,7 @@ Solr comes with several [built-in tokenizers](https://lucene.apache.org/solr/gui
 I believe you can only have [one tokenizer per analyzer](https://lucene.apache.org/solr/guide/7_0/tokenizers.html)
 
 
-### === Filters
+### Filters
 
 Whereas a `tokenizer` takes a string of text and produces a set of tokens, a `filter` takes a set of tokens, process them, and produces a different set of tokens. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/about-filters.html) says that
 
@@ -823,7 +881,7 @@ Notice that unlike tokenizers, whose job is to split text into tokens, the job o
 Solr comes with many [built-in Filters](https://lucene.apache.org/solr/guide/7_0/filter-descriptions.html) that we can use to perform useful transformations. For example the ASCII Folding Filter converts non-ASCII characters to their ASCII equivalent (e.g. "México" is converted to "Mexico"). Likewise the English Possessive Filter removes singular possessives (trailing 's) from words. Another useful filter is the Porter Stem Filter that calculates word stems using English language rules (e.g. both "jumping" and "jumped" will be reduced to "jump".)
 
 
-### === Putting it all together
+### Putting it all together
 
 If we look at the tokenizer and filters defined for the `text_general` field type at *index time* we would see that we are tokenizing with the `StandardTokenizer` and filtering with the `StopFilter` and the `LowerCaseFilter` filters.
 
@@ -832,7 +890,7 @@ Notice that the at *query time* an extra filter, the `SynonymGraphFilter`, is ap
 If we *index* the text "The television is broken!" the tokenizer and filters defined in the `indexAnalyzer` will transform this text to four tokens: "the", "television", "is", and "broken". Notice how the tokens were lowercased ("The" became "the") and the exclamation sign was dropped.
 
 Likewise, if we *query* for the text "The TV is broken!" the tokenizer and filters defined in the `queryAnalyzer` will convert the text to the following tokens: "the", "television", "televisions", "tvs", "tv", "is", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to four synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those four synonyms predefined in the `synonyms.txt` file.
-## == Stored vs indexed fields
+## Stored vs indexed fields
 
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond this tutorial.
 
@@ -898,12 +956,12 @@ If we query for this document notice how `f_stored` and `f_both` will be fetched
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both"
 
-# "response":{"numFound":1,"start":0,"docs":[
-# {
-#   "id":"f_demo",
-#   "f_stored":"stored",
-#   "f_both":"both"}]
-# }}
+  # "response":{"numFound":1,"start":0,"docs":[
+  # {
+  #   "id":"f_demo",
+  #   "f_stored":"stored",
+  #   "f_both":"both"}]
+  # }}
 ```
 
 Keep in mind that we can search by `f_indexed` because it is indexed:
@@ -911,8 +969,8 @@ Keep in mind that we can search by `f_indexed` because it is indexed:
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
 
-# will find the document, but again, the value of field f_indexed
-# will not be included in results.
+  # will find the document, but again, the value of field f_indexed
+  # will not be included in results.
 ```
 
 Notice that even though we are able to fetch the value for the `f_stored` field we cannot use it for searches:
@@ -920,14 +978,14 @@ Notice that even though we are able to fetch the value for the `f_stored` field 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=f_stored:stored"
 
-# will return no results
-#   "response":{"numFound":0,"start":0,"docs":[]
+  # will return no results
+  #   "response":{"numFound":0,"start":0,"docs":[]
 ```
 
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
 
 
-### === Indexed, stored, and docValues
+### Indexed, stored, and docValues
 
 In the previous example we declared three fields with different indexed/stored settings and all of them were of type `text_general`. However, if you set the indexed/stored setting in fields of type `string` the default behavior is slightly different because Solr stores and handles `string` fields different from `text_general` fields.
 
@@ -936,7 +994,7 @@ For `string` fields, Solr adds an extra property [DocValues](https://lucene.apac
 You can prevent Solr from using `docValues` in a `string` field by setting `docValues=false`. This would allow you to control whether a field is really stored and index like we did for `text_general` fields. Unless you have a good reason to change the default value for `docValues` I would suggest not changing it.
 
 Solr does not allow you to set `docValues=true` for `text_general` fields.
-## == Recreating our Solr core
+## Recreating our Solr core
 
 Before we start the next section, where we will make customizations to the schema, let's delete the current core and re-create it empty.
 
@@ -977,11 +1035,11 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
   #  }}
   #
 ```
-## == Adding a new field
+## Adding a new field
 So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Let us now add and customize some of the fields in our core to have more control on how Solr indexes and searches data.
 
 
-### === Customizing the author fields
+### Customizing the author fields
 Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
 
 Run the following command to create the `author` field as single value:
@@ -1049,7 +1107,7 @@ Having a single `authorsAll` field will allow us to find books authored by a par
 We need to re-import our data for these changes to take effect, but before we do this let's do another customization to the schema.
 
 
-### === Customizing the title fields
+### Customizing the title fields
 Most (if not all) the titles in our source JSON file are in English. Therefore let's configure the `title` field to use the `text_en` (text English) field type rather than the default `text_general` field type.
 
 Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. You can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to validate this.
@@ -1066,7 +1124,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 ```
 
 
-### === Testing our changes
+### Testing our changes
 Now that we have configured our schema with a few  specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
@@ -1074,7 +1132,7 @@ $ post -c bibdata data/books.json
 ```
 
 
-### === Testing changes to the author field
+### Testing changes to the author field
 
 Take a look at the data for this particular book that has many authors and notice how the `authorsAll` field has the combination of `author` and `authorOthers` (even though our source data didn't have an `authorsAll` field.)
 
@@ -1120,7 +1178,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,author,authorsAll,subjec
 notice that the result includes a book where "George" is one of the authors (even if he is not the main author.)
 
 
-### === Testing changes to the title field
+### Testing changes to the title field
 
 Now run a query for books with the title "run" (`q=title:run`):
 
@@ -1153,7 +1211,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=title&q=title:"its+a+dogs+n
 ```
 
 notice that the results include a book titled "It's a dog's New York". This book was considered a match for our search because the `text_en` field type uses the EnglishPossessive filter that drop the trailing `'s` from the search terms which allowed Solr to find a match despite the poor spelling used in our search terms.
-## == Dynamic Fields
+## Dynamic Fields
 
 If look at the data in the source `data/book.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
 
@@ -1215,7 +1273,7 @@ Take a look at the dynamic fields defined in the `schema.xml` for these projects
 * Princeton (a Blacklight app?): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/orangelight/conf/schema.xml
 
 Notice the `*_tesim` vs `*_sim` dynamic field definitions in the PSU repo, or the `*_sort` dynamic definition in the Princeton repo, or the `*_display` vs `*_sort` definitions in the Brown repository.
-## == title_str field
+## title_str field
 
 Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `title` and another `title_str` but we only have `title` in the JSON file. Where does `title_str` come from?
 
@@ -1269,7 +1327,7 @@ In some instances we passed rather sophisticated values for these parameters, fo
 The components in Solr that parse these parameters are called Query Parsers. Their job is to extract the parameters and create a query that Lucene can understand. Remember that Lucene is the search engine underneath Solr.
 
 
-## == Query Parsers
+## Query Parsers
 
 Out of the box Solr comes with three query parsers: Standard, DisMax, and Extended DisMax (eDisMax). Each of them has its own advantages and disadvantages.
 
@@ -1290,7 +1348,7 @@ By using the *eDisMax* parser we could pass a much simpler `q` parameter to Solr
 The rest of the examples in this section are going to use the eDisMax parser, notice the `defType=edismax` in our queries to Solr to make this selection. As we will see later on this tutorial you can also set the default query parser of your Solr core to use eDisMax by updating the `defType` parameter in your `solrconfig.xml` so that you don't have to explicitly set it on every query.
 
 
-## == Basic searching in Solr
+## Basic searching in Solr
 The number of search parameters that you can pass to Solr is rather large and, as we've noticed, they also depend on what query parser you are using.
 
 To see a list a comprehensive list of the parameters that apply to all parsers take a look at the [Common Query Parameters](https://lucene.apache.org/solr/guide/7_0/common-query-parameters.html#common-query-parameters) and the [Standard Query Parser](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) sections in the Solr Reference Guide.
@@ -1356,7 +1414,7 @@ The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/the-standard
 [this tutorial](http://www.solrtutorial.com/solr-query-syntax.html) are good places to check for quick reference on the query syntax.
 
 
-### === q and fq parameters
+### q and fq parameters
 
 Solr supports two different parameters to filter results in a query. One is the Query `q` parameter that we've been using in all our examples. The other is the Filter Query `fq` parameter that we introduced in the last query. Both parameters can be used to filter the documents to return in a query, but there is a key difference between them: `q` calculates scores for the results whereas `fq` does not.
 
@@ -1377,7 +1435,7 @@ The reason this is important is because values filtered via `fq` can be cached a
 Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are `ANDed` (you cannot specify an OR operation among them).
 
 
-### === the qf parameter
+### the qf parameter
 
 The DisMax and eDisMax query parsers provide another parameter, Query Fields `qf`, that should not be confused with the `q` or `fq` parameters. The `qf` parameter is used to indicate the *list of fields* that the search should be executed on along with their boost values.
 
@@ -1388,7 +1446,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="geor
 ```
 
 
-### === debugQuery
+### debugQuery
 Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This particularly useful if the results that you get in a query are not what you were expecting. For example:
 
 ```
@@ -1418,7 +1476,7 @@ Notice the `debug` property, inside this property there is information about:
 * what query parser (`QParser`) was used
 
 
-### === Ranking of documents
+### Ranking of documents
 
 When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
 
@@ -1445,7 +1503,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
-### === Default Field
+### Default Field
 
 By default if you don't specify a field to search on the `q` parameter Solr will use a default field. In a typical Solr installation this would be the `_text_` field. For example if we issue a query for the word "west" without indicating a field (e.g. `q=west`) and look at the debug information we will see what Solr expanded the query into:
 
@@ -1468,7 +1526,7 @@ notice the `parsedquery` indicates that is searching on the `_text_` field.
 You can overwrite the default field by passing the `df` parameter, for example to use the `title` field as the default parameter we could pass `qf=title:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
 
 
-### === Filtering with ranges
+### Filtering with ranges
 
 `id:[00000018 TO 00000028]`
 
@@ -1479,9 +1537,9 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 
 
-### === Where to find more
+### Where to find more
 Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results. Chapter 3 on this book goes into great detail on how to read and understand the ranking of results.
-## == Facets
+## Facets
 One of the most popular features of Solr is the concept of *facets*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/faceting.html) defines it as:
 
     Faceting is the arrangement of search results into categories
@@ -1558,7 +1616,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subje
   #  ...
   #
 ```
-## == Hit highlighting
+## Hit highlighting
 
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
 ).
@@ -1583,14 +1641,14 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=washington&q
 ```
 
 Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
-## == Searching (more advanced)
+## Searching (more advanced)
 pf
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
 
 The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
 # PART IV - MISCELLANEOUS
 
-## == Solr directories
+## Solr directories
 
 In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.1.0.zip` file.
 
@@ -1607,7 +1665,7 @@ Assuming we unzipped this zip file in our home directory we would have a folder 
 * `server/solr-webapp/`: This is the code to power the "Dashboard" that we see when we visit http://localhost:8983/solr/#/
 
 
-### === Your bibdata core
+### Your bibdata core
 
 As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
 
@@ -1623,7 +1681,7 @@ As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. Th
 The `data` folder contains the data that Solr stores for this core. This is where the actual index is located. The only thing that you probably want to do with this folder is back it up regularly. Other than that, you should stay away from it :)  
 
 The `conf` folder contains configuration files for this core. In the following sections we'll look at some of the files in this folder (e.g. `solrconfig.xml`, `stopwords.txt`, and `synonyms.txt`) and how they can be updated to configure different options in Solr.
-## == Synonyms
+## Synonyms
 
 In a previous section, when we looked at the `text_general` field type, we noticed that it used a filter to handle synonyms at query time.
 
@@ -1665,7 +1723,7 @@ $ cat ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
 ```
 
 
-### === Life without synonyms
+### Life without synonyms
 
 In the data in our `bibdata` core several of the books have the words "twentieth century" in the title but these books would not be retrieved if a user were to search for "20th century".
 
@@ -1689,7 +1747,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"20th+cent
   #
 ```
 
-### === Adding synonyms
+### Adding synonyms
 
 We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `synonyms.txt` file by adding a like as follows:
 
@@ -1727,17 +1785,17 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"twentieth
 ```
 
 
-### === More info
+### More info
 
 To find more about synonyms take a look at this [blog post](https://library.brown.edu/DigitalTechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.
-## == Core-specific configuration
+## Core-specific configuration
 
 One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.1.0/server/solr/bibdata/conf/solr_config.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
 
-### === Request Handlers
+### Request Handlers
 
 When we submit a request to Solr the request is processed by a request handler. Throughout this tutorial all our queries to Solr have gone to a URL that ends with `/select`, for example:
 
@@ -1780,7 +1838,7 @@ Be careful, an incorrect setting on this file can take our core down or cause qu
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
 
-### === LocalParams and dereferencing
+### LocalParams and dereferencing
 
 In addition to the standard parameters in a request handler we can also define custom settings and use them in our search queries. For example is possible to define a new setting (`custom_search_field`) to group a list of fields and their boost values as shown below:
 
@@ -1810,7 +1868,7 @@ q={! qf=$custom_search_field}teachers
 You can see an example of how this is used in a Blacklight application in the following [blog post](https://library.brown.edu/DigitalTechnologies/solr-localparams-and-dereferencing/).
 
 
-### === Search Components
+### Search Components
 
 Request handlers in turn use search components to execute different operations on a search. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) defines search components as:
 
@@ -1840,15 +1898,15 @@ Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting
 Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
 
 
-### === Solr-wide configuration
+### Solr-wide configuration
 
 Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file.
 
 There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
-## == Spellchecker
+## Spellchecker
 
 TODO flesh out this section
-## == Solr Replication
+## Solr Replication
 
 Replication is a technique in which you "create multiple identical copies of your index and load balance traffic across each of the copies" [Solr in Action, p. 375](https://www.worldcat.org/title/solr-in-action/oclc/879605085).
 
@@ -1863,7 +1921,7 @@ Solr uses the *one-master, many-replica* model to handle replication in which th
 To configure replication in Solr we need to add a new request handler in our `solrconfig.xml` and by convention this handler is named `/replication`.
 
 
-### === Master server configuration
+### Master server configuration
 
 To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml`:
 
@@ -1888,7 +1946,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
 and look at its setting under the [Replication](http://localhost:8983/solr/#/bibdata/replication) tab in the Solr Admin web page you should see a green checkbox next to the "replication enable" setting.
 
 
-### === Replica server configuration
+### Replica server configuration
 
 For replication to work we need to have other Solr core (or cores) where the data will be replicated to. In a production setting these replica copies will typically live in a different machine from the master, but to keep things simple on this tutorial we are going to define the replica on the same machine and Solr installation that we have been using.
 
@@ -1901,7 +1959,7 @@ $ solr create -c theothercore
 If you query `theothercore` it will have no documents since it is brand new.
 
 ```
-# curl http://localhost:8983/solr/theothercore/select?q=*
+$ curl http://localhost:8983/solr/theothercore/select?q=*
 
   #
   # {
@@ -1942,7 +2000,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
 If we query the replica again we would see documents on it. Also, if we look at the settings under the [Replication](http://localhost:8983/solr/#/theothercore/replication) tab in the Solr Admin web page *for this new core* we would see information about the replication including the master URL and the polling interval.
 
 
-### === Sharding
+### Sharding
 
 Sharding is a different technique from replication that is used to execute *distributed queries* across multiple Solr cores. This is useful when you have too many documents to handle on a single server.
 
@@ -1951,7 +2009,7 @@ Sharding is beyond the scope of this tutorial but Chapter 12 of [Solr in Action]
 Trivia: "One of the upper limits in Solr is that an index cannot contain more than 2^31 documents, due to an underlying limitation in Lucene." (Solr in Action, p. 372). That's two billion documents (2,000,000,000) for those of us that use the [short scale](https://en.wikipedia.org/wiki/Long_and_short_scales).
 
 
-### === SolrCloud
+### SolrCloud
 
 Solr also provides a set of features known as SolrCloud that is the preferred way to handle fault tolerance and high availability in large scale environments. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/solrcloud.html) defines it as:
 
@@ -1962,14 +2020,14 @@ Solr also provides a set of features known as SolrCloud that is the preferred wa
     ZooKeeper database to figure out which servers need to handle the request.
 
 This is also out of the scope of this tutorial.
-## == Sources and where to find more
+## Sources and where to find more
 
 * [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/)
 * [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) by Trey Grainger and Timothy Potter
 * [Relevant search with applications for Solr and Elasticsearch](http://www.worldcat.org/title/relevant-search-with-applications-for-solr-and-elasticsearch/oclc/980984111) by Doug Turnbull and John Berryman
 
 
-### === Sample data
+### Sample data
 
 File `data/books.json` contains 10,000 books taken from Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
 

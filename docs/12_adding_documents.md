@@ -1,4 +1,4 @@
-## == Adding documents to Solr
+## Adding documents to Solr
 
 In the last section we ran a query against Solr that showed us that our
 newly created core `bibdata` has no documents in it. Remember that our call to

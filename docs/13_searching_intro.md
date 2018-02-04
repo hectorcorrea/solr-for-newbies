@@ -1,4 +1,4 @@
-## == Searching for documents
+## Searching for documents
 
 Now that we have added a few documents to our `bibdata` core we can query Solr for those documents. In a subsequent section we'll explore more advanced searching options and how our schema definition is key to enable different kind of searches, but for now we'll start with a few basic searches to get familiar with the way querying works in Solr.
 
@@ -20,7 +20,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **subjectsGeo**: (MARC 650z)
 
 
-### === Fetching data
+### Fetching data
 
 To fetch data from Solr we make an HTTP request to the `select` handler. For example:
 
@@ -31,7 +31,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 There are many parameters that we can pass to this handler to define what documents we want to fetch and what fields we want to fetch.
 
 
-### === Selecting what fields to fetch
+### Selecting what fields to fetch
 
 We can use the `fl` parameter to indicate what fields we want to fetch. For example to request the `id` and the `title` of the documents we would use `fl=id,title` as in the following example:
 
@@ -44,7 +44,7 @@ Note: When issuing the commands via cURL (as in the previous example) make sure 
 Try adding and removing some other fields to this list, for example, `fl=id,author,title` or `fl=id,title,author,subjects`
 
 
-### === Filtering the documents to fetch
+### Filtering the documents to fetch
 
 In the previous examples you might have seen an inconspicuous `q=*` parameter in the URL. The `q` (query) parameter tells Solr what documents to retrieve. This is somewhat similar to the `WHERE` clause in a SQL SELECT query.
 
@@ -115,7 +115,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
 ```
 
 
-### === Getting facets
+### Getting facets
 
 When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
 

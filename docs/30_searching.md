@@ -11,7 +11,7 @@ In some instances we passed rather sophisticated values for these parameters, fo
 The components in Solr that parse these parameters are called Query Parsers. Their job is to extract the parameters and create a query that Lucene can understand. Remember that Lucene is the search engine underneath Solr.
 
 
-## == Query Parsers
+## Query Parsers
 
 Out of the box Solr comes with three query parsers: Standard, DisMax, and Extended DisMax (eDisMax). Each of them has its own advantages and disadvantages.
 
@@ -32,7 +32,7 @@ By using the *eDisMax* parser we could pass a much simpler `q` parameter to Solr
 The rest of the examples in this section are going to use the eDisMax parser, notice the `defType=edismax` in our queries to Solr to make this selection. As we will see later on this tutorial you can also set the default query parser of your Solr core to use eDisMax by updating the `defType` parameter in your `solrconfig.xml` so that you don't have to explicitly set it on every query.
 
 
-## == Basic searching in Solr
+## Basic searching in Solr
 The number of search parameters that you can pass to Solr is rather large and, as we've noticed, they also depend on what query parser you are using.
 
 To see a list a comprehensive list of the parameters that apply to all parsers take a look at the [Common Query Parameters](https://lucene.apache.org/solr/guide/7_0/common-query-parameters.html#common-query-parameters) and the [Standard Query Parser](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) sections in the Solr Reference Guide.
@@ -98,7 +98,7 @@ The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/the-standard
 [this tutorial](http://www.solrtutorial.com/solr-query-syntax.html) are good places to check for quick reference on the query syntax.
 
 
-### === q and fq parameters
+### q and fq parameters
 
 Solr supports two different parameters to filter results in a query. One is the Query `q` parameter that we've been using in all our examples. The other is the Filter Query `fq` parameter that we introduced in the last query. Both parameters can be used to filter the documents to return in a query, but there is a key difference between them: `q` calculates scores for the results whereas `fq` does not.
 
@@ -119,7 +119,7 @@ The reason this is important is because values filtered via `fq` can be cached a
 Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are `ANDed` (you cannot specify an OR operation among them).
 
 
-### === the qf parameter
+### the qf parameter
 
 The DisMax and eDisMax query parsers provide another parameter, Query Fields `qf`, that should not be confused with the `q` or `fq` parameters. The `qf` parameter is used to indicate the *list of fields* that the search should be executed on along with their boost values.
 
@@ -130,7 +130,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="geor
 ```
 
 
-### === debugQuery
+### debugQuery
 Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This particularly useful if the results that you get in a query are not what you were expecting. For example:
 
 ```
@@ -160,7 +160,7 @@ Notice the `debug` property, inside this property there is information about:
 * what query parser (`QParser`) was used
 
 
-### === Ranking of documents
+### Ranking of documents
 
 When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
 
@@ -187,7 +187,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
-### === Default Field
+### Default Field
 
 By default if you don't specify a field to search on the `q` parameter Solr will use a default field. In a typical Solr installation this would be the `_text_` field. For example if we issue a query for the word "west" without indicating a field (e.g. `q=west`) and look at the debug information we will see what Solr expanded the query into:
 
@@ -210,7 +210,7 @@ notice the `parsedquery` indicates that is searching on the `_text_` field.
 You can overwrite the default field by passing the `df` parameter, for example to use the `title` field as the default parameter we could pass `qf=title:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
 
 
-### === Filtering with ranges
+### Filtering with ranges
 
 `id:[00000018 TO 00000028]`
 
@@ -221,5 +221,5 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 
 
-### === Where to find more
+### Where to find more
 Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results. Chapter 3 on this book goes into great detail on how to read and understand the ranking of results.

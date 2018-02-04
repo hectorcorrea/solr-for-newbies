@@ -1,4 +1,4 @@
-## == Synonyms
+## Synonyms
 
 In a previous section, when we looked at the `text_general` field type, we noticed that it used a filter to handle synonyms at query time.
 
@@ -40,7 +40,7 @@ $ cat ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
 ```
 
 
-### === Life without synonyms
+### Life without synonyms
 
 In the data in our `bibdata` core several of the books have the words "twentieth century" in the title but these books would not be retrieved if a user were to search for "20th century".
 
@@ -64,7 +64,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"20th+cent
   #
 ```
 
-### === Adding synonyms
+### Adding synonyms
 
 We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `synonyms.txt` file by adding a like as follows:
 
@@ -102,6 +102,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"twentieth
 ```
 
 
-### === More info
+### More info
 
 To find more about synonyms take a look at this [blog post](https://library.brown.edu/DigitalTechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.

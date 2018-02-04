@@ -1,11 +1,11 @@
-## == Core-specific configuration
+## Core-specific configuration
 
 One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.1.0/server/solr/bibdata/conf/solr_config.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
 
-### === Request Handlers
+### Request Handlers
 
 When we submit a request to Solr the request is processed by a request handler. Throughout this tutorial all our queries to Solr have gone to a URL that ends with `/select`, for example:
 
@@ -48,7 +48,7 @@ Be careful, an incorrect setting on this file can take our core down or cause qu
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
 
-### === LocalParams and dereferencing
+### LocalParams and dereferencing
 
 In addition to the standard parameters in a request handler we can also define custom settings and use them in our search queries. For example is possible to define a new setting (`custom_search_field`) to group a list of fields and their boost values as shown below:
 
@@ -78,7 +78,7 @@ q={! qf=$custom_search_field}teachers
 You can see an example of how this is used in a Blacklight application in the following [blog post](https://library.brown.edu/DigitalTechnologies/solr-localparams-and-dereferencing/).
 
 
-### === Search Components
+### Search Components
 
 Request handlers in turn use search components to execute different operations on a search. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) defines search components as:
 
@@ -108,7 +108,7 @@ Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting
 Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
 
 
-### === Solr-wide configuration
+### Solr-wide configuration
 
 Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file.
 

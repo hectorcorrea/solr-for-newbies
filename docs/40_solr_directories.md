@@ -1,6 +1,6 @@
 # PART IV - MISCELLANEOUS
 
-## == Solr directories
+## Solr directories
 
 In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.1.0.zip` file.
 
@@ -17,7 +17,7 @@ Assuming we unzipped this zip file in our home directory we would have a folder 
 * `server/solr-webapp/`: This is the code to power the "Dashboard" that we see when we visit http://localhost:8983/solr/#/
 
 
-### === Your bibdata core
+### Your bibdata core
 
 As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
 
