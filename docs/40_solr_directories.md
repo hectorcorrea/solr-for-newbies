@@ -4,17 +4,27 @@
 
 In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.1.0.zip` file.
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.1.0/` with several subdirectories underneath:     
+Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.1.0/` with several directories underneath:     
 
-* `bin/`: Scripts to start/stop Solr and post data to it.
+```
+~/solr-7.1.0/
+|-- bin/
+|-- dist/
+|-- examples/
+|-- server/
+    |-- solr/
+    |-- solr-webapp/
+```
 
-* `dist/`: Contains the Java Archive (JAR) files. These are the binaries that make up Solr.
+Directory `bin/` contains the scripts to start/stop Solr and post data to it.
 
-* `examples/`: Sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
+Directory `dist/` contains the Java Archive (JAR) files. These are the binaries that make up Solr.
 
-* `server/solr/`: There is one folder here for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
+Directory `examples/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
 
-* `server/solr-webapp/`: This is the code to power the "Dashboard" that we see when we visit http://localhost:8983/solr/#/
+Directory `server/solr/` contains one folder for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
+
+Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that we see when we visit http://localhost:8983/solr/#/
 
 
 ### Your bibdata core

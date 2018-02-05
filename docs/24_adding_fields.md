@@ -5,16 +5,24 @@ So far we have only worked with the fields that were automatically added to our 
 ### Customizing the author fields
 Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
 
-Run the following command to create the `author` field as single value:
+Run the following command to create the `author` field as single value and force it to be a `string` rather than `text_general`:
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
       "name":"author",
-      "type":"text_general",
+      "type":"string",
       "multiValued":false
     }
 }' http://localhost:8983/solr/bibdata/schema
+
+  #
+  # response will look like
+  # {
+  #   "responseHeader":{
+  #     "status":0,
+  #     "QTime":10}}
+  #
 ```
 
 Run the following command to create the `authorsOther` field as multi-value:
@@ -75,7 +83,6 @@ Most (if not all) the titles in our source JSON file are in English. Therefore l
 
 Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. You can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to validate this.
 
-
 To define our `title` field run the following command:
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
@@ -86,12 +93,25 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-
-### Testing our changes
-Now that we have configured our schema with a few  specific field definitions let's re-import the data so that fields are indexed using the new configuration.
+When we let Solr automatically create the `title` field based on the data that we imported, Solr also created a second field (`title_str`) with the string representation of the title. Now that we are explicitly defining the `title` field Solr won't automatically create the `title_str` field for us, but we can easily ask Solr to do it:
 
 ```
-$ post -c bibdata data/books.json
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field":{
+    "source":"title",
+    "dest":[ "title_s" ]
+  }
+}' http://localhost:8983/solr/bibdata/schema
+```
+
+Notice that we are using the `_s` suffix for our copy field because that represents a single string which allows us to sort it, whereas the original `_str` copy field created by Solr was a multi-value string that could not be sorted.
+
+### Testing our changes
+Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
+
+```
+$ cd ~/solr-7.1.0/bin
+$ post -c bibdata books.json
 ```
 
 
@@ -140,6 +160,15 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,author,authorsAll,subjec
 
 notice that the result includes a book where "George" is one of the authors (even if he is not the main author.)
 
+Another benefit of our customized `author` field is that, because we made it *string* and *single value*, we now can sort the results by author, for example:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&sort=author+asc&fl=id,author'
+
+  #
+  # results will be sorted by author
+  #
+```
 
 ### Testing changes to the title field
 
@@ -174,3 +203,14 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=title&q=title:"its+a+dogs+n
 ```
 
 notice that the results include a book titled "It's a dog's New York". This book was considered a match for our search because the `text_en` field type uses the EnglishPossessive filter that drop the trailing `'s` from the search terms which allowed Solr to find a match despite the poor spelling used in our search terms.
+
+
+Important: Sorting a `string` field in Solr works as you would expect it, however sorting a `text_en` or `text_general` field field **does not** work because the value has been tokenized. As an exercise try sorting results by `title` (a `text_en` field) and by `title_s` (a `string` field) and compare the results:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title+asc'
+
+
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title_s+asc'
+
+```

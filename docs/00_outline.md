@@ -41,7 +41,7 @@ Tutorial Outline
     * [Testing changes to the author field](#testing-changes-to-the-author-field)
     * [Testing changes to the title field](#testing-changes-to-the-title-field)
   * [Dynamic Fields](#dynamic-fields)
-  * [title_str field](#title_str-field)
+  * [subjects_str field](#subjects_str-field)
 
 
 * [PART III: SEARCHING](#part-iii-searching)

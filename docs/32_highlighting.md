@@ -3,10 +3,10 @@
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
 ).
 
-Let's say that we search for books where the `author` or the `title` include the word "washington". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
+Let's say that we search for books where the one of the authors (`authorsAll`) or the `title` include the word "michael". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=washington&qf=title+author&hl=on'
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=title+authorsAll&hl=on'
 
   #
   # response will include

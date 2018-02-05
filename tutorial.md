@@ -41,7 +41,7 @@ Tutorial Outline
     * [Testing changes to the author field](#testing-changes-to-the-author-field)
     * [Testing changes to the title field](#testing-changes-to-the-title-field)
   * [Dynamic Fields](#dynamic-fields)
-  * [title_str field](#title_str-field)
+  * [subjects_str field](#subjects_str-field)
 
 
 * [PART III: SEARCHING](#part-iii-searching)
@@ -954,7 +954,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '[{
 If we query for this document notice how `f_stored` and `f_both` will be fetched but *not* `f_indexed` (even though we list it in the `fl` parameter) because `f_indexed` is not stored.
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both'
 
   # "response":{"numFound":1,"start":0,"docs":[
   # {
@@ -967,7 +967,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_
 Keep in mind that we can search by `f_indexed` because it is indexed:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed'
 
   # will find the document, but again, the value of field f_indexed
   # will not be included in results.
@@ -976,7 +976,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
 Notice that even though we are able to fetch the value for the `f_stored` field we cannot use it for searches:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=f_stored:stored"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
 
   # will return no results
   #   "response":{"numFound":0,"start":0,"docs":[]
@@ -1022,7 +1022,7 @@ $ solr create -c bibdata
 Making sure the core was created:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 
   #
   # {
@@ -1042,16 +1042,24 @@ So far we have only worked with the fields that were automatically added to our 
 ### Customizing the author fields
 Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
 
-Run the following command to create the `author` field as single value:
+Run the following command to create the `author` field as single value and force it to be a `string` rather than `text_general`:
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
       "name":"author",
-      "type":"text_general",
+      "type":"string",
       "multiValued":false
     }
 }' http://localhost:8983/solr/bibdata/schema
+
+  #
+  # response will look like
+  # {
+  #   "responseHeader":{
+  #     "status":0,
+  #     "QTime":10}}
+  #
 ```
 
 Run the following command to create the `authorsOther` field as multi-value:
@@ -1112,7 +1120,6 @@ Most (if not all) the titles in our source JSON file are in English. Therefore l
 
 Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. You can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to validate this.
 
-
 To define our `title` field run the following command:
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
@@ -1123,12 +1130,25 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-
-### Testing our changes
-Now that we have configured our schema with a few  specific field definitions let's re-import the data so that fields are indexed using the new configuration.
+When we let Solr automatically create the `title` field based on the data that we imported, Solr also created a second field (`title_str`) with the string representation of the title. Now that we are explicitly defining the `title` field Solr won't automatically create the `title_str` field for us, but we can easily ask Solr to do it:
 
 ```
-$ post -c bibdata data/books.json
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field":{
+    "source":"title",
+    "dest":[ "title_s" ]
+  }
+}' http://localhost:8983/solr/bibdata/schema
+```
+
+Notice that we are using the `_s` suffix for our copy field because that represents a single string which allows us to sort it, whereas the original `_str` copy field created by Solr was a multi-value string that could not be sorted.
+
+### Testing our changes
+Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
+
+```
+$ cd ~/solr-7.1.0/bin
+$ post -c bibdata books.json
 ```
 
 
@@ -1177,6 +1197,15 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,author,authorsAll,subjec
 
 notice that the result includes a book where "George" is one of the authors (even if he is not the main author.)
 
+Another benefit of our customized `author` field is that, because we made it *string* and *single value*, we now can sort the results by author, for example:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&sort=author+asc&fl=id,author'
+
+  #
+  # results will be sorted by author
+  #
+```
 
 ### Testing changes to the title field
 
@@ -1211,6 +1240,17 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=title&q=title:"its+a+dogs+n
 ```
 
 notice that the results include a book titled "It's a dog's New York". This book was considered a match for our search because the `text_en` field type uses the EnglishPossessive filter that drop the trailing `'s` from the search terms which allowed Solr to find a match despite the poor spelling used in our search terms.
+
+
+Important: Sorting a `string` field in Solr works as you would expect it, however sorting a `text_en` or `text_general` field field **does not** work because the value has been tokenized. As an exercise try sorting results by `title` (a `text_en` field) and by `title_s` (a `string` field) and compare the results:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title+asc'
+
+
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title_s+asc'
+
+```
 ## Dynamic Fields
 
 If look at the data in the source `data/book.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
@@ -1273,26 +1313,26 @@ Take a look at the dynamic fields defined in the `schema.xml` for these projects
 * Princeton (a Blacklight app?): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/orangelight/conf/schema.xml
 
 Notice the `*_tesim` vs `*_sim` dynamic field definitions in the PSU repo, or the `*_sort` dynamic definition in the Princeton repo, or the `*_display` vs `*_sort` definitions in the Brown repository.
-## title_str field
+## subjects_str field
 
-Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `title` and another `title_str` but we only have `title` in the JSON file. Where does `title_str` come from?
+Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `subjects` and another `subjects_str` but we only have `subjects` in the JSON file. Where does `subjects_str` come from?
 
-When we imported our data, because our `bibdata` core allows for automatic field creation, Solr guessed a type for the `title` field based on the data that we imported and assigned it `text_general` but *it also created a separate field* (`title_str`) to store a `string` version of the title values. This other field was created as a **copyField**. We can view its definition via the following command:
+When we imported our data, because our `bibdata` core allows for automatic field creation, Solr guessed a type for the `subjects` field based on the data that we imported and assigned it `text_general` but *it also created a separate field* (`subjects_str`) to store a `string` version of the title values. This other field was created as a **copyField**. We can view its definition via the following command:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/copyfields?dest.fl=title_str
+$ curl localhost:8983/solr/bibdata/schema/copyfields?dest.fl=subjects_str
 
   # response will include
   #
   # {
-  #   "source":"title",
-  #   "dest":"title_str",
+  #   "source":"subjects",
+  #   "dest":"subjects_str",
   #   "maxChars":256
   # },
   #
 ```
 
-This definition indicates that first 256 characters of the `title` will be copied to `title_str` field but it does not really tell us what kind of field `title_str` will be.
+This definition indicates that first 256 characters of the `subjects` will be copied to `subjects_str` field but it does not really tell us what kind of field `subjects_str` will be.
 
 However, the `_str` suffix in the name is a common pattern used in Solr to identify **dynamicFields**. Dynamic Fields are used to tell Solr that any field name imported that matches a particular pattern (e.g. `*_str`) will be created with a particular field definition. Let's look at the default definition for the `*_str` pattern:
 
@@ -1313,7 +1353,7 @@ $ curl "localhost:8983/solr/bibdata/schema/dynamicfields/*_str"
 
 Notice how the `*_str` dynamic field definition will create a `strings` field for any field that ends with `_str`. You can see the definition of the `strings` field type via `curl localhost:8983/solr/bibdata/schema/fieldtypes/strings`
 
-With all this information we can conclude that the first 256 characters of the `title` will be copied to a `title_str` field (via a **copyField**). The `title_str` will be created of the `*_txt` **dynamicField** definition as a `strings` type. `strings` in turn is a multi-value `string` field type.
+With all this information we can conclude that the first 256 characters of the `subjects` will be copied to a `subjects_str` field (via a **copyField**). The `subjects_str` will be created of the `*_txt` **dynamicField** definition as a `strings` type. `strings` in turn is a multi-value `string` field type.
 # PART III: SEARCHING
 
 When we issue a search to Solr we pass the search parameters in the query string. In previous examples we passed values in the `q` parameter to indicate the values that we want to search for and `fl` to indicate what fields we want to retrieve. For example:
@@ -1390,7 +1430,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=author:*'
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+author:*'
 ```
 
-* Documents where at least one of the subjects starts with "com" (`q=subjects:com*`)
+* Documents where at least one of the subjects has a the word "com" (`q=subjects:com*`)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
 ```
@@ -1581,7 +1621,7 @@ There are several extra parameters that you can pass to Solr to customize how ma
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=publisher_str&f.publisher_str.facet.mincount=100&f.publisher_str.facet.limit=20'
 ```
 
-You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information by subject and then by publisher you could issue the following command:
+You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* you could issue the following command:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_str,publisher_str&facet.limit=5'
@@ -1621,10 +1661,10 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subje
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
 ).
 
-Let's say that we search for books where the `author` or the `title` include the word "washington". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
+Let's say that we search for books where the one of the authors (`authorsAll`) or the `title` include the word "michael". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=washington&qf=title+author&hl=on'
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=title+authorsAll&hl=on'
 
   #
   # response will include
@@ -1642,7 +1682,11 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=washington&q
 
 Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
 ## Searching (more advanced)
+
+TODO: flesh out this section
+
 pf
+
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
 
 The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
@@ -1652,17 +1696,27 @@ The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what docume
 
 In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.1.0.zip` file.
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.1.0/` with several subdirectories underneath:     
+Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.1.0/` with several directories underneath:     
 
-* `bin/`: Scripts to start/stop Solr and post data to it.
+```
+~/solr-7.1.0/
+|-- bin/
+|-- dist/
+|-- examples/
+|-- server/
+    |-- solr/
+    |-- solr-webapp/
+```
 
-* `dist/`: Contains the Java Archive (JAR) files. These are the binaries that make up Solr.
+Directory `bin/` contains the scripts to start/stop Solr and post data to it.
 
-* `examples/`: Sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
+Directory `dist/` contains the Java Archive (JAR) files. These are the binaries that make up Solr.
 
-* `server/solr/`: There is one folder here for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
+Directory `examples/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
 
-* `server/solr-webapp/`: This is the code to power the "Dashboard" that we see when we visit http://localhost:8983/solr/#/
+Directory `server/solr/` contains one folder for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
+
+Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that we see when we visit http://localhost:8983/solr/#/
 
 
 ### Your bibdata core
@@ -1773,6 +1827,8 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
   #   "QTime":221}}
   #
 ```
+
+You can also reload the core via the [Solr Admin](http://localhost:8983/solr/#/) page. Select "Core Admin", then "bibdata", and click "Reload".
 
 If you run the queries again they will both report "33 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
 

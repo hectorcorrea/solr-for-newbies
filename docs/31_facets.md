@@ -40,7 +40,7 @@ There are several extra parameters that you can pass to Solr to customize how ma
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=publisher_str&f.publisher_str.facet.mincount=100&f.publisher_str.facet.limit=20'
 ```
 
-You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information by subject and then by publisher you could issue the following command:
+You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* you could issue the following command:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_str,publisher_str&facet.limit=5'

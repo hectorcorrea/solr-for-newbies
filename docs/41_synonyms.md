@@ -91,6 +91,8 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
   #
 ```
 
+You can also reload the core via the [Solr Admin](http://localhost:8983/solr/#/) page. Select "Core Admin", then "bibdata", and click "Reload".
+
 If you run the queries again they will both report "33 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
 
 ```

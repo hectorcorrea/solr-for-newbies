@@ -74,7 +74,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=author:*'
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+author:*'
 ```
 
-* Documents where at least one of the subjects starts with "com" (`q=subjects:com*`)
+* Documents where at least one of the subjects has a the word "com" (`q=subjects:com*`)
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
 ```

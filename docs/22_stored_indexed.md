@@ -62,7 +62,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '[{
 If we query for this document notice how `f_stored` and `f_both` will be fetched but *not* `f_indexed` (even though we list it in the `fl` parameter) because `f_indexed` is not stored.
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both'
 
   # "response":{"numFound":1,"start":0,"docs":[
   # {
@@ -75,7 +75,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_
 Keep in mind that we can search by `f_indexed` because it is indexed:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed'
 
   # will find the document, but again, the value of field f_indexed
   # will not be included in results.
@@ -84,7 +84,7 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed"
 Notice that even though we are able to fetch the value for the `f_stored` field we cannot use it for searches:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=f_stored:stored"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
 
   # will return no results
   #   "response":{"numFound":0,"start":0,"docs":[]

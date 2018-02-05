@@ -26,7 +26,7 @@ $ solr create -c bibdata
 Making sure the core was created:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=*:*"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 
   #
   # {
