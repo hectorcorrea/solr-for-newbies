@@ -1040,17 +1040,29 @@ So far we have only worked with the fields that were automatically added to our 
 
 
 ### Customizing the author fields
-Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value but `authorsOther` is multi-value. If we let Solr create these fields both of them will be multi-value so let's define them in our schema so that we can customize them.
+Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value and `authorsOther` is multi-value. When we let Solr automatically create these fields both of them ended up being multi-value so let's define them manually in our schema so that we can customize author to be single value so that we can sort our results by it (you can only sort by single-value fields).
 
-Run the following command to create the `author` field as single value and force it to be a `string` rather than `text_general`:
+Let's also create a new field (`authorsAll`) that will combine the main author with the other authors, that way we only need to search against a single field when searching by author. Notice that we are making this field `text_general` (rather than string) so that we can do partial matching.
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
+  "add-field":[
+    {
       "name":"author",
       "type":"string",
       "multiValued":false
+    },
+    {
+      "name":"authorsOther",
+      "type":"string",
+      "multiValued":true
+    },
+    {
+      "name":"authorsAll",
+      "type":"text_general",
+      "multiValued":true
     }
+  ]
 }' http://localhost:8983/solr/bibdata/schema
 
   #
@@ -1062,78 +1074,40 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   #
 ```
 
-Run the following command to create the `authorsOther` field as multi-value:
+Now let's configure Solr to automatically copy the values of `author` and `authorOther` to our new `authorAll` field by defining two `copy-fields`:
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-      "name":"authorsOther",
-      "type":"text_general",
-      "multiValued":true
+  "add-copy-field":[
+    {
+      "source":"author",
+      "dest":[ "authorsAll" ]
+    },
+    {
+      "source":"authorsOther",
+      "dest":[ "authorsAll" ]
     }
+  ]
 }' http://localhost:8983/solr/bibdata/schema
 ```
-
-Let's say that we want to create a single field in our Solr schema to store the combination of all the authors (`author` + `authorsOther`). We could define a new multi-value field as follow:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":[{
-    "name":"authorsAll",
-    "type":"text_general",
-    "multiValued":true
-  }]
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-Now let's configure Solr to automatically copy the values of `author` and `authorOther` to our new `authorAll` field by defining two `copy-fields`.
-
-Run the following command to define a `copy-field` to copy the `author` to our new `authorsAll` field:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-copy-field":{
-    "source":"author",
-    "dest":[ "authorsAll" ]
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-Run the following command to define another `copy-field` to copy the `authorsOther` to our new `authorsAll` field:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-copy-field":{
-    "source":"authorsOther",
-    "dest":[ "authorsAll" ]
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-Having a single `authorsAll` field will allow us to find books authored by a particular person regardless of whether they were the main author or not.
 
 We need to re-import our data for these changes to take effect, but before we do this let's do another customization to the schema.
 
 
 ### Customizing the title fields
-Most (if not all) the titles in our source JSON file are in English. Therefore let's configure the `title` field to use the `text_en` (text English) field type rather than the default `text_general` field type.
+Most (if not all) the titles in our source JSON file are in English. Therefore let's configure the `title` field to be single-value and to use the `text_en` (text English) field type rather than the default multi-value `text_general` field type.
 
-Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. You can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to validate this.
+Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. We can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to see the specifics for these field types.
 
-To define our `title` field run the following command:
+When we let Solr automatically create the `title` field based on the data that we imported, Solr also created a second field (`title_str`) with the string representation of the title. Now that we are explicitly defining the `title` field Solr won't automatically create the second field for us, but we can easily ask Solr to do it. We'll use the `_s` instead of `_str` because our new title field is single value.
+
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{
-      "name":"title",
-      "type":"text_en"
-    }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-When we let Solr automatically create the `title` field based on the data that we imported, Solr also created a second field (`title_str`) with the string representation of the title. Now that we are explicitly defining the `title` field Solr won't automatically create the `title_str` field for us, but we can easily ask Solr to do it:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+    "name":"title",
+    "type":"text_en",
+    "multiValued":false
+  },
   "add-copy-field":{
     "source":"title",
     "dest":[ "title_s" ]
@@ -1141,7 +1115,6 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-Notice that we are using the `_s` suffix for our copy field because that represents a single string which allows us to sort it, whereas the original `_str` copy field created by Solr was a multi-value string that could not be sorted.
 
 ### Testing our changes
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
