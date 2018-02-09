@@ -30,7 +30,7 @@ Tutorial Outline
     * [Tokenizers](#tokenizers)
     * [Filters](#filters)
     * [Putting it all together](#putting-it-all-together)
-  * [Stored vs indexed fields](#stored-vs-indexed-fields)
+  * [Stored vs indexed fields (optional)](#stored-vs-indexed-fields-optional)
     * [Indexed, stored, and docValues](#indexed-stored-and-docvalues)
   * [Recreating our Solr core](#recreating-our-solr-core)
   * [Adding a new field](#adding-a-new-field)
@@ -40,7 +40,7 @@ Tutorial Outline
     * [Testing changes to the author field](#testing-changes-to-the-author-field)
     * [Testing changes to the title field](#testing-changes-to-the-title-field)
   * [Dynamic Fields](#dynamic-fields)
-  * [subjects_str field](#subjects_str-field)
+  * [subjects_str field (optional)](#subjects_str-field-optional)
 
 
 * [PART III: SEARCHING](#part-iii-searching)
@@ -50,15 +50,15 @@ Tutorial Outline
     * [the qf parameter](#the-qf-parameter)
     * [debugQuery](#debugquery)
     * [Ranking of documents](#ranking-of-documents)
-    * [Default Field](#default-field)
+    * [Default Field (optional)](#default-field-optional)
     * [Filtering with ranges](#filtering-with-ranges)
     * [Where to find more](#where-to-find-more)
   * [Facets](#facets)
   * [Hit highlighting](#hit-highlighting)
-  * [Searching (more advanced)](#searching-more-advanced)
+  * [Advanced search options (optional)](#advanced-search-options-optional)
 
 
-* [PART IV: MISCELLANEOUS](#part-iv-miscellaneous)
+* [PART IV: MISCELLANEOUS (optional)](#part-iv-miscellaneous-optional)
   * [Solr directories](#solr-directories)
     * [Your bibdata core](#your-bibdata-core)
   * [Synonyms](#synonyms)
@@ -70,7 +70,7 @@ Tutorial Outline
     * [LocalParams and dereferencing](#localparams-and-dereferencing)
     * [Search Components](#search-components)
     * [Solr-wide configuration](#solr-wide-configuration)
-  * [Spellchecker](#spellchecker)
+  * [Spellchecker ](#spellchecker)
   * [Solr Replication](#solr-replication)
     * [Master server configuration](#master-server-configuration)
     * [Replica server configuration](#replica-server-configuration)
@@ -889,7 +889,7 @@ Notice that the at *query time* an extra filter, the `SynonymGraphFilter`, is ap
 If we *index* the text "The television is broken!" the tokenizer and filters defined in the `indexAnalyzer` will transform this text to four tokens: "the", "television", "is", and "broken". Notice how the tokens were lowercased ("The" became "the") and the exclamation sign was dropped.
 
 Likewise, if we *query* for the text "The TV is broken!" the tokenizer and filters defined in the `queryAnalyzer` will convert the text to the following tokens: "the", "television", "televisions", "tvs", "tv", "is", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to four synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those four synonyms predefined in the `synonyms.txt` file.
-## Stored vs indexed fields
+## Stored vs indexed fields (optional)
 
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond the scope of this tutorial.
 
@@ -1285,7 +1285,7 @@ Take a look at the dynamic fields defined in the `schema.xml` for these projects
 * Princeton (a Blacklight app?): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/orangelight/conf/schema.xml
 
 Notice the `*_tesim` vs `*_sim` dynamic field definitions in the PSU repo, or the `*_sort` dynamic definition in the Princeton repo, or the `*_display` vs `*_sort` definitions in the Brown repository.
-## subjects_str field
+## subjects_str field (optional)
 
 Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `subjects` and another `subjects_str` but we only have `subjects` in the JSON file. Where does `subjects_str` come from?
 
@@ -1515,7 +1515,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
-### Default Field
+### Default Field (optional)
 
 By default if you don't specify a field to search on the `q` parameter Solr will use a default field. In a typical Solr installation this would be the `_text_` field. For example if we issue a query for the word "west" without indicating a field (e.g. `q=west`) and look at the debug information we will see what Solr expanded the query into:
 
@@ -1539,6 +1539,8 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 
 ### Filtering with ranges
+
+TODO: flesh out this section
 
 `id:[00000018 TO 00000028]`
 
@@ -1653,7 +1655,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=t
 ```
 
 Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
-## Searching (more advanced)
+## Advanced search options (optional)
 
 TODO: flesh out this section
 
@@ -1662,7 +1664,7 @@ pf
 pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
 
 The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
-# PART IV: MISCELLANEOUS
+# PART IV: MISCELLANEOUS (optional)
 
 ## Solr directories
 
@@ -1931,9 +1933,9 @@ Although search components are defined in `solrconfig.xml` it's a bit tricky to 
 Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file.
 
 There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
-## Spellchecker
+## Spellchecker 
 
-TODO flesh out this section
+TODO: flesh out this section
 ## Solr Replication
 
 Replication is a technique in which you "create multiple identical copies of your index and load balance traffic across each of the copies" [Solr in Action, p. 375](https://www.worldcat.org/title/solr-in-action/oclc/879605085).

@@ -1,4 +1,4 @@
-## subjects_str field
+## subjects_str field (optional)
 
 Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `subjects` and another `subjects_str` but we only have `subjects` in the JSON file. Where does `subjects_str` come from?
 

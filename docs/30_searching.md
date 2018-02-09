@@ -187,7 +187,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:wes
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
-### Default Field
+### Default Field (optional)
 
 By default if you don't specify a field to search on the `q` parameter Solr will use a default field. In a typical Solr installation this would be the `_text_` field. For example if we issue a query for the word "west" without indicating a field (e.g. `q=west`) and look at the debug information we will see what Solr expanded the query into:
 
@@ -211,6 +211,8 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 
 ### Filtering with ranges
+
+TODO: flesh out this section
 
 `id:[00000018 TO 00000028]`
 

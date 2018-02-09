@@ -1,4 +1,4 @@
-## Searching (more advanced)
+## Advanced search options (optional)
 
 TODO: flesh out this section
 
