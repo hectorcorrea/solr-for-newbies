@@ -54,7 +54,7 @@ KEY     DOCUMENT ID
 ----    -----------------
 DC      1, 2
 guide   1, 2
-dogs    1, 2, 3
+dogs    1, 3
 tour    2
 cats    3
 ```
