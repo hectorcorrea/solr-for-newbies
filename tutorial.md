@@ -1,7 +1,6 @@
 Tutorial Outline
 
 
-
 * [PART I: INTRODUCTION](#part-i-introduction)
   * [What is Solr](#what-is-solr)
     * [Solr's document model](#solrs-document-model)

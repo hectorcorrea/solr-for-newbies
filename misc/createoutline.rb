@@ -13,7 +13,6 @@ def markdown_link(text)
 end
 
 puts "Tutorial Outline"
-puts ""
 files.each do |file|
   File.readlines(file).each do |line|
     if line.start_with?("# ")
