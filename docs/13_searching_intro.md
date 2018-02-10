@@ -7,7 +7,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **id**: string to identify each document ([MARC](https://www.loc.gov/marc/bibliographic/) 001)
 * **author**: string for the main author (MARC 100a)
 * **authorDate**: date for the author (MARC 100d)
-* **authorFuller**: title of the book (MARC 100q)
+* **authorFuller**: fuller form of the name (MARC 100q)
 * **authorsOther**: list of other authors (MARC 700a)
 * **title**: title of the book (MARC 245ab)
 * **responsibility**: statement of responsibility (MARC 245c)
@@ -111,6 +111,18 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
 
   # will show
   # "parsedquery":"title:school _text_:teachers",
+  #
+```
+
+
+Notice that Solr returns results paginated, by default it returns the first 10 documents that match the query. We can request a large page size or another page via the `start` and `rows` parameters which we will discuss later. But notice that at the top of the results Solr always tells us the total number of results found:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title:education&fl=id,title'
+
+  #
+  # response will include
+  #   "response":{"numFound":101,"start":0,"docs":[
   #
 ```
 

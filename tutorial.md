@@ -306,6 +306,8 @@ $ which solr
   #  
 ```
 
+Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent. 
+
 If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.1.0/bin/solr`.
 ## Creating our first Solr core
 
@@ -313,7 +315,7 @@ Solr uses the concept of *cores* to represent independent environments in which
 we configure data schemas and store data. This is similar to the concept of a
 "database" in MySQL or PostgreSQL.
 
-For our purposes, let's create a core named `bibdata` via the following command:
+For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
 $ cd ~/solr-7.1.0/bin
@@ -416,7 +418,7 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder that we can use in Windows. Here is what you'll need to to:
 
 ```
-> cd C:\Users\you\solr-7.1.0\exampledocs
+> cd C:\Users\you\solr-7.1.0\examples\exampledocs
 > copy path\to\books.json .
 > java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
 
@@ -437,7 +439,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **id**: string to identify each document ([MARC](https://www.loc.gov/marc/bibliographic/) 001)
 * **author**: string for the main author (MARC 100a)
 * **authorDate**: date for the author (MARC 100d)
-* **authorFuller**: title of the book (MARC 100q)
+* **authorFuller**: fuller form of the name (MARC 100q)
 * **authorsOther**: list of other authors (MARC 700a)
 * **title**: title of the book (MARC 245ab)
 * **responsibility**: statement of responsibility (MARC 245c)
@@ -545,6 +547,18 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=ti
 ```
 
 
+Notice that Solr returns results paginated, by default it returns the first 10 documents that match the query. We can request a large page size or another page via the `start` and `rows` parameters which we will discuss later. But notice that at the top of the results Solr always tells us the total number of results found:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title:education&fl=id,title'
+
+  #
+  # response will include
+  #   "response":{"numFound":101,"start":0,"docs":[
+  #
+```
+
+
 ### Getting facets
 
 When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
@@ -597,12 +611,12 @@ To delete all documents for the `bibdata` core we can submit a request to Solr's
 `update` endpoint (rather than the `select` endpoint) with a command like this:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/update?commit=true" --data '<delete><query>*:*</query></delete>'
+$ curl "http://localhost:8983/solr/bibdata/update?commit=true" --data '<delete><query>id:00020424</query></delete>'
 ```
 
-The body of the request (`--data`) indicates to Solr that we want to delete all documents (notice the `*:*` query).
+The body of the request (`--data`) indicates to Solr that we want to delete a specific document (notice the `id:00020424` query).
 
-You can also pass a more specific query, for example `id:00020424` to delete a single document or `title:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it).
+We can also pass a less specific query like `title:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it). Or we can delete *all documents* with a query like `*:*`.
 
 Be aware that even if you delete all documents from a Solr core the schema and the core's configuration will remain intact. For example, the fields that were defined are still available even if no documents exist in the core anymore.
 
@@ -627,7 +641,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to do and store different transformation on the values given to us. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `biddata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as show in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
+Our newly created `bibdata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema

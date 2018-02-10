@@ -12,7 +12,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to do and store different transformation on the values given to us. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `biddata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as show in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
+Our newly created `bibdata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema

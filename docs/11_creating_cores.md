@@ -4,7 +4,7 @@ Solr uses the concept of *cores* to represent independent environments in which
 we configure data schemas and store data. This is similar to the concept of a
 "database" in MySQL or PostgreSQL.
 
-For our purposes, let's create a core named `bibdata` via the following command:
+For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
 $ cd ~/solr-7.1.0/bin
