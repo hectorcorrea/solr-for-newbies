@@ -889,6 +889,18 @@ Notice that the at *query time* an extra filter, the `SynonymGraphFilter`, is ap
 If we *index* the text "The television is broken!" the tokenizer and filters defined in the `indexAnalyzer` will transform this text to four tokens: "the", "television", "is", and "broken". Notice how the tokens were lowercased ("The" became "the") and the exclamation sign was dropped.
 
 Likewise, if we *query* for the text "The TV is broken!" the tokenizer and filters defined in the `queryAnalyzer` will convert the text to the following tokens: "the", "television", "televisions", "tvs", "tv", "is", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to four synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those four synonyms predefined in the `synonyms.txt` file.
+
+The "Analysis" option in the [Solr Admin](http://localhost:8983/solr/#/bibdata/analysis) tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
+
+* Enter "The quick brown fox jumps over the lazy dog" in the "Field Value (*index*)", select `string` as the field type and see how is indexed. Then select `text_general` and see how is indexed. Lastly, select `text_en` and see how is indexed.
+
+* With the text still on the "Field Value (*index*)" text box, enter "The quick brown fox jumps over the LAZY dog" on the "Field Value (*query*)" and try the different field types (`string/text_general/text_en`) again to see how each of them shows different matches.
+
+* Try changing the text on the "Field Value (*query*)" text box to "The quick brown foxes jumped over the LAZY dogs". Try again with the different field types to see the matches.
+
+* Now enter "The TV is broken!" on the "Field Value (*index*)" text box, blank the "Field Value (*query*)" text box, select `text_general`, and see how the value is indexed. Then do the reverse, blank the indexed value and enter "The TV is broken!" on the "Field Value (*query*)" text box and notice synonyms being applied.
+
+* Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_general` fields.
 ## Stored vs indexed fields (optional)
 
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond the scope of this tutorial.
