@@ -1965,14 +1965,14 @@ To configure replication in Solr we need to add a new request handler in our `so
 
 ### Master server configuration
 
-To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml`:
+To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">
   <lst name="master">
     <str name="replicateAfter">optimize</str>
     <str name="backupAfter">optimize</str>
-    <str name="confFiles">schema.xml,stopwords.txt</str>
+    <str name="confFiles">managed-schema,stopwords.txt</str>
   </lst>
 </requestHandler>
 ```
@@ -1982,7 +1982,7 @@ Notice the settings under the `master` section. These setting designate this ser
 If you reload this core
 
 ```
-$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
+$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
 ```
 
 and look at its setting under the [Replication](http://localhost:8983/solr/#/bibdata/replication) tab in the Solr Admin web page you should see a green checkbox next to the "replication enable" setting.
@@ -2015,7 +2015,7 @@ $ curl http://localhost:8983/solr/theothercore/select?q=*
   #
 ```
 
-Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.1.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave" (rather than "master") as show below:
+Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.1.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">
