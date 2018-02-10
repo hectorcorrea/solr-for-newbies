@@ -361,10 +361,10 @@ newly created core `bibdata` has no documents in it. Remember that our call to
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 ```
 
-returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json) file (if you cloned this GitHub repo the file is already in your data folder):
+returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file (if you cloned this GitHub repo the file is already in your machine):
 
 ```
-$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json' > books.json
+$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 
   #
   # You'll see something like this...
@@ -1237,7 +1237,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title_s+a
 ```
 ## Dynamic Fields
 
-If look at the data in the source `data/book.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
+If look at the data in the source `books.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
 
 ```
 {
@@ -2071,8 +2071,14 @@ This is also out of the scope of this tutorial.
 
 ### Sample data
 
-File `data/books.json` contains 10,000 books taken from Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
+File `books.json` contains 10,000 books taken from Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
 
-TODO: document how I created `data/books.json` from the original MARC data.
+The steps to create the `books.json` file from the MARC data are as follow:
 
-TODO: Do I need the larger set with 250K books? or a smaller one?
+* Download file `BooksAll.2014.part01.utf8.gz` from https://www.loc.gov/cds/downloads/MDSConnect/BooksAll.2014.part01.utf8.gz.
+* Unzip it: `gzip -d BooksAll.2014.part01.utf8.gz`
+* Process the unzipped file with [marcli](https://github.com/hectorcorrea/marcli) with the following command: `./marcli --file BooksAll.2014.part01.utf8 -format solr > books.json`
+
+The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of the tutorial I manually truncated the file to include only the first 10,000 books.
+
+`marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file. 

@@ -6,7 +6,7 @@ File **tutorial.md** has most of the material that we will cover during the work
 
 Files **slides.key** and **slides.pdf** are the slides with some "big picture" diagrams to support the material in tutorial.md.
 
-Folder `data/` has the sample data that we will use during the workshop.
+File **books.json** has the sample data that we will use during the workshop.
 
 Folder `scripts/` has a few scripts that can be used to automate the steps of adding documents or fields to the Solr core used in the tutorial. These scrips just bundle steps indicated in the tutorial.
 

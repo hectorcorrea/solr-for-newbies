@@ -7,10 +7,10 @@ newly created core `bibdata` has no documents in it. Remember that our call to
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 ```
 
-returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json) file (if you cloned this GitHub repo the file is already in your data folder):
+returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file (if you cloned this GitHub repo the file is already in your machine):
 
 ```
-$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/data/books.json' > books.json
+$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 
   #
   # You'll see something like this...
