@@ -31,6 +31,7 @@ Tutorial Outline
     * [Filters](#filters)
     * [Putting it all together](#putting-it-all-together)
   * [Stored vs indexed fields (optional)](#stored-vs-indexed-fields-optional)
+    * [But why?](#but-why)
     * [Indexed, stored, and docValues](#indexed-stored-and-docvalues)
   * [Recreating our Solr core](#recreating-our-solr-core)
   * [Adding a new field](#adding-a-new-field)
@@ -796,16 +797,8 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   # }
 ```
 
-This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`.
-
-* `indexAnalyzer` refers to the transformations that will be made to the data before is *indexed* by Solr for any field of this type.
-
-* `queryAnalyzer` refers to the transformations that will be applied to the search terms when we *query* a field of this type.
-
-Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time since the `StopFilterFactory` filter is defined in both the query and the index analyzer sections. However, "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.
+This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`. We will explore those in the next section.
 ## Analyzers, Tokenizers, and Filters  
-
-When we looked at the definition of the `text_general` field type we saw a couple of values that pointed to `tokenizer` and `filters` under the `indexAnalyzer` and `queryAnalyzer` properties.
 
 The `indexAnalyzer` section defines the transformations to perform *as the data is indexed* in Solr and `queryAnalyzer` defines transformations to perform *as we query for data* out of Solr. It's important to notice that the output of the `indexAnalyzer` affects the terms *indexed*, but not the value *stored*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/analyzers.html) says:
 
@@ -815,58 +808,11 @@ The `indexAnalyzer` section defines the transformations to perform *as the data 
     an analyzer might split "Brown Cow" into two indexed terms "brown"
     and "cow", but the stored value will still be a single String: "Brown Cow"
 
-Below is how the analyzers for the `text_general` field type are defined in a standard Solr installation.
-
-```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
-
-  # Response includes indexAnalyzer's tokenizer and filters:
-  #
-  #     "indexAnalyzer":{
-  #       "tokenizer":{
-  #         "class":"solr.StandardTokenizerFactory"
-  #       },
-  #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
-  #       ]
-  #     },
-  #
-  # and queryAnalyzer's tokenizer and filters:
-  #
-  #     "queryAnalyzer":{
-  #       "tokenizer":{
-  #         "class":"solr.StandardTokenizerFactory"
-  #       },
-  #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.SynonymGraphFilterFactory",
-  #           "expand":"true",
-  #           "ignoreCase":"true",
-  #           "synonyms":"synonyms.txt"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
-  #       ]
-  #     }
-```
-
 When a value is *indexed* for a particular field the value is first passed to the `tokenizer` and then to the `filters` defined in the `indexAnalyzer` section for that field type. Similarly, when we *query* for a value in a given field the value is first processed by the `tokenizer` and then by the `filters` defined in the `queryAnalyzer` section for that field.
 
-Notice that the tokenizer and filters applied at index time can be different from the ones applied at query time, as it is the case in the `text_general` field type above (notice the extra filter on the `queryAnalyzer` section.)
+If we look again at the definition for the `text_general` field type we'll notice that "stop words" (i.e. words to be ignored) are handled at index and query time (notice the `StopFilterFactory` filter appears in the `indexAnalyzer` and the `queryAnalyzer` sections.) However, notice that "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer` section.
 
+We can customize field type definitions to use different filters and tokenizers via the Schema API which we will discuss later on this tutorial.
 
 ### Tokenizers
 
@@ -915,6 +861,8 @@ The "Analysis" option in the [Solr Admin](http://localhost:8983/solr/#/bibdata/a
 * Now enter "The TV is broken!" on the "Field Value (*index*)" text box, blank the "Field Value (*query*)" text box, select `text_general`, and see how the value is indexed. Then do the reverse, blank the indexed value and enter "The TV is broken!" on the "Field Value (*query*)" text box and notice synonyms being applied.
 
 * Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_general` fields.
+
+Quiz: When we tested the text "The television is broken" with the `text_general` field type we probably expected the word "the" to be dropped since it's a stop word in the English language. Can you guess why it was not dropped? Hint: try the same text but with the `text_en` field type instead and see what happens.
 ## Stored vs indexed fields (optional)
 
 There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond the scope of this tutorial.
@@ -1008,6 +956,11 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
 ```
 
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
+
+
+### But why?
+
+There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values. Conversely, perhaps we want to create a field with a combination of values and search on that field but we don't want to display it to the users (the default `_text_` field in our schema is such an example, although we are not populating it).
 
 
 ### Indexed, stored, and docValues
@@ -1116,7 +1069,9 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-We need to re-import our data for these changes to take effect, but before we do this let's do another customization to the schema.
+We can see how these changes are now part of the schema by looking at the definitions of the `author`, `authorsOther`, and `authorsAll` in the [Solr Admin](http://localhost:8983/solr/#/bibdata/schema) tool either via the *Schema* menu option or by looking at the `managed-schema` file under the *Files* option.
+
+We need to re-import our data for these changes to be applied to the data, but before we do this let's do another customization to the schema.
 
 
 ### Customizing the title fields
@@ -1483,9 +1438,11 @@ As we saw in a previous example if we execute a search on multiple fields and gi
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="george+washington"&qf=title+authorsAll^20&defType=edismax'
 ```
 
+Boost values are arbitrary, you can use 1, 20, 789, 76.2, 1000, or whatever number you like, you can even use negative numbers (`qf=title authorsAll^-20`). They are just a way for us to hint Solr which fields we consider more important in a particular search.
+
 
 ### debugQuery
-Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This particularly useful if the results that you get in a query are not what you were expecting. For example:
+Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This is particularly useful if the results that you get in a query are not what you were expecting. For example:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:west+AND+authorsAll:nancy&fl=id,title,authorsAll&defType=edismax&debugQuery=on'

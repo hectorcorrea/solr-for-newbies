@@ -167,10 +167,4 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   # }
 ```
 
-This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`.
-
-* `indexAnalyzer` refers to the transformations that will be made to the data before is *indexed* by Solr for any field of this type.
-
-* `queryAnalyzer` refers to the transformations that will be applied to the search terms when we *query* a field of this type.
-
-Notice that in the definition for `text_general` "stop words" (i.e. words to be ignored) will be considered at index and query time since the `StopFilterFactory` filter is defined in both the query and the index analyzer sections. However, "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer`.
+This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`. We will explore those in the next section.

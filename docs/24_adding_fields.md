@@ -54,7 +54,9 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-We need to re-import our data for these changes to take effect, but before we do this let's do another customization to the schema.
+We can see how these changes are now part of the schema by looking at the definitions of the `author`, `authorsOther`, and `authorsAll` in the [Solr Admin](http://localhost:8983/solr/#/bibdata/schema) tool either via the *Schema* menu option or by looking at the `managed-schema` file under the *Files* option.
+
+We need to re-import our data for these changes to be applied to the data, but before we do this let's do another customization to the schema.
 
 
 ### Customizing the title fields

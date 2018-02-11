@@ -31,6 +31,7 @@ Tutorial Outline
     * [Filters](#filters)
     * [Putting it all together](#putting-it-all-together)
   * [Stored vs indexed fields (optional)](#stored-vs-indexed-fields-optional)
+    * [But why?](#but-why)
     * [Indexed, stored, and docValues](#indexed-stored-and-docvalues)
   * [Recreating our Solr core](#recreating-our-solr-core)
   * [Adding a new field](#adding-a-new-field)

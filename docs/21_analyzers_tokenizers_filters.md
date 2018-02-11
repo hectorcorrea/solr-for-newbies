@@ -1,7 +1,5 @@
 ## Analyzers, Tokenizers, and Filters  
 
-When we looked at the definition of the `text_general` field type we saw a couple of values that pointed to `tokenizer` and `filters` under the `indexAnalyzer` and `queryAnalyzer` properties.
-
 The `indexAnalyzer` section defines the transformations to perform *as the data is indexed* in Solr and `queryAnalyzer` defines transformations to perform *as we query for data* out of Solr. It's important to notice that the output of the `indexAnalyzer` affects the terms *indexed*, but not the value *stored*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/analyzers.html) says:
 
     The output of an Analyzer affects the terms indexed in a given field
@@ -10,58 +8,11 @@ The `indexAnalyzer` section defines the transformations to perform *as the data 
     an analyzer might split "Brown Cow" into two indexed terms "brown"
     and "cow", but the stored value will still be a single String: "Brown Cow"
 
-Below is how the analyzers for the `text_general` field type are defined in a standard Solr installation.
-
-```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
-
-  # Response includes indexAnalyzer's tokenizer and filters:
-  #
-  #     "indexAnalyzer":{
-  #       "tokenizer":{
-  #         "class":"solr.StandardTokenizerFactory"
-  #       },
-  #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
-  #       ]
-  #     },
-  #
-  # and queryAnalyzer's tokenizer and filters:
-  #
-  #     "queryAnalyzer":{
-  #       "tokenizer":{
-  #         "class":"solr.StandardTokenizerFactory"
-  #       },
-  #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.SynonymGraphFilterFactory",
-  #           "expand":"true",
-  #           "ignoreCase":"true",
-  #           "synonyms":"synonyms.txt"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
-  #       ]
-  #     }
-```
-
 When a value is *indexed* for a particular field the value is first passed to the `tokenizer` and then to the `filters` defined in the `indexAnalyzer` section for that field type. Similarly, when we *query* for a value in a given field the value is first processed by the `tokenizer` and then by the `filters` defined in the `queryAnalyzer` section for that field.
 
-Notice that the tokenizer and filters applied at index time can be different from the ones applied at query time, as it is the case in the `text_general` field type above (notice the extra filter on the `queryAnalyzer` section.)
+If we look again at the definition for the `text_general` field type we'll notice that "stop words" (i.e. words to be ignored) are handled at index and query time (notice the `StopFilterFactory` filter appears in the `indexAnalyzer` and the `queryAnalyzer` sections.) However, notice that "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer` section.
 
+We can customize field type definitions to use different filters and tokenizers via the Schema API which we will discuss later on this tutorial.
 
 ### Tokenizers
 
@@ -110,3 +61,5 @@ The "Analysis" option in the [Solr Admin](http://localhost:8983/solr/#/bibdata/a
 * Now enter "The TV is broken!" on the "Field Value (*index*)" text box, blank the "Field Value (*query*)" text box, select `text_general`, and see how the value is indexed. Then do the reverse, blank the indexed value and enter "The TV is broken!" on the "Field Value (*query*)" text box and notice synonyms being applied.
 
 * Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_general` fields.
+
+Quiz: When we tested the text "The television is broken" with the `text_general` field type we probably expected the word "the" to be dropped since it's a stop word in the English language. Can you guess why it was not dropped? Hint: try the same text but with the `text_en` field type instead and see what happens.

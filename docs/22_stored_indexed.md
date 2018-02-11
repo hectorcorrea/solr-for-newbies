@@ -93,6 +93,11 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
 
 
+### But why?
+
+There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values. Conversely, perhaps we want to create a field with a combination of values and search on that field but we don't want to display it to the users (the default `_text_` field in our schema is such an example, although we are not populating it).
+
+
 ### Indexed, stored, and docValues
 
 In the previous example we declared three fields with different indexed/stored settings and all of them were of type `text_general`. However, if you set the indexed/stored setting in fields of type `string` the default behavior is slightly different because Solr stores and handles `string` fields different from `text_general` fields.
