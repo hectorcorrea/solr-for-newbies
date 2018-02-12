@@ -53,10 +53,10 @@ Tutorial Outline
     * [Ranking of documents](#ranking-of-documents)
     * [Default Field (optional)](#default-field-optional)
     * [Filtering with ranges](#filtering-with-ranges)
+    * [Minimum match (advanced)](#minimum-match-advanced)
     * [Where to find more](#where-to-find-more)
   * [Facets](#facets)
   * [Hit highlighting](#hit-highlighting)
-  * [Advanced search options (optional)](#advanced-search-options-optional)
 
 
 * [PART IV: MISCELLANEOUS (optional)](#part-iv-miscellaneous-optional)
@@ -70,8 +70,7 @@ Tutorial Outline
     * [Request Handlers](#request-handlers)
     * [LocalParams and dereferencing](#localparams-and-dereferencing)
     * [Search Components](#search-components)
-    * [Solr-wide configuration](#solr-wide-configuration)
-  * [Spellchecker ](#spellchecker)
+  * [Spellchecker](#spellchecker)
   * [Solr Replication](#solr-replication)
     * [Master server configuration](#master-server-configuration)
     * [Replica server configuration](#replica-server-configuration)

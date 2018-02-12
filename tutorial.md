@@ -53,10 +53,10 @@ Tutorial Outline
     * [Ranking of documents](#ranking-of-documents)
     * [Default Field (optional)](#default-field-optional)
     * [Filtering with ranges](#filtering-with-ranges)
+    * [Minimum match (advanced)](#minimum-match-advanced)
     * [Where to find more](#where-to-find-more)
   * [Facets](#facets)
   * [Hit highlighting](#hit-highlighting)
-  * [Advanced search options (optional)](#advanced-search-options-optional)
 
 
 * [PART IV: MISCELLANEOUS (optional)](#part-iv-miscellaneous-optional)
@@ -70,8 +70,7 @@ Tutorial Outline
     * [Request Handlers](#request-handlers)
     * [LocalParams and dereferencing](#localparams-and-dereferencing)
     * [Search Components](#search-components)
-    * [Solr-wide configuration](#solr-wide-configuration)
-  * [Spellchecker ](#spellchecker)
+  * [Spellchecker](#spellchecker)
   * [Solr Replication](#solr-replication)
     * [Master server configuration](#master-server-configuration)
     * [Replica server configuration](#replica-server-configuration)
@@ -493,7 +492,7 @@ We can request filter by many different fields, for example to request documents
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+author:Alice'
 ```
 
-As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title:teachers AND author:Alice`
+As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title:teachers AND author:Alice` Please notice that the `AND` operator **must be in uppercase**.
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+AND+author:Alice'
@@ -517,7 +516,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+te
   #
 ```
 
-Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title` but they can be 3 words apart (notice the `~3`):
+Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title` but they can be a few words apart (notice the `~3`):
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"~3'
@@ -1315,7 +1314,7 @@ When we issue a search to Solr we pass the search parameters in the query string
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title'
 ```
 
-In some instances we passed rather sophisticated values for these parameters, for example we used `q=title:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within three words of each other.
+In some instances we passed rather sophisticated values for these parameters, for example we used `q=title:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within a few word words of each other.
 
 The components in Solr that parse these parameters are called Query Parsers. Their job is to extract the parameters and create a query that Lucene can understand. Remember that Lucene is the search engine underneath Solr.
 
@@ -1324,7 +1323,7 @@ The components in Solr that parse these parameters are called Query Parsers. The
 
 Out of the box Solr comes with three query parsers: Standard, DisMax, and Extended DisMax (eDisMax). Each of them has its own advantages and disadvantages.
 
-* The [Standard](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like AND or OR operations.
+* The [Standard](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like `AND` or `OR` operations.
 
 * The [DisMax](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html) query parser (DisMax) on the other hand was designed to handle user entered queries and is very forgiving on errors when parsing a query, however this parser only supports simple query expressions.
 
@@ -1368,9 +1367,9 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington'
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington&start=10&rows=15'
 ```
 
-* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~3`)
+* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~1`) Technically the `~N` means "N edit distance away" (See Solr in Action, p. 63).
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~3&fl=id,title'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~1&fl=id,title'
 ```
 
 * Documents that have a main author (`q=author:*` means any author)
@@ -1388,7 +1387,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+autho
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
 ```
 
-* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter)
+* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter) Again, please notice that the `AND` operator **must be in uppercase**.
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story+AND+subjects:women'
 ```
@@ -1425,7 +1424,7 @@ In [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085
 
 The reason this is important is because values filtered via `fq` can be cached and reused better by Solr in subsequent queries because they don't have a score assigned to them. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application)
 
-Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are `ANDed` (you cannot specify an OR operation among them).
+Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are ANDed (you cannot specify an OR operation among them).
 
 
 ### the qf parameter
@@ -1523,15 +1522,48 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 ### Filtering with ranges
 
-TODO: flesh out this section
+You can also filter a field to be within a range by using the bracket operator with the following syntax: `field:[firstValue TO lastValue]`. For example, to request documents with `id` between `00000018` and `00000028` we could do: `id:[00000018 TO 00000028]`. You can also indicate open-ended ranges by passing an asterisk as the value, for example: `id:[* TO 00000028]`.
 
-`id:[00000018 TO 00000028]`
-
-`id:[00009999 TO *]`
+Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` fields it will filter on the *terms indexed* not on the value of the field.
 
 
-`subjects:[Geography TO Heroes]` but be careful that it will match any term in the subject field between Geography and Heroes (e.g. "Mental healing")
+### Minimum match (advanced)
 
+In addition to using the `AND/OR` operators in our searches, the eDisMax parser provides a powerful feature called *minimum match* (`mm`) that allows for more flexible matching conditions than what we can do with just boolean operators.
+
+```
+The eDisMax query parser provides the ability to blur the lines of
+traditional Boolean logic through the use of the mm (minimum match)
+parameter. The mm parameter allows you to define either a specific
+number of terms or a percentage of terms in a query that must match
+in order for a document to be considered a match.
+- [Solr in Action, p. 228]
+```
+
+With the *minimum match* parameter is possible to tell Solr to consider a document a match if 75% of the terms searched for are found on it for all queries that have more than three words. For example, the following four word query `q=school teachers secondary classroom` on the title field (`qf=title`) will return any document where at least 50% of the search terms are found (`mm=3<50%`):
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title&mm=3%3C50%25&q=school%20teachers%20secondary%20classroom&qf=title'
+
+  #
+  # results will include
+  #
+  # {
+  #   "id":"00010001",
+  #   "title":["Succeeding in the secondary classroom : strategies for middle and high school teachers /"]},
+  # {
+  #   "id":"00002200",
+  #   "title":["Aids to teachers of School chemistry."]},
+  # {
+  #   "id":"00020157",
+  #   "title":["Standards in the classroom : how teachers and students negotiate learning /"]},
+  # {
+  #   "id":"00008378",
+  #   "title":["Keys to the classroom : a teacher's guide to the first month of school /"]},
+  #
+```
+
+We can indicate more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though: `mm=2<2&3<2`
 
 
 ### Where to find more
@@ -1638,15 +1670,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=t
 ```
 
 Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
-## Advanced search options (optional)
-
-TODO: flesh out this section
-
-pf
-
-pf (phrase field) is for boosting based on proximity of the search terms within the document. I think is related to another field called proximity slop (ps).
-
-The "p" is for "phrase" or "proximity" boosting. "pf" doesn't change what documents match, but gives a boost if all of the terms occur next to or near each other, based on "ps" (phrase/proximity slop.) http://grokbase.com/t/lucene/solr-user/137tqgw12c/difference-between-qf-and-pf-parameters
 # PART IV: MISCELLANEOUS (optional)
 
 ## Solr directories
@@ -1699,7 +1722,7 @@ In a previous section, when we looked at the `text_general` field type, we notic
 Here is how to view that definition again:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
+$ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_general'
 
   #
   # "queryAnalyzer":{
@@ -1807,6 +1830,8 @@ One of the most important configuration files for a Solr core is `solrconfig.xml
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
+Note: Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
+
 
 ### Request Handlers
 
@@ -1909,16 +1934,118 @@ You can find the definition of the search components in the `solrconfig.xml` by 
 Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting results in  previous section are defined here.
 
 Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
+## Spellchecker
 
+Solr provides spellcheck functionality out of the box that we can use to help users when they misspell a word in their queries. For example, if a user searches for "Washingon" (notice the missing "t") most likely Solr will return zero results, but with the spellcheck turned on Solr is able to suggest the correct spelling for the query (i.e. "Washington").
 
-### Solr-wide configuration
+In our current `bibdata` core a search for "Washingon" will return zero results:
 
-Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file.
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
 
-There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
-## Spellchecker 
+  #
+  # response will indicate
+  # {
+  # "responseHeader":{
+  #   "status":0,
+  #  "params":{
+  #    "q":"title:washingon",
+  #    "fl":"id,title"}},
+  # "response":{"numFound":0,"start":0,"docs":[]
+  # }}
+  #
+```
 
-TODO: flesh out this section
+Spellchecking is configured under the `/select` request handler in `solrconfig.xml`. To enable it we need to update the `defaults` settings and enable the `spellcheck` search component. To do this update the `/select` request handler as follows:
+
+```
+<requestHandler name="/select" class="solr.SearchHandler">
+  <lst name="defaults">
+    <str name="echoParams">explicit</str>
+    <int name="rows">10</int>
+    <int name="rows">10</int>
+    <str name="defType">edismax</str>
+    <str name="spellcheck">on</str>
+    <str name="spellcheck.extendedResults">false</str>
+    <str name="spellcheck.count">5</str>
+    <str name="spellcheck.alternativeTermCount">2</str>
+    <str name="spellcheck.maxResultsForSuggest">5</str>
+    <str name="spellcheck.collate">true</str>
+    <str name="spellcheck.collateExtendedResults">true</str>
+    <str name="spellcheck.maxCollationTries">5</str>
+    <str name="spellcheck.maxCollations">3</str>
+  </lst>
+
+  <arr name="last-components">
+    <str>spellcheck</str>
+  </arr>
+</requestHandler>
+```
+
+The `spellcheck` component indicated above is already defined in the `solrconfig.xml` with the following defaults.
+
+```
+<searchComponent name="spellcheck" class="solr.SpellCheckComponent">
+  <str name="queryAnalyzerFieldType">text_general</str>
+  <lst name="spellchecker">
+    <str name="name">default</str>
+    <str name="field">_text_</str>
+    <str name="classname">solr.DirectSolrSpellChecker</str>
+    ...
+  </lst>
+</searchComponent
+```
+
+Notice how by default it will use the `_text_` field for spellcheck. The `_text_` field would be a good field to use if we were populating it, but we aren't in our current configuration. Instead let's update this setting to use the `title` field instead.
+
+Once these changes have been made to the `solr_config.xml` we must reload our core for the changes to take effect:
+
+```
+$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
+
+  #
+  # {
+  #   "responseHeader":{
+  #      "status":0,
+  #      "QTime":10392
+  #   }
+  # }
+  #
+  
+```
+
+Now that our `bibdata` core has been configured to use spellcheck let's try out misspelled query again:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
+
+  #
+  # response will indicate
+  #
+  # {
+  #   "responseHeader":{
+  #     "response":{"numFound":0,"start":0,"docs":[]
+  #   },
+  #   "spellcheck":{
+  #     "suggestions":[
+  #       "washingon",{
+  #         "numFound":1,
+  #         "startOffset":6,
+  #         "endOffset":15,
+  #         "suggestion":["washington"]
+  #     }],
+  #     "collations":[
+  #       "collation",{
+  #         "collationQuery":"title:washington",
+  #         "hits":21,
+  #         "misspellingsAndCorrections":[
+  #         "washingon","washington"]}]
+  #   }
+  # }
+  #
+```
+
+Notice that even though we got zero results back, the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
 ## Solr Replication
 
 Replication is a technique in which you "create multiple identical copies of your index and load balance traffic across each of the copies" [Solr in Action, p. 375](https://www.worldcat.org/title/solr-in-action/oclc/879605085).
