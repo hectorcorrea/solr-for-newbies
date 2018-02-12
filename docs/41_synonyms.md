@@ -5,7 +5,7 @@ In a previous section, when we looked at the `text_general` field type, we notic
 Here is how to view that definition again:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
+$ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_general'
 
   #
   # "queryAnalyzer":{

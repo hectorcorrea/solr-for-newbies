@@ -6,7 +6,7 @@ When we issue a search to Solr we pass the search parameters in the query string
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title'
 ```
 
-In some instances we passed rather sophisticated values for these parameters, for example we used `q=title:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within three words of each other.
+In some instances we passed rather sophisticated values for these parameters, for example we used `q=title:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within a few word words of each other.
 
 The components in Solr that parse these parameters are called Query Parsers. Their job is to extract the parameters and create a query that Lucene can understand. Remember that Lucene is the search engine underneath Solr.
 
@@ -15,7 +15,7 @@ The components in Solr that parse these parameters are called Query Parsers. The
 
 Out of the box Solr comes with three query parsers: Standard, DisMax, and Extended DisMax (eDisMax). Each of them has its own advantages and disadvantages.
 
-* The [Standard](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like AND or OR operations.
+* The [Standard](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like `AND` or `OR` operations.
 
 * The [DisMax](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html) query parser (DisMax) on the other hand was designed to handle user entered queries and is very forgiving on errors when parsing a query, however this parser only supports simple query expressions.
 
@@ -59,9 +59,9 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington'
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington&start=10&rows=15'
 ```
 
-* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~3`)
+* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~1`) Technically the `~N` means "N edit distance away" (See Solr in Action, p. 63).
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~3&fl=id,title'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~1&fl=id,title'
 ```
 
 * Documents that have a main author (`q=author:*` means any author)
@@ -79,7 +79,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+autho
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
 ```
 
-* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter)
+* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter) Again, please notice that the `AND` operator **must be in uppercase**.
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story+AND+subjects:women'
 ```
@@ -116,7 +116,7 @@ In [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085
 
 The reason this is important is because values filtered via `fq` can be cached and reused better by Solr in subsequent queries because they don't have a score assigned to them. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application)
 
-Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are `ANDed` (you cannot specify an OR operation among them).
+Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are ANDed (you cannot specify an OR operation among them).
 
 
 ### the qf parameter
@@ -214,15 +214,48 @@ You can overwrite the default field by passing the `df` parameter, for example t
 
 ### Filtering with ranges
 
-TODO: flesh out this section
+You can also filter a field to be within a range by using the bracket operator with the following syntax: `field:[firstValue TO lastValue]`. For example, to request documents with `id` between `00000018` and `00000028` we could do: `id:[00000018 TO 00000028]`. You can also indicate open-ended ranges by passing an asterisk as the value, for example: `id:[* TO 00000028]`.
 
-`id:[00000018 TO 00000028]`
-
-`id:[00009999 TO *]`
+Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` fields it will filter on the *terms indexed* not on the value of the field.
 
 
-`subjects:[Geography TO Heroes]` but be careful that it will match any term in the subject field between Geography and Heroes (e.g. "Mental healing")
+### Minimum match (advanced)
 
+In addition to using the `AND/OR` operators in our searches, the eDisMax parser provides a powerful feature called *minimum match* (`mm`) that allows for more flexible matching conditions than what we can do with just boolean operators.
+
+```
+The eDisMax query parser provides the ability to blur the lines of
+traditional Boolean logic through the use of the mm (minimum match)
+parameter. The mm parameter allows you to define either a specific
+number of terms or a percentage of terms in a query that must match
+in order for a document to be considered a match.
+- [Solr in Action, p. 228]
+```
+
+With the *minimum match* parameter is possible to tell Solr to consider a document a match if 75% of the terms searched for are found on it for all queries that have more than three words. For example, the following four word query `q=school teachers secondary classroom` on the title field (`qf=title`) will return any document where at least 50% of the search terms are found (`mm=3<50%`):
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title&mm=3%3C50%25&q=school%20teachers%20secondary%20classroom&qf=title'
+
+  #
+  # results will include
+  #
+  # {
+  #   "id":"00010001",
+  #   "title":["Succeeding in the secondary classroom : strategies for middle and high school teachers /"]},
+  # {
+  #   "id":"00002200",
+  #   "title":["Aids to teachers of School chemistry."]},
+  # {
+  #   "id":"00020157",
+  #   "title":["Standards in the classroom : how teachers and students negotiate learning /"]},
+  # {
+  #   "id":"00008378",
+  #   "title":["Keys to the classroom : a teacher's guide to the first month of school /"]},
+  #
+```
+
+We can indicate more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though: `mm=2<2&3<2`
 
 
 ### Where to find more
