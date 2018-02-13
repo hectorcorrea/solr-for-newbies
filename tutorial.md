@@ -1895,7 +1895,7 @@ In addition to the standard parameters in a request handler we can also define c
 
 We can then use this new setting in our queries by using the [Local Parameters](https://lucene.apache.org/solr/guide/7_0/local-parameters-in-queries.html#parameter-dereferencing) and [Dereferencing](https://lucene.apache.org/solr/guide/7_0/local-parameters-in-queries.html#parameter-dereferencing) features of Solr.
 
-The syntax to use local parameters and dereferencing look a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencig (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`
+The syntax to use local parameters and dereferencing look a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`
 
 For example to use our newly defined `custom_search_field` in a query we could pass the following to Solr:
 
