@@ -26,10 +26,10 @@ $ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_general'
 
 Notice how one of the filter uses the `SynonymGraphFilterFactory` to handle synonyms and references a file `synonyms.txt`.
 
-The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
+The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
 
 ```
-$ cat ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
+$ cat ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
 
   #
   # will include a few lines including
@@ -75,7 +75,7 @@ We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `s
 You can do this with your favorite editor or with a command like this:
 
 ```
-$ echo "20th,twentieth" >> ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
+$ echo "20th,twentieth" >> ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
 ```
 
 You *must reload your core* for the changes to the `synonyms.txt` to take effect. You can do this as follow:

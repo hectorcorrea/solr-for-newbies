@@ -45,13 +45,13 @@ Run the installer that you downloaded. Once it has completed, go back to the Ter
 
 ### Installing Solr
 
-You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
+You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.4 which is the one that we will be using.
 
 First, download Solr and save it to a file.
 
 ```
 $ cd
-$ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.1.0/solr-7.1.0.zip > solr-7.1.0.zip
+$ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.4.0.zip
 
   #
   # You'll see something like this...
@@ -64,21 +64,21 @@ $ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.1.0/solr-
 Then unzip the downloaded file with the following command:
 
 ```
-$ unzip solr-7.1.0.zip
+$ unzip solr-7.4.0.zip
 
   #
   # A ton of information will be displayed here as Solr is being
   # decompressed/unzipped. Most of the lines will say something like
-  # "inflating: solr-7.1.0/the-name-of-a-file"
+  # "inflating: solr-7.4.0/the-name-of-a-file"
   #
 ```
 
-Now that Solr has been installed on your machine you will have a folder named `solr-7.1.0`. This folder has the files to run and configure Solr. The Solr binaries (i.e. the Java JAR files) are under `solr-7.1.0/dist` but for the most part we will use the utilities under `solr-7.1.0/bin` to start and stop Solr.
+Now that Solr has been installed on your machine you will have a folder named `solr-7.4.0`. This folder has the files to run and configure Solr. The Solr binaries (i.e. the Java JAR files) are under `solr-7.4.0/dist` but for the most part we will use the utilities under `solr-7.4.0/bin` to start and stop Solr.
 
 First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr status
 
   #
@@ -96,7 +96,7 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 To start Solr run the `solr` script again but with the `start` parameter:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr start
 
   #
@@ -112,15 +112,15 @@ You can validate this by opening your browser and going to http://localhost:8983
 You can also issue the `status` command again from the Terminal and Solr will report something like this:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr status
 
   # Found 1 Solr nodes:
   #
   # Solr process 86348 running on port 8983
   # {
-  # "solr_home":"/some/path/solr-7.1.0/server/solr",
-  # "version":"7.1.0 84..0659 - ubuntu - 2017-10-13 16:15:59",
+  # "solr_home":"/some/path/solr-7.4.0/server/solr",
+  # "version":"7.4.0 84..0659 - ubuntu - 2017-10-13 16:15:59",
   # "startTime":"2017-11-11T22:12:15.497Z",
   # "uptime":"0 days, 0 hours, 0 minutes, 12 seconds",
   # "memory":"26.4 MB (%5.4) of 490.7 MB"}
@@ -132,18 +132,18 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 ### Adding Solr to your path (optional)
 
-In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
+In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.4.0`) you can run the following commands:
 
 ```  
 $ cd
-$ PATH=~/solr-7.1.0/bin:$PATH
+$ PATH=~/solr-7.4.0/bin:$PATH
 $ which solr
 
   #
-  # /your-home-folder/solr-7.1.0/bin/solr
+  # /your-home-folder/solr-7.4.0/bin/solr
   #  
 ```
 
-Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent. 
+Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
 
-If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.1.0/bin/solr`.
+If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.4.0/bin/solr`.

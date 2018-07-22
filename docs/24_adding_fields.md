@@ -85,7 +85,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ post -c bibdata books.json
 ```
 

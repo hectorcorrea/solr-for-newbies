@@ -1,10 +1,10 @@
 ## Core-specific configuration
 
-One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.1.0/server/solr/bibdata/conf/solr_config.xml`.
+One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.4.0/server/solr/bibdata/conf/solr_config.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
-Note: Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
+Note: Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.4.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
 
 
 ### Request Handlers
@@ -18,7 +18,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 The `/select` in the URL points to a request handler defined in `solrconfig.xml`. If we look at the content of this file you'll notice a definition like this:
 
 ```
-$ cat ~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml
+$ cat ~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml
 
   #
   # notice the "/select" in this requestHandler definition

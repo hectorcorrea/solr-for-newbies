@@ -7,7 +7,7 @@ we configure data schemas and store data. This is similar to the concept of a
 For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr create -c bibdata
 
   #

@@ -207,13 +207,13 @@ Run the installer that you downloaded. Once it has completed, go back to the Ter
 
 ### Installing Solr
 
-You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.1 which is the one that we will be using.
+You can find download links for Solr at the [Apache Solr](https://lucene.apache.org/solr/) site. To make it easy, below are the steps to download and install version 7.4 which is the one that we will be using.
 
 First, download Solr and save it to a file.
 
 ```
 $ cd
-$ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.1.0/solr-7.1.0.zip > solr-7.1.0.zip
+$ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.4.0.zip
 
   #
   # You'll see something like this...
@@ -226,21 +226,21 @@ $ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.1.0/solr-
 Then unzip the downloaded file with the following command:
 
 ```
-$ unzip solr-7.1.0.zip
+$ unzip solr-7.4.0.zip
 
   #
   # A ton of information will be displayed here as Solr is being
   # decompressed/unzipped. Most of the lines will say something like
-  # "inflating: solr-7.1.0/the-name-of-a-file"
+  # "inflating: solr-7.4.0/the-name-of-a-file"
   #
 ```
 
-Now that Solr has been installed on your machine you will have a folder named `solr-7.1.0`. This folder has the files to run and configure Solr. The Solr binaries (i.e. the Java JAR files) are under `solr-7.1.0/dist` but for the most part we will use the utilities under `solr-7.1.0/bin` to start and stop Solr.
+Now that Solr has been installed on your machine you will have a folder named `solr-7.4.0`. This folder has the files to run and configure Solr. The Solr binaries (i.e. the Java JAR files) are under `solr-7.4.0/dist` but for the most part we will use the utilities under `solr-7.4.0/bin` to start and stop Solr.
 
 First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr status
 
   #
@@ -258,7 +258,7 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 To start Solr run the `solr` script again but with the `start` parameter:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr start
 
   #
@@ -274,15 +274,15 @@ You can validate this by opening your browser and going to http://localhost:8983
 You can also issue the `status` command again from the Terminal and Solr will report something like this:
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr status
 
   # Found 1 Solr nodes:
   #
   # Solr process 86348 running on port 8983
   # {
-  # "solr_home":"/some/path/solr-7.1.0/server/solr",
-  # "version":"7.1.0 84..0659 - ubuntu - 2017-10-13 16:15:59",
+  # "solr_home":"/some/path/solr-7.4.0/server/solr",
+  # "version":"7.4.0 84..0659 - ubuntu - 2017-10-13 16:15:59",
   # "startTime":"2017-11-11T22:12:15.497Z",
   # "uptime":"0 days, 0 hours, 0 minutes, 12 seconds",
   # "memory":"26.4 MB (%5.4) of 490.7 MB"}
@@ -294,21 +294,21 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 ### Adding Solr to your path (optional)
 
-In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.1.0`) you can run the following commands:
+In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.4.0`) you can run the following commands:
 
 ```  
 $ cd
-$ PATH=~/solr-7.1.0/bin:$PATH
+$ PATH=~/solr-7.4.0/bin:$PATH
 $ which solr
 
   #
-  # /your-home-folder/solr-7.1.0/bin/solr
+  # /your-home-folder/solr-7.4.0/bin/solr
   #  
 ```
 
-Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent. 
+Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
 
-If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.1.0/bin/solr`.
+If you don't do this you will need to make sure that you always refer to Solr with the full path, for example `~/solr-7.4.0/bin/solr`.
 ## Creating our first Solr core
 
 Solr uses the concept of *cores* to represent independent environments in which
@@ -318,7 +318,7 @@ we configure data schemas and store data. This is similar to the concept of a
 For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ ./solr create -c bibdata
 
   #
@@ -383,7 +383,7 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
 
 ```
-$ ~/solr-7.1.0/bin/post -c bibdata books.json
+$ ~/solr-7.4.0/bin/post -c bibdata books.json
 
   #
   # (some text here...)
@@ -418,7 +418,7 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder that we can use in Windows. Here is what you'll need to to:
 
 ```
-> cd C:\Users\you\solr-7.1.0\examples\exampledocs
+> cd C:\Users\you\solr-7.4.0\examples\exampledocs
 > copy path\to\books.json .
 > java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
 
@@ -623,7 +623,7 @@ Be aware that even if you delete all documents from a Solr core the schema and t
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ ~/solr-7.1.0/bin/solr delete -c bibdata
+$ ~/solr-7.4.0/bin/solr delete -c bibdata
 ```
 
 be aware that you will need to re-create the core if you want to re-import data to it.
@@ -1099,7 +1099,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
-$ cd ~/solr-7.1.0/bin
+$ cd ~/solr-7.4.0/bin
 $ post -c bibdata books.json
 ```
 
@@ -1674,12 +1674,12 @@ Notice how the `highlighting` property includes the `id` of each document in the
 
 ## Solr directories
 
-In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.1.0.zip` file.
+In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.4.0.zip` file.
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.1.0/` with several directories underneath:     
+Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.4.0/` with several directories underneath:
 
 ```
-~/solr-7.1.0/
+~/solr-7.4.0/
 |-- bin/
 |-- dist/
 |-- examples/
@@ -1704,7 +1704,7 @@ Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that
 As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
 
 ```
-~/solr-7.1.0/
+~/solr-7.4.0/
 |-- server/
     |-- solr/
         |-- bibdata/
@@ -1743,10 +1743,10 @@ $ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_general'
 
 Notice how one of the filter uses the `SynonymGraphFilterFactory` to handle synonyms and references a file `synonyms.txt`.
 
-The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
+The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
 
 ```
-$ cat ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
+$ cat ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
 
   #
   # will include a few lines including
@@ -1792,7 +1792,7 @@ We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `s
 You can do this with your favorite editor or with a command like this:
 
 ```
-$ echo "20th,twentieth" >> ~/solr-7.1.0/server/solr/bibdata/conf/synonyms.txt
+$ echo "20th,twentieth" >> ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
 ```
 
 You *must reload your core* for the changes to the `synonyms.txt` to take effect. You can do this as follow:
@@ -1826,11 +1826,11 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"twentieth
 To find more about synonyms take a look at this [blog post](https://library.brown.edu/DigitalTechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.
 ## Core-specific configuration
 
-One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.1.0/server/solr/bibdata/conf/solr_config.xml`.
+One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.4.0/server/solr/bibdata/conf/solr_config.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
-Note: Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.1.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
+Note: Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.4.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
 
 
 ### Request Handlers
@@ -1844,7 +1844,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 The `/select` in the URL points to a request handler defined in `solrconfig.xml`. If we look at the content of this file you'll notice a definition like this:
 
 ```
-$ cat ~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml
+$ cat ~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml
 
   #
   # notice the "/select" in this requestHandler definition
@@ -2063,7 +2063,7 @@ To configure replication in Solr we need to add a new request handler in our `so
 
 ### Master server configuration
 
-To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
+To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">
@@ -2113,7 +2113,7 @@ $ curl http://localhost:8983/solr/theothercore/select?q=*
   #
 ```
 
-Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.1.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
+Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.4.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">

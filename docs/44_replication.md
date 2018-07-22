@@ -15,7 +15,7 @@ To configure replication in Solr we need to add a new request handler in our `so
 
 ### Master server configuration
 
-To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.1.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
+To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">
@@ -65,7 +65,7 @@ $ curl http://localhost:8983/solr/theothercore/select?q=*
   #
 ```
 
-Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.1.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
+Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.4.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
 
 ```
 <requestHandler name="/replication" class="solr.ReplicationHandler">

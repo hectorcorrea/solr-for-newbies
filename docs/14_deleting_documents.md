@@ -15,7 +15,7 @@ Be aware that even if you delete all documents from a Solr core the schema and t
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ ~/solr-7.1.0/bin/solr delete -c bibdata
+$ ~/solr-7.4.0/bin/solr delete -c bibdata
 ```
 
 be aware that you will need to re-create the core if you want to re-import data to it.

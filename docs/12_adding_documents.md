@@ -27,7 +27,7 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
 
 ```
-$ ~/solr-7.1.0/bin/post -c bibdata books.json
+$ ~/solr-7.4.0/bin/post -c bibdata books.json
 
   #
   # (some text here...)
@@ -62,7 +62,7 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder that we can use in Windows. Here is what you'll need to to:
 
 ```
-> cd C:\Users\you\solr-7.1.0\examples\exampledocs
+> cd C:\Users\you\solr-7.4.0\examples\exampledocs
 > copy path\to\books.json .
 > java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
 
