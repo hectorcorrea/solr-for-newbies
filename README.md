@@ -9,5 +9,3 @@ Files **slides.key** and **slides.pdf** are the slides with some "big picture" d
 File **books.json** has the sample data that we will use during the workshop.
 
 Folder `scripts/` has a few scripts that can be used to automate the steps of adding documents or fields to the Solr core used in the tutorial. These scrips just bundle steps indicated in the tutorial.
-
-You can ignore folders `docs/` and `misc/` since they contain the bits and pieces that I used to create the tutorial file from a set of smaller files.
