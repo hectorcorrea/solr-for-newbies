@@ -183,7 +183,7 @@ $ cd ~/solr-7.4.0/bin
 $ ./solr start
 
   #
-  # Waiting up to 180 seconds to see Solr running on port 8983 [-]  
+  # Waiting up to 180 seconds to see Solr running on port 8983 [-]
   # Started Solr server on port 8983 (pid=85830). Happy searching!
   #
 ```
@@ -217,14 +217,14 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.4.0`) you can run the following commands:
 
-```  
+```
 $ cd
 $ PATH=~/solr-7.4.0/bin:$PATH
 $ which solr
 
   #
   # /your-home-folder/solr-7.4.0/bin/solr
-  #  
+  #
 ```
 
 Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
@@ -314,7 +314,7 @@ $ ~/solr-7.4.0/bin/post -c bibdata books.json
   # 1 files indexed.
   # COMMITting Solr index changes to http://localhost:8983/solr/bibdata/update...
   # Time spent: 0:00:00.324
-  #  
+  #
 ```
 
 Now if we run our query again we should see some results
@@ -427,7 +427,7 @@ Now let's try something else. Let's issue a search for books where the title say
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"'
 
-  # the results will include   
+  # the results will include
   # {
   #   "id":"00010001",
   #   "title":["... : strategies for middle and high school teachers /"]},
@@ -726,7 +726,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
 
 This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`. We will explore those in the next section.
 
-## Analyzers, Tokenizers, and Filters  
+## Analyzers, Tokenizers, and Filters
 
 The `indexAnalyzer` section defines the transformations to perform *as the data is indexed* in Solr and `queryAnalyzer` defines transformations to perform *as we query for data* out of Solr. It's important to notice that the output of the `indexAnalyzer` affects the terms *indexed*, but not the value *stored*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/analyzers.html) says:
 
@@ -778,7 +778,7 @@ If we *index* the text "The television is broken!" the tokenizer and filters def
 
 Likewise, if we *query* for the text "The TV is broken!" the tokenizer and filters defined in the `queryAnalyzer` will convert the text to the following tokens: "the", "television", "televisions", "tvs", "tv", "is", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to four synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those four synonyms predefined in the `synonyms.txt` file.
 
-The "Analysis" option in the [Solr Admin](http://localhost:8983/solr/#/bibdata/analysis) tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
+The Solr [Analysis Screen](https://lucene.apache.org/solr/guide/7_0/analysis-screen.html) in the [Solr Admin](http://localhost:8983/solr/#/bibdata/analysis) tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
 
 * Enter "The quick brown fox jumps over the lazy dog" in the "Field Value (*index*)", select `string` as the field type and see how is indexed. Then select `text_general` and see how is indexed. Lastly, select `text_en` and see how is indexed.
 
@@ -791,6 +791,37 @@ The "Analysis" option in the [Solr Admin](http://localhost:8983/solr/#/bibdata/a
 * Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_general` fields.
 
 Quiz: When we tested the text "The television is broken" with the `text_general` field type we probably expected the word "the" to be dropped since it's a stop word in the English language. Can you guess why it was not dropped? Hint: try the same text but with the `text_en` field type instead and see what happens.
+
+
+## Handling text in Chinese, Japanese, and Korean (optional)
+
+If your data has text in Chinese, Japanese, or Korean (CJK) Solr has built-in support for searching text in these languasges using the proper transformations. Just Solr uses different transformation when using field type `text_en` instead of `text_general` Solr applies different rules when using field type `text_cjk`.
+
+You can see the definition of this field type with the following command. Notice how there are several filters (`CJKWidthFilterFactory`, `LowerCaseFilterFactory`, `CJKBigramFilterFactory`) that are different from what we saw in the `text_general` definition.
+
+```
+$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_cjk
+
+  # ...
+  # "fieldType":{
+  #   "name":"text_cjk",
+  #   "class":"solr.TextField",
+  #   "positionIncrementGap":"100",
+  #   "analyzer":{
+  #     "tokenizer":{
+  #       "class":"solr.StandardTokenizerFactory"},
+  #     "filters":[
+  #       {"class":"solr.CJKWidthFilterFactory"},
+  #       {"class":"solr.LowerCaseFilterFactory"},
+  #       {"class":"solr.CJKBigramFilterFactory"}]}}}
+  #
+```
+
+If you go to the Analysis Screen and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)" and the "Field Value (Query)", select `text_en` as the FieldType and analyse the values you'll notice how there is (as expected) a match. Now change the "Field Value (Query)" to include only the "志" character and run the analysis again using `text_en` as the field type. Notice how Solr will detect a match, which is incorrect using CJK rules.
+
+If you select `text_cjk` as the FieldType and run the analysis again you'll see how Solr detected that this was not a match after applying the fules of the `CJKBigramFilterFactory`.
+
+The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the blog post is a bit dated, there basic idea of it is still relevant, particularly if, like me, are not a CJK speaker.
 
 ## Stored vs indexed fields (optional)
 
@@ -1535,10 +1566,10 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subje
   #      "Indians of North America",104,
   #      "English language",88,
   #      ...
-  #    
+  #
 ```
 
-You might have noticed that we are using the `string` representation of the subjects (`subjects_str`) to generate the facets rather than the `text_general` version stored in the `subjects` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subject` field is tokenized whereas the indexed version of `subject_str` is the entire string.  
+You might have noticed that we are using the `string` representation of the subjects (`subjects_str`) to generate the facets rather than the `text_general` version stored in the `subjects` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subject` field is tokenized whereas the indexed version of `subject_str` is the entire string.
 
 You can indicate more than one `facet.field`, for example to get facets for publisher and subjects we would pass `facet.field=subjects_str&facet.field=publisher_str`
 
@@ -1605,7 +1636,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=t
   #     "title":["Partners and parents / by <em>Michael</em> Chinery."]},
   #   "00011434":{
   #     "authorsAll":["Castleman, <em>Michael</em>."]},
-  #      
+  #
 ```
 
 Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
@@ -1654,7 +1685,7 @@ As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. Th
             |-- data/
 ```
 
-The `data` folder contains the data that Solr stores for this core. This is where the actual index is located. The only thing that you probably want to do with this folder is back it up regularly. Other than that, you should stay away from it :)  
+The `data` folder contains the data that Solr stores for this core. This is where the actual index is located. The only thing that you probably want to do with this folder is back it up regularly. Other than that, you should stay away from it :)
 
 The `conf` folder contains configuration files for this core. In the following sections we'll look at some of the files in this folder (e.g. `solrconfig.xml`, `stopwords.txt`, and `synonyms.txt`) and how they can be updated to configure different options in Solr.
 
@@ -1815,7 +1846,7 @@ We can make changes to this section to indicate that we want to use the eDisMax 
 
 We'll need to reload your core for changes to the `solrconfig.xml` to take effect.
 
-Be careful, an incorrect setting on this file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title, author` (notice the comma to separate the fields) will cause Solr to ignore this parameter.  
+Be careful, an incorrect setting on this file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title, author` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
@@ -1956,7 +1987,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
   #   }
   # }
   #
-  
+
 ```
 
 Now that our `bibdata` core has been configured to use spellcheck let's try out misspelled query again:
@@ -2126,4 +2157,4 @@ The steps to create the `books.json` file from the MARC data are as follow:
 
 The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of the tutorial I manually truncated the file to include only the first 10,000 books.
 
-`marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file. 
+`marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file.
