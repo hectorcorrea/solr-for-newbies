@@ -4,7 +4,7 @@ The repository contains the materials for the [Solr for newbies](https://2019.co
 
 File **workshop.md** has most of the material that we will cover during the workshop. In order to have a textual record of the commands to execute (along with their parameters and output) all the examples in the **workshop.md** are shown as executed via command line utilities like cURL. However, during the workshop we will use a combination of approaches, some steps will be executed through the command line while others will be done through the admin web page that Solr provides out of the box.
 
-File **workshop.pdf** has the same content as workshop.md but in PDF format.
+File **workshop.pdf** has the same content as workshop.md but in PDF format and it's [downloadable]( https://github.com/hectorcorrea/solr-for-newbies/raw/master/workshop.pdf).
 
 Files **slides.key** and **slides.pdf** are the slides with some "big picture" diagrams to support the material in workshop.md.
 
