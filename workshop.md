@@ -795,7 +795,7 @@ Quiz: When we tested the text "The television is broken" with the `text_general`
 
 ## Handling text in Chinese, Japanese, and Korean (optional)
 
-If your data has text in Chinese, Japanese, or Korean (CJK) Solr has built-in support for searching text in these languasges using the proper transformations. Just Solr uses different transformation when using field type `text_en` instead of `text_general` Solr applies different rules when using field type `text_cjk`.
+If your data has text in Chinese, Japanese, or Korean (CJK) Solr has built-in support for searching text in these languages using the proper transformations. Just as Solr uses different transformation when using field type `text_en` instead of `text_general` Solr applies different rules when using field type `text_cjk`.
 
 You can see the definition of this field type with the following command. Notice how there are several filters (`CJKWidthFilterFactory`, `LowerCaseFilterFactory`, `CJKBigramFilterFactory`) that are different from what we saw in the `text_general` definition.
 
@@ -819,9 +819,9 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_cjk
 
 If you go to the Analysis Screen and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)" and the "Field Value (Query)", select `text_en` as the FieldType and analyse the values you'll notice how there is (as expected) a match. Now change the "Field Value (Query)" to include only the "志" character and run the analysis again using `text_en` as the field type. Notice how Solr will detect a match, which is incorrect using CJK rules.
 
-If you select `text_cjk` as the FieldType and run the analysis again you'll see how Solr detected that this was not a match after applying the fules of the `CJKBigramFilterFactory`.
+If you select `text_cjk` as the FieldType and run the analysis again you'll see how Solr detected that this was not a match after applying the rules of the `CJKBigramFilterFactory`.
 
-The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the blog post is a bit dated, there basic idea of it is still relevant, particularly if, like me, are not a CJK speaker.
+The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the blog post is a bit dated, there basic idea of it is still relevant, particularly if you, like me, are not a CJK speaker.
 
 ## Stored vs indexed fields (optional)
 
