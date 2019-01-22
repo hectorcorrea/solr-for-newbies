@@ -19,10 +19,20 @@ wkhtmltopdf \
 --footer-left "Solr for newbies workshop" \
 --footer-right "[page]/[toPage]" \
 --footer-spacing 20 \
---margin-top 20 \
---margin-left 20 \
---margin-bottom 40 \
---margin-right 20 \
+--margin-top 15 \
+--margin-left 15 \
+--margin-bottom 30 \
+--margin-right 15 \
+--dpi 120 \
 workshop.html workshop.pdf
 
+# Other settings that I tried
+#
+# --dpi 200 \
+# --zoom 1.3 \
+# --disable-smart-shrinking \
+# --print-media-type \
+# --lowquality \
+# --page-size Letter \
+#
 
