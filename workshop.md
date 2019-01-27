@@ -289,6 +289,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file (if you cloned this GitHub repo the file is already in your machine):
 
 ```
+$ cd ~/solr-7.4.0/bin
 $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 
   #
@@ -306,7 +307,8 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
 
 ```
-$ ~/solr-7.4.0/bin/post -c bibdata books.json
+$ cd ~/solr-7.4.0/bin
+$ ./post -c bibdata books.json
 
   #
   # (some text here...)
@@ -1063,7 +1065,7 @@ Now that we have configured our schema with a few specific field definitions let
 
 ```
 $ cd ~/solr-7.4.0/bin
-$ post -c bibdata books.json
+$ ./post -c bibdata books.json
 ```
 
 
