@@ -4,9 +4,9 @@
 # Convert the markdown file to HTML
 # https://pandoc.org/MANUAL.html
 #
-pandoc workshop.md \
+pandoc tutorial.md \
 -f markdown \
--t html -s -o workshop.html \
+-t html -s -o tutorial.html \
 --toc \
 --include-before-body=cover_page.html \
 --metadata pagetitle="Solr for newbies workshop"
@@ -24,7 +24,7 @@ wkhtmltopdf \
 --margin-bottom 30 \
 --margin-right 15 \
 --dpi 120 \
-workshop.html workshop.pdf
+tutorial.html tutorial.pdf
 
 # Other settings that I tried
 #
