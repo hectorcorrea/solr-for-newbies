@@ -533,6 +533,53 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
   #
 ```
 
+
+## Updating documents
+To update a document in Solr you have two options. One option is to post the data for that document again to Solr and let Solr overwrite the old document with the new data. The key for this to work is to provide the same ID as the existing document in the new data. 
+
+For example, if we query the document with ID `00000034` we would get:
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
+
+  # "response":{"numFound":1,"start":0,"docs":[
+  # {
+  #   "id":"00000034",
+  #      "author":"Burrows Brothers Company, Cleveland.",
+  #      "authorsAll":["Burrows Brothers Company, Cleveland."],
+  #      "title":"A catalogue of the best books in every...",
+  #      "title_s":"A catalogue of the best books in every...",
+  #      "publisher":["Cleveland,"],
+  #      "subjects":["Booksellers' catalogs"],
+  #   ...
+  #
+```
+
+If we post to Solr a new document with the **same ID** Solr will **overwrite** the old document with the new data. Below is an example of how to update this document with new JSON data:
+
+```
+$ curl -X POST --data '[{"id":"00000034","title":"the new title"}]' "http://localhost:8983/solr/bibdata/update?commit=true"
+```
+
+Out of the box Solr supports multiple input formats (JSON, XML, CSV), section [Uploading Data with Index Handlers](https://lucene.apache.org/solr/guide/7_0/uploading-data-with-index-handlers.html#uploading-data-with-index-handlers) in the Solr guide provides more details out this.
+
+If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide in the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title`).
+
+```
+$ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
+
+  # "response":{"numFound":1,"start":0,"docs":[
+  # {
+  #   "id":"00000034",
+  #   "title":"the new title",
+  #   "title_s":"the new title"}
+  #   ...
+  #
+```
+
+The second option to update a document is to update only parts of a document but that is out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
+
+
 ## Deleting documents
 To delete all documents for the `bibdata` core we can submit a request to Solr's
 `update` endpoint (rather than the `select` endpoint) with a command like this:
@@ -819,11 +866,10 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_cjk
   #
 ```
 
-If you go to the Analysis Screen and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)" and the "Field Value (Query)", select `text_en` as the FieldType and analyse the values you'll notice how there is (as expected) a match. Now change the "Field Value (Query)" to include only the "志" character and run the analysis again using `text_en` as the field type. Notice how Solr will detect a match, which is incorrect using CJK rules.
+If you go to the Analysis Screen and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)", select `text_en` as the FieldType and analyse the values you'll notice how Solr calculated three tokens ("胡", "志", and "明") which is incorrect in Chinese. However, if you select `text_cjk` and analyze the values again you'll notice that you'll end with two tokens ("胡志" and "志明") thanks to the `CJKBigramFilterFactory` and that is the expected behavior for text in chinese. 
 
-If you select `text_cjk` as the FieldType and run the analysis again you'll see how Solr detected that this was not a match after applying the rules of the `CJKBigramFilterFactory`.
+The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the technology referenced in the blog post is a bit dated, the basic idea still is  relevant particularly if you, like me, are not a CJK speaker.
 
-The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the blog post is a bit dated, there basic idea of it is still relevant, particularly if you, like me, are not a CJK speaker.
 
 ## Stored vs indexed fields (optional)
 
@@ -931,7 +977,7 @@ In the previous example we declared three fields with different indexed/stored s
 
 For `string` fields, Solr adds an extra property [DocValues](https://lucene.apache.org/solr/guide/7_1/docvalues.html#docvalues) and sets it to true by default. This is an optimization that allows Solr to perform better when searching and faceting values in these fields but, as a result, fields with `docValue=true` behave as fields *indexed and stored* regardless of the value set for `stored` and `indexed` properties!
 
-You can prevent Solr from using `docValues` in a `string` field by setting `docValues=false`. This would allow you to control whether a field is really stored and index like we did for `text_general` fields. Unless you have a good reason to change the default value for `docValues` I would suggest not changing it.
+You can prevent Solr from using `docValues` in a `string` field by setting `docValues=false`. This would allow you to control whether a field is really stored and indexed like we did for `text_general` fields. Unless you have a good reason to change the default value for `docValues` I would suggest not changing it. A good reason to set `docValues=false` in a string field is if you want to store more than 32K of data in such field. 
 
 Solr does not allow you to set `docValues=true` for `text_general` fields.
 
@@ -1940,7 +1986,6 @@ Spellchecking is configured under the `/select` request handler in `solrconfig.x
 <requestHandler name="/select" class="solr.SearchHandler">
   <lst name="defaults">
     <str name="echoParams">explicit</str>
-    <int name="rows">10</int>
     <int name="rows">10</int>
     <str name="defType">edismax</str>
     <str name="spellcheck">on</str>
