@@ -93,14 +93,14 @@ from the Terminal (aka Command Prompt if you are on Windows):
 $ java --version
 
   #
-  # java version "9.0.1"
-  # Java(TM) SE Runtime Environment (build 9.0.1+11)
-  # Java HotSpot(TM) 64-Bit Server VM (build 9.0.1+11, mixed mode)
+  # java version "11.0.2" 2019-01-15 LTS
+  # Java(TM) SE Runtime Environment 18.9 (build 11.0.2+9-LTS)
+  # Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.2+9-LTS, mixed mode)
   #
 ```
 
 If the JDK is installed on your machine you'll see the text indicating
-the version that you have (e.g. "9.0.1" above). The specific Java version
+the version that you have (e.g. "11.0.2" above). The specific Java version
 does not matter much as long as the previous command displays a version
 of Java, you should be OK.
 
@@ -119,11 +119,11 @@ If Java *is installed* on your machine skip the "Installing Java" section below 
 
 ### Installing Java
 
-To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and select the option to download the "Java Platform (JDK) 9".
+To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and click the "DOWNLOAD" button at the top of the page to download the "Java Platform (JDK) 11".
 
-From there, under the "Java SE Development Kit 9.0.1" select the file appropriated for your operating system, accept the license agreement, and download it. For example, for the Mac the file would be `jdk-9.0.1_osx-x64_bin.dmg`.
+From there, under the "Java SE Development Kit 11.0.2", accept the license agreement  and select the file appropriated for your operating system. For Mac download the ".dmg" file (`jdk-11.0.2_osx-x64_bin.dmg`) and for Windows download the ".exe" file (`jdk-11.0.2_windows-x64_bin.exe`).
 
-Run the installer that you downloaded. Once it has completed, go back to the Terminal and run the `java -version` command again. You should see the text with the Java version number this time.
+Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed, *open a new Terminal window* and run the `java -version` command again. You should see the text with the Java version number this time.
 
 
 ### Installing Solr
@@ -134,7 +134,7 @@ First, download Solr and save it to a file.
 
 ```
 $ cd
-$ curl http://mirror.cc.columbia.edu/pub/software/apache/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.4.0.zip
+$ curl http://archive.apache.org/dist/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.4.0.zip
 
   #
   # You'll see something like this...
@@ -279,14 +279,7 @@ in either case you'll see `"numFound":0` indicating that there are no documents 
 
 ## Adding documents to Solr
 
-In the last section we ran a query against Solr that showed us that our
-newly created core `bibdata` has no documents in it. Remember that our call to
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
-```
-
-returned `"numFound":0`. Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file (if you cloned this GitHub repo the file is already in your machine):
+Now let's add a few documents to this `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file:
 
 ```
 $ cd ~/solr-7.4.0/bin
@@ -301,7 +294,18 @@ $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/b
 ```
 
 File `books.json` contains a small sample data a set with information about a
-few thousand books. Go ahead and take a look at it (e.g. via `cat books.json`)
+few thousand books. You can take a look at it via `cat books.json` or using your text editor of choice. Below is an example on one of the books in this file:
+
+```
+{
+  "id":"00000007",
+  "author_txt_en":"Guiney, Louise Imogen,",
+  "authorDate_s":"1861-1920.",
+  "title_txt_en":"The martyrs' idyl, and shorter poems,",
+  "responsibility_txt_en":"by Louise Imogen Guiney.",
+  "publisher_txt_en":"Boston"
+}
+```
 
 Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
@@ -340,7 +344,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
 
 Notice how the number of documents found is greater than zero (e.g. `"numFound":1000`)
 
-**Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder that we can use in Windows. Here is what you'll need to to:
+**Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder in Solr that we can use in Windows. Here is what you'll need to to:
 
 ```
 > cd C:\Users\you\solr-7.4.0\examples\exampledocs
@@ -363,19 +367,21 @@ Now that we have added a few documents to our `bibdata` core we can query Solr f
 If you look at the content of the `books.json` file that we imported into our `bibdata` core you'll notice that the documents have the following fields:
 
 * **id**: string to identify each document ([MARC](https://www.loc.gov/marc/bibliographic/) 001)
-* **author**: string for the main author (MARC 100a)
-* **authorDate**: date for the author (MARC 100d)
-* **authorFuller**: fuller form of the name (MARC 100q)
-* **authorsOther**: list of other authors (MARC 700a)
-* **title**: title of the book (MARC 245ab)
-* **responsibility**: statement of responsibility (MARC 245c)
-* **publisher**: publisher name (MARC 260a)
+* **author_txt_en**: string for the main author (MARC 100a)
+* **authorDate_s**: date for the author (MARC 100d)
+* **authorFuller_txt_en**: fuller form of the name (MARC 100q)
+* **authorsOther_txts_en**: list of other authors (MARC 700a)
+* **title_txt_en**: title of the book (MARC 245ab)
+* **responsibility_txt_en**: statement of responsibility (MARC 245c)
+* **publisher_txt_en**: publisher name (MARC 260a)
 * **urls_ss**: URLs (MARC 856u)
-* **subjects**: an array of subjects (MARC 650a)
-* **subjectsForm**: (MARC 650v)
-* **subjectsGeneral**: (MARC 650x)
-* **subjectsChrono**: (MARC 650y)
-* **subjectsGeo**: (MARC 650z)
+* **subjects_txts_en**: an array of subjects (MARC 650a)
+* **subjectsForm_txts_en**: (MARC 650v)
+* **subjectsGeneral_txts_en**: (MARC 650x)
+* **subjectsChrono_txts_en**: (MARC 650y)
+* **subjectsGeo_txts_en**: (MARC 650z)
+
+The suffix added to each field (e.g. `_s` or `_txt_en`) are hints for Solr to pick the appropriate field type for each field (e.g. string vs text in English) as ingests the data. We will look closely into this in a later section.
 
 
 ### Fetching data
@@ -391,43 +397,43 @@ There are many parameters that we can pass to this handler to define what docume
 
 ### Selecting what fields to fetch
 
-We can use the `fl` parameter to indicate what fields we want to fetch. For example to request the `id` and the `title` of the documents we would use `fl=id,title` as in the following example:
+We can use the `fl` parameter to indicate what fields we want to fetch. For example to request the `id` and the `title_txt_en` of the documents we would use `fl=id,title_txt_en` as in the following example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title_txt_en'
 ```
 
-Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title` and not `fl=id,` `title`. If the parameter includes spaces Solr will not return any results and it won't give you a visible error either!
+Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title_txt_en` and not `fl=id,` `title_txt_en`. If the parameter includes spaces Solr will not return any results and it will give you a cryptic error message.
 
-Try adding and removing some other fields to this list, for example, `fl=id,author,title` or `fl=id,title,author,subjects`
+Try adding and removing some other fields to this list, for example, `fl=id,author_txt_en,title_txt_en` or `fl=id,title_txt_en,author_txt_en,subjects_txts_en`
 
 
 ### Filtering the documents to fetch
 
 In the previous examples you might have seen an inconspicuous `q=*` parameter in the URL. The `q` (query) parameter tells Solr what documents to retrieve. This is somewhat similar to the `WHERE` clause in a SQL SELECT query.
 
-If we want to retrieve all the documents we can just pass `q=*`. But if we want to filter we can use the following syntax: `q=field:value` to filter documents where a specific field has a particular value. For example, to include only documents where the `title` has the word "teachers" we would use `q=title:teachers`:
+If we want to retrieve all the documents we can just pass `q=*`. But if we want to filter we can use the following syntax: `q=field:value` to filter documents where a specific field has a particular value. For example, to include only documents where the `title_txt_en` has the word "teachers" we would use `q=title_txt_en:teachers`:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:teachers'
 ```
 
-We can request filter by many different fields, for example to request documents where the `title` includes the word "teachers" **or** the `author` includes the word "Alice" we would use `q=title:teachers author:Alice`
+We can request filter by many different fields, for example to request documents where the `title_txt_en` includes the word "teachers" **or** the `author_txt_en` includes the word "Alice" we would use `q=title_txt_en:teachers author_txt_en:Alice`
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+author:Alice'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:teachers+author_txt_en:Alice'
 ```
 
-As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title:teachers AND author:Alice` Please notice that the `AND` operator **must be in uppercase**.
+As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title_txt_en:teachers AND author_txt_en:Alice` Notice that the `AND` operator **must be in uppercase**.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:teachers+AND+author:Alice'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:teachers+AND+author_txt_en:Alice'
 ```
 
-Now let's try something else. Let's issue a search for books where the title says "school teachers" using `q=title:"school teachers"`
+Now let's try something else. Let's issue a search for books where the title says "school teachers" using `q=title_txt_en:"school teachers"`
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"school+teachers"'
 
   # the results will include
   # {
@@ -442,38 +448,41 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+te
   #
 ```
 
-Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title` but they can be a few words apart (notice the `~3`):
+Notice how all three results have the term "school teachers" somewhere on the title. Now let's issue a slightly different query using `q=title_txt_en:"school teachers"~3` to indicate that we want the words "school" and "teachers" to be present in the `title_txt_en` but they can be a few words apart (notice the `~3`):
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"school+teachers"~3'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"school+teachers"~3'
 ```
 
 The result for this query will include a new book with title "Aids to teachers of School chemistry" which includes both terms (school and teachers) but the order does not matter as long as they are close to each other.
 
-One other thing. When searching multi-word keywords for a given field make sure the keywords are surrounded by quotes, for example make sure to use `q=title:"school teachers"` and not `q=title:school teachers`. The later will execute a search for "school" in the `title` field and "teachers" in the `_text_` field.
+One other thing. When searching multi-word keywords for a given field make sure the keywords are surrounded by quotes, for example make sure to use `q=title_txt_en:"school teachers"` and not `q=title_txt_en:school teachers`. The later will execute a search for "school" in the `title_txt_en` field and "teachers" in the `_text_` field.
 
 You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. For example in the following command we surround both search terms in quotes:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:"school+teachers"' | grep parsedquery
+$ curl -s 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&debugQuery=on&q=title_txt_en:"school+teachers"' | grep parsedquery
 
   # will show
-  # "parsedquery":"PhraseQuery(title:\"school teachers\")",
+  # "parsedquery":"PhraseQuery(title_txt_en:\"school teachers\")",
   #
 ```
 
-whereas in the following command we don't:
+notice that the `parsedQuery` shows that Solr is searching for, as we would expect, both words in the `title_txt_en` field.
+
+Now let's look at the `parsedQuery` when we don't surround the search terms in quotes:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&debugQuery=on&q=title:school+teachers' | grep parsedquery
+$ curl -s 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&debugQuery=on&q=title_txt_en:school+teachers' | grep parsedquery
 
   # will show
-  # "parsedquery":"title:school _text_:teachers",
+  # "parsedquery":"title_txt_en:school _text_:teachers",
   #
 ```
 
+notice that Solr searched for the word "school" in the `title_txt_en` field but searched for the word "teachers" on the `_text_` field. Certainly not what we were expecting. We'll elaborate in a later section on the significance of the `_text_` field but for now make sure to surround in quotes the search terms when issuing multi word searches.
 
-Notice that Solr returns results paginated, by default it returns the first 10 documents that match the query. We can request a large page size or another page via the `start` and `rows` parameters which we will discuss later. But notice that at the top of the results Solr always tells us the total number of results found:
+One last thing to notice is that Solr returns results paginated, by default it returns the first 10 documents that match the query. We'll see later on this tutorial how we can request a large page size (via the `rows` parameter) or another page (via the `start` parameter). But for now just notice that at the top of the results Solr always tells us the total number of results found:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title:education&fl=id,title'
@@ -487,36 +496,12 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title:education&fl=id,title'
 
 ### Getting facets
 
-When we issue a search Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
+When we issue a search, Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
 
-For example, to search for all documents with title "education" (`q=title:education`) and retrieve facets (`facet=on`) based on the `subjects` field (`facet.field=subjects`) we'll use a query like this:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:education&facet=on&facet.field=subjects'
-
-  # response will include something like this
-  #
-  # "facet_counts":{
-  #   "facet_queries":{},
-  #   "facet_fields":{
-  #     "subjects":[
-  #       "education",45,
-  #       "and",18,
-  #       "higher",12,
-  #       "colleges",7,
-  #       "in",7,
-  #       "universities",7,
-  #       "educational",6,
-  #       "moral",4,
-  #       "social",4,
-  #       "teachers",4,
-  #
-```
-
-You might notice a few extraneous subjects in the list (like the words "and", and "in") and you can also guess that "higher" should really be "higher education". We'll review later why we are getting the *tokenized* version of the subject rather than the actual subject values. For now, try issuing the previous command but using the `subjects_str` field instead:
+For example, to search for all documents with title "education" (`q=title_txt_en:education`) and retrieve facets (`facet=on`) based on the subjects  (`facet.field=subjects_txts_en_str`) we'll use a query like this:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:education&facet=on&facet.field=subjects_str'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:education&facet=on&facet.field=subjects_txts_en_str'
 
   # response will include something like this
   #
@@ -524,18 +509,23 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:edu
   #   "facet_queries":{},
   #   "facet_fields":{
   #     "subjects_str":[
+  #       "Education",12,
   #       "Education, Higher",10,
-  #       "Education",7,
   #       "Universities and colleges",6,
-  #       "Educational equalization",3,
-  #       "Moral education",3,
-  #       "Women",3,
+  #       "Educational equalization",4,
+  #       "Women",4,
   #
+```
+
+You might have noticed that we used the "string" version of the subjects (`subjects_txts_en_str`) rather than the "text" version of them (`subjects_txts_en`). This is because using the "text" version would have generated facets based on the *tokenized* version of the subjects rather than the original subjects. We will review tokenization in a later section but if you want to see the difference run this command and notice the facets returned:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:education&facet=on&facet.field=subjects_txts_en'
 ```
 
 
 ## Updating documents
-To update a document in Solr you have two options. One option is to post the data for that document again to Solr and let Solr overwrite the old document with the new data. The key for this to work is to provide the same ID as the existing document in the new data. 
+To update a document in Solr you have two options. One option is to post the data for that document again to Solr and let Solr overwrite the old document with the new data. The key for this to work is to provide *the same ID in the new data* as the ID of an existing document.
 
 For example, if we query the document with ID `00000034` we would get:
 
@@ -545,25 +535,27 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
   # "response":{"numFound":1,"start":0,"docs":[
   # {
   #   "id":"00000034",
-  #      "author":"Burrows Brothers Company, Cleveland.",
-  #      "authorsAll":["Burrows Brothers Company, Cleveland."],
-  #      "title":"A catalogue of the best books in every...",
-  #      "title_s":"A catalogue of the best books in every...",
-  #      "publisher":["Cleveland,"],
-  #      "subjects":["Booksellers' catalogs"],
-  #   ...
+  #   "author_txt_en":"Burrows Brothers Company, Cleveland.",
+  #   "title_txt_en":"A catalogue of the best books in every....",
+  #   "publisher_txt_en":"Cleveland,",
+  #   "subjects_txts_en":["Booksellers' catalogs"],
+  #   "subjectsGeo_txts_en":["United States"],
+  #   "subjects_txts_en_str":["Booksellers' catalogs"],
+  #   "_version_":1624648963022913536,
+  #   "subjectsGeo_txts_en_str":["United States"]}]
+  # }}
   #
 ```
 
-If we post to Solr a new document with the **same ID** Solr will **overwrite** the old document with the new data. Below is an example of how to update this document with new JSON data:
+If we post to Solr a new document with the **same ID** Solr will **overwrite** the existing document with the new data. Below is an example of how to update this document with new JSON data using `curl` to post the data to Solr:
 
 ```
-$ curl -X POST --data '[{"id":"00000034","title":"the new title"}]' "http://localhost:8983/solr/bibdata/update?commit=true"
+$ curl -X POST --data '[{"id":"00000034","title_txt_en":"the new title"}]' "http://localhost:8983/solr/bibdata/update?commit=true"
 ```
 
 Out of the box Solr supports multiple input formats (JSON, XML, CSV), section [Uploading Data with Index Handlers](https://lucene.apache.org/solr/guide/7_0/uploading-data-with-index-handlers.html#uploading-data-with-index-handlers) in the Solr guide provides more details out this.
 
-If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide in the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title`).
+If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide in the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title_txt_en`).
 
 ```
 $ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
@@ -571,13 +563,12 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
   # "response":{"numFound":1,"start":0,"docs":[
   # {
   #   "id":"00000034",
-  #   "title":"the new title",
-  #   "title_s":"the new title"}
-  #   ...
+  #   "title_txt_en":"the new title"
+  # }]}
   #
 ```
 
-The second option to update a document is to update only parts of a document but that is out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
+The second option to update a document is to update only parts of a document, but that is out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
 
 
 ## Deleting documents
@@ -590,17 +581,19 @@ $ curl "http://localhost:8983/solr/bibdata/update?commit=true" --data '<delete><
 
 The body of the request (`--data`) indicates to Solr that we want to delete a specific document (notice the `id:00020424` query).
 
-We can also pass a less specific query like `title:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it). Or we can delete *all documents* with a query like `*:*`.
+We can also pass a less specific query like `title_txt_en:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it). Or we can delete *all documents* with a query like `*:*`.
 
 Be aware that even if you delete all documents from a Solr core the schema and the core's configuration will remain intact. For example, the fields that were defined are still available even if no documents exist in the core anymore.
 
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ ~/solr-7.4.0/bin/solr delete -c bibdata
+$ cd ~/solr-7.4.0/bin
+$ ./solr delete -c bibdata
 ```
 
 be aware that you will need to re-create the core if you want to re-import data to it.
+
 
 <div style="page-break-after: always;"></div>
 
@@ -608,17 +601,19 @@ be aware that you will need to re-create the core if you want to re-import data 
 
 The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
-**Field Types** are the building blocks to define fields in our schema. Examples of field types are: `binary`, `boolean`, `pfloat`, `string`, and `text_general`. These are akin to the "field types" that are supported in a relational database like MySQL but, as we will see later, they are far more configurable than what you can do in a relational database.
+**Field Types** are the building blocks to define fields in our schema. Examples of field types are: `binary`, `boolean`, `pfloat`, `string`, `text_general`, and `text_en`. These are akin to the "field types" that are supported in a relational database like MySQL but, as we will see later, they are far more configurable than what you can do in a relational database.
 
 There are three kind of fields that can be defined in a Solr schema:
 
-* **Fields** are the specific fields that you define for your particular core. Fields are based of a "field type", for example, we might define field `title` based of the `string` field type and a field `price` base of the `pfloat` field type.
+* **Fields** are the specific fields that you define for your particular core. Fields are based of a "field type", for example, we might define field `title` based on the `string` field type and a field `price` base of the `pfloat` field type.
 
 * **dynamicFields** are field patterns that we define to automatically create new fields when the data submitted to Solr matches the given pattern. For example, we can define that if receive data for a field that ends with `_txt` the field will be create it as a `text_general` field type.
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to do and store different transformation on the values given to us. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `bibdata` core already has a schema, you can view how the details of it via the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The response will be rather long but it will be roughly include the following categories under the "schema" element:
+Our newly created `bibdata` core already has a schema and you can view the definition through the Solr Admin web page via the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) or by exploring the `managed-schema` file via the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html).
+
+You can also view this information with the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The response will be rather long and it will be organized in four categories: `fieldTypes`, `fields`, `dynamicFields`, and `copyFields` as shown below:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema
@@ -627,17 +622,20 @@ $ curl localhost:8983/solr/bibdata/schema
   #   "responseHeader": {"status": 0, "QTime": 2},
   #   "schema": {
   #     "fieldTypes":   [lots of field types defined],
+  #
   #     "fields":       [lots of fields defined],
+  #
   #     "dynamicFields":[lots of dynamic fields defined],
+  #
   #     "copyFields":   [a few copy fields defined]
   #   }
   # }
   #
 ```
 
-You can also view this information via the [Solr Admin](http://localhost:8983/solr/#/bibdata/schema) web page, under the *Schema* menu option or by looking at the `managed-schema` file under the *Files* menu option.
+The advantage of the Schema API is that it allows you to view *and update* the information programatically which is useful if you need to recreate identical Solr cores without manually configuring each field definition.
 
-You can request each of these categories individually with the following commands (notice that combined words like `fieldTypes` and `dynamicFields` are *not* capitalized in the URLs below):
+You can request information about each of these categories individually in the Schema API with the following commands (notice that combined words like `fieldTypes` and `dynamicFields` are *not* capitalized in the URLs below):
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes
@@ -648,16 +646,39 @@ $ curl localhost:8983/solr/bibdata/schema/copyfields
 
 Notice that unlike a relational database, where only a handful field types are available to choose from (e.g. integer, date, boolean, char, and varchar) in Solr there are lots of predefined field types available out of the box, and each of them with its own configuration.
 
-**Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this new file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
+**Note for Solr 4.x users:** In Solr 4 the default mechanism to update the schema was by editing the file `schema.xml`. Starting in Solr 5 the default mechanism is through the "Managed Schema Definition" which uses the Schema API to add, edit, and remove fields. There is a `managed-schema` file with the same information as `schema.xml` but you are not supposed to edit this file. See section "Managed Schema Definition in SolrConfig" in the [Solr Reference Guide 5.0 (PDF)](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-5.0.pdf) for more information about this.
 
 
 ## Fields in our schema
 
-You might be wondering where did the fields like `id`, `title`, `author`, `subjects`, and `subjects_str` in our `bibdata` core come from since we never explicitly defined them.
+You might be wondering how did the fields like `id`, `title_txt_en`, `author_txt_en`, `subjects_txts_en`, and `subjects_txts_en_str` in our `bibdata` core were created if we never explicitly defined them.
 
-Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match some of the fields defined in our schema.
+Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match most of the fields defined in our schema. Below is the data for one of the records in our sample data:
 
-You can disable the automatic creation of fields in Solr if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *reject* the import of any documents with fields not defined in the schema. Note: I believe the ability to disable automatic field creation is new in Solr 6.x. Need to find out the exact version this became available.
+```
+{
+  "id":"00000018",
+  "author_txt_en":"Tarbell, H. S.",
+  "authorDate_s":"1838-1904.",
+  "authorFuller_txt_en":"(Horace Sumner),",
+  "authorsOther_txts_en":["Tarbell, Martha,"],
+  "title_txt_en":"The complete geography.",
+  "publisher_txt_en":"New York,",
+  "subjects_txts_en":["Geography"]
+}
+```
+
+The process that Solr follows when a new document is ingested into Solr is more or less as follows:
+
+* If there is an exact match for a field being ingested and the fields defined in the Schema then Solr will use the definition in the Schema to ingest the data. This is what happened for the `id` field. Our JSON data has an `id` field and so does the Schema, therefore Solr stored the `id` value in the `id` field as indicated in the Schema (i.e. as single-value string.)
+
+* If there is no exact match in the Schema then Solr will look at the **dynamicFields** definitions to see if the field can be indexed with some predefined settings. This is what happened with the `title_txt_en` field. Because there is not `title_txt_en` definition in the Schema Solr used the dynamic field definition for `*_txt_en` that indicated that the value should be indexed using the text in English (`text_en`) field definition.
+
+* If no match is found in the dynamic fields either Solr will make a guess on what is the best type to use based on the data for this field in the source document. This is what happened with the `subjects_txts_en` field (notice that it ends with `_txts_en` rather than `_txt_en`). In this instance Solr guessed and created the field as `text_general` multi-valued. Additionally, Solr has built-in logic to automatically create a string representation of these text fields and hence you'll also see a `subjects_txts_en_str` in the schema.
+
+In the following sections we are going to drill down into some of specifics of the fields and dynamic field definitions that are configured in our Solr core.
+
+**Note:** You can disable automatic field creation if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *refuse* to import any documents with fields not defined in the schema. For more information about the different way in which the Solr Schema can be configured check out this [blog post](https://bryanbende.com/development/2015/11/14/solr-schemas).
 
 
 ### Field: id
@@ -701,51 +722,63 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/string
   #
 ```
 
-In this case the `class` points to an internal Solr class that will be used to handle values of the string type.
+In this case the `class` points to an internal Solr class (`solr.StrField`) that will be used to handle values of the string type.
 
 
-### Field: title
+### Field: title_txt_en
 
-Now let's look at a more complex field and field type. Let's look at the definition for the `title` type:
+Now let's look at a more complex field and field type. If we look for a definition for the `title_txt_en` Solr will report that we don't have one:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fields/title
+$ curl localhost:8983/solr/bibdata/schema/fields/title_txt_en
 
   # {
-  #   "responseHeader":{...}
-  #   "field":{
-  #     "name":"title",
-  #     "type":"text_general"
-  #   }
-  # }
+  #   "responseHeader":{...
+  #   "error":{
+  #     "metadata":[
+  #      "error-class","org.apache.solr.common.SolrException",
+  #      "root-error-class","org.apache.solr.common.SolrException"],
+  #    "msg":"No such path /schema/fields/title_txt_en",
+  #    "code":404}}
   #
 ```
 
-That looks innocent enough: our `title` field points to the type `text_general` so let's see what does `text_general` means:
+However, if we look at the dynamic field definitions we'll notice that there is one for fields that end in `_txt_en`:
 
 ```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
+$ curl localhost:8983/solr/bibdata/schema/dynamicfields/*_txt_en
+
+  # {
+  #   "responseHeader":{...
+  #   "dynamicField":{
+  #     "name":"*_txt_en",
+  #     "type":"text_en",
+  #     "indexed":true,
+  #     "stored":true}}
+  #
+```
+
+This tells Solr that any field name in the source data that does not already exist in Solr and that ends in `_txt_en` should be created as a field of type `text_en`. That looks innocent enough, so let's look closer to see what field type `text_en` means:
+
+```
+$ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en
 
   # {
   #   "responseHeader":{...}
   #   "fieldType":{
-  #     "name":"text_general",
+  #     "name":"text_en",
   #     "class":"solr.TextField",
   #     "positionIncrementGap":"100",
-  #     "multiValued":true,
   #     "indexAnalyzer":{
   #       "tokenizer":{
   #         "class":"solr.StandardTokenizerFactory"
   #       },
   #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
+  #         { "class":"solr.StopFilterFactory" ... },
+  #         { "class":"solr.LowerCaseFilterFactory" },
+  #         { "class":"solr.EnglishPossessiveFilterFactory" },
+  #         { "class":"solr.KeywordMarkerFilterFactory" ... },
+  #         { "class":"solr.PorterStemFilterFactory" }
   #       ]
   #     },
   #     "queryAnalyzer":{
@@ -753,27 +786,22 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general
   #         "class":"solr.StandardTokenizerFactory"
   #       },
   #       "filters":[
-  #         {
-  #           "class":"solr.StopFilterFactory",
-  #           "words":"stopwords.txt",
-  #           "ignoreCase":"true"
-  #         },
-  #         {
-  #           "class":"solr.SynonymGraphFilterFactory",
-  #           "expand":"true",
-  #           "ignoreCase":"true",
-  #           "synonyms":"synonyms.txt"
-  #         },
-  #         {
-  #           "class":"solr.LowerCaseFilterFactory"
-  #         }
+  #         { "class":"solr.SynonymGraphFilterFactory" ... },
+  #         { "class":"solr.StopFilterFactory" ... },
+  #         { "class":"solr.LowerCaseFilterFactory" },
+  #         { "class":"solr.EnglishPossessiveFilterFactory" },
+  #         { "class":"solr.KeywordMarkerFilterFactory" ... },
+  #         { "class":"solr.PorterStemFilterFactory" }
   #       ]
   #     }
   #   }
   # }
 ```
 
-This is obviously a much more complex definition than the ones we saw before. Although the basics are the same, the field type points to a `class` (solr.TextField) and it indicates it's a multi-value type, notice the next two properties defined for this field: `indexAnalyzer` and `queryAnalyzer`. We will explore those in the next section.
+This is obviously a much more complex definition than the ones we saw before. Although the basics are the same (e.g. the field type points to class `solr.TextField`) notice that there are two new sections `indexAnalyzer` and `queryAnalyzer` for this field type. We will explore those in the next section.
+
+**Note:** The fact that the Solr schema API does not show dynamically created fields (like `title_txt_en`) is a baffling, particularly since they do show in the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) of the Solr Admin screen. This has been a known issue for many years as shown in this [Stack Overflow question from 2010](https://stackoverflow.com/questions/3211139/solr-retrieve-field-names-from-a-solr-index) in which one of the answers suggests using the following command to list all fields, including those created via `dynamicField` definitions: `curl localhost:8983/solr/bibdata/admin/luke?numTerms=0`
+
 
 ## Analyzers, Tokenizers, and Filters
 
@@ -785,11 +813,12 @@ The `indexAnalyzer` section defines the transformations to perform *as the data 
     an analyzer might split "Brown Cow" into two indexed terms "brown"
     and "cow", but the stored value will still be a single String: "Brown Cow"
 
-When a value is *indexed* for a particular field the value is first passed to the `tokenizer` and then to the `filters` defined in the `indexAnalyzer` section for that field type. Similarly, when we *query* for a value in a given field the value is first processed by the `tokenizer` and then by the `filters` defined in the `queryAnalyzer` section for that field.
+When a value is *indexed* for a particular field the value is first passed to a `tokenizer` and then to the `filters` defined in the `indexAnalyzer` section for that field type. Similarly, when we *query* for a value in a given field the value is first processed by a `tokenizer` and then by the `filters` defined in the `queryAnalyzer` section for that field.
 
-If we look again at the definition for the `text_general` field type we'll notice that "stop words" (i.e. words to be ignored) are handled at index and query time (notice the `StopFilterFactory` filter appears in the `indexAnalyzer` and the `queryAnalyzer` sections.) However, notice that "synonyms" will only be applied at query time since the filter `SynonymGraphFilter` only appears on the `queryAnalyzer` section.
+If we look again at the definition for the `text_en` field type we'll notice that "stop words" (i.e. words to be ignored) are handled at index and query time (notice the `StopFilterFactory` filter appears in the `indexAnalyzer` and the `queryAnalyzer` sections.) However, notice that "synonyms" will only be applied at query time since the filter `SynonymGraphFilterFactory` only appears on the `queryAnalyzer` section.
 
 We can customize field type definitions to use different filters and tokenizers via the Schema API which we will discuss later on this tutorial.
+
 
 ### Tokenizers
 
@@ -819,34 +848,32 @@ Solr comes with many [built-in Filters](https://lucene.apache.org/solr/guide/7_0
 
 ### Putting it all together
 
-If we look at the tokenizer and filters defined for the `text_general` field type at *index time* we would see that we are tokenizing with the `StandardTokenizer` and filtering with the `StopFilter` and the `LowerCaseFilter` filters.
+When we looked at the definition for the `text_en` field type we noticed that at *index time* several filters were applied (`StopFilterFactory`, `LowerCaseFilterFactory`, `EnglishPossessiveFilterFactory`, `KeywordMarkerFilterFactory`, and `PorterStemFilterFactory`.)
 
-Notice that the at *query time* an extra filter, the `SynonymGraphFilter`, is applied for this field type.
+That means that if we *index* the text "The Television is Broken!" in a `text_en` field the filters defined in the `indexAnalyzer` will transform this text into two tokens: "televis", and "broken". Notice how the tokens were lowercased, the stop words ("the" and "is") dropped, and only the stem of the word "television" was indexed.
 
-If we *index* the text "The television is broken!" the tokenizer and filters defined in the `indexAnalyzer` will transform this text to four tokens: "the", "television", "is", and "broken". Notice how the tokens were lowercased ("The" became "the") and the exclamation sign was dropped.
-
-Likewise, if we *query* for the text "The TV is broken!" the tokenizer and filters defined in the `queryAnalyzer` will convert the text to the following tokens: "the", "television", "televisions", "tvs", "tv", "is", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to four synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those four synonyms predefined in the `synonyms.txt` file.
+Likewise, the definition for `text_en` included the additional filter `SynonymGraphFilter` at *query time*. So if we were to *query* for the text "The TV is Broken!" Solr will run this text through the filters indicated in the `queryAnalyzer` section and generate the following tokens: "televis", "tv", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to its synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those synonyms predefined in the `synonyms.txt` file.
 
 The Solr [Analysis Screen](https://lucene.apache.org/solr/guide/7_0/analysis-screen.html) in the [Solr Admin](http://localhost:8983/solr/#/bibdata/analysis) tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
 
-* Enter "The quick brown fox jumps over the lazy dog" in the "Field Value (*index*)", select `string` as the field type and see how is indexed. Then select `text_general` and see how is indexed. Lastly, select `text_en` and see how is indexed.
+* Enter "The quick brown fox jumps over the lazy dog" in the "Field Value (*index*)", select `string` as the field type and see how is indexed. Then select `text_general` and click "Analyze Values" to see how it's indexed. Lastly, select `text_en` and see how it's indexed. You might want to uncheck the "Verbose output" to see the differences more clearly.
 
 * With the text still on the "Field Value (*index*)" text box, enter "The quick brown fox jumps over the LAZY dog" on the "Field Value (*query*)" and try the different field types (`string/text_general/text_en`) again to see how each of them shows different matches.
 
-* Try changing the text on the "Field Value (*query*)" text box to "The quick brown foxes jumped over the LAZY dogs". Try again with the different field types to see the matches.
+* Try changing the text on the "Field Value (*query*)" text box to "The quick brown foxes jumped over the LAZY dogs". Compare the results using `text_general` versus `text_en`.
 
-* Now enter "The TV is broken!" on the "Field Value (*index*)" text box, blank the "Field Value (*query*)" text box, select `text_general`, and see how the value is indexed. Then do the reverse, blank the indexed value and enter "The TV is broken!" on the "Field Value (*query*)" text box and notice synonyms being applied.
+* Now enter "The TV is broken!" on the "Field Value (*index*)" text box, clear the "Field Value (*query*)" text box, select `text_en`, and see how the value is indexed. Then do the reverse, clear the indexed value and enter "The TV is broken!" on the "Field Value (*query*)" text box and notice synonyms being applied.
 
-* Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_general` fields.
+* Now enter "The TV is broken!" on the "Field Value (*index*)" text box and "the television is broken" on the "Field Value (*query*)". Notice how they are matched because the use of synonyms applied for `text_en` fields.
 
-Quiz: When we tested the text "The television is broken" with the `text_general` field type we probably expected the word "the" to be dropped since it's a stop word in the English language. Can you guess why it was not dropped? Hint: try the same text but with the `text_en` field type instead and see what happens.
+* Now enter "The TV is broken!" on the "Field Value (*index*)" text box and clear the "Field Value (*query*)" text box, select `text_general` and notice how the stop words were not removed because we are not using English specific rules.
 
 
 ## Handling text in Chinese, Japanese, and Korean (optional)
 
 If your data has text in Chinese, Japanese, or Korean (CJK) Solr has built-in support for searching text in these languages using the proper transformations. Just as Solr uses different transformation when using field type `text_en` instead of `text_general` Solr applies different rules when using field type `text_cjk`.
 
-You can see the definition of this field type with the following command. Notice how there are several filters (`CJKWidthFilterFactory`, `LowerCaseFilterFactory`, `CJKBigramFilterFactory`) that are different from what we saw in the `text_general` definition.
+You can see the definition of this field type with the following command. Notice how there are two new filters (`CJKWidthFilterFactory` and `CJKBigramFilterFactory`) that are different from what we saw in the `text_en` definition.
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_cjk
@@ -866,9 +893,9 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_cjk
   #
 ```
 
-If you go to the Analysis Screen and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)", select `text_en` as the FieldType and analyse the values you'll notice how Solr calculated three tokens ("胡", "志", and "明") which is incorrect in Chinese. However, if you select `text_cjk` and analyze the values again you'll notice that you'll end with two tokens ("胡志" and "志明") thanks to the `CJKBigramFilterFactory` and that is the expected behavior for text in chinese. 
+If you go to the Analysis Screen again and enter "胡志明" (Ho Chi Minh) as the "Field Value (index)", select `text_general` as the FieldType and analyse the values you'll notice how Solr calculated three tokens ("胡", "志", and "明") which is incorrect in Chinese. However, if you select `text_cjk` and analyze the values again you'll notice that you'll end with two tokens ("胡志" and "志明") thanks to the `CJKBigramFilterFactory` and that is the expected behavior for text in chinese.
 
-The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the technology referenced in the blog post is a bit dated, the basic idea still is  relevant particularly if you, like me, are not a CJK speaker.
+The data for this section was taken from this [blog post](https://opensourceconnections.com/blog/2011/12/23/indexing-chinese-in-solr/). Although the technology referenced in the blog post is a bit dated, the basic concepts explained are still relevant, particularly if you, like me, are not a CJK speaker.
 
 
 ## Stored vs indexed fields (optional)
@@ -965,146 +992,67 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
 
 Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
 
-
-### But why?
-
-There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values. Conversely, perhaps we want to create a field with a combination of values and search on that field but we don't want to display it to the users (the default `_text_` field in our schema is such an example, although we are not populating it).
+There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values. Conversely, perhaps we want to create a field with a combination of values and search on that field but we don't want to display it to the users (the default `_text_` field in our schema is such an example).
 
 
-### Indexed, stored, and docValues
+## Customizing our schema
+So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Because the fields in our source data had suffixes (`_s`, `_txt_en`) that match with the default `dynamicField` definitions in a standard Solr installation most of our fields were created with the proper field type except, as we saw earlier, the `_txts_en` field which was created as a `text_general` field rather than at `text_en` field.
 
-In the previous example we declared three fields with different indexed/stored settings and all of them were of type `text_general`. However, if you set the indexed/stored setting in fields of type `string` the default behavior is slightly different because Solr stores and handles `string` fields different from `text_general` fields.
+Also, although it's nice that we can do sophisticated searches by title (because it is a `text_en` field) we [could not sort](https://stackoverflow.com/a/7992380/446681) the results by this field because it's a tokenized field, technically we can sort by it but the results will not be what we expect.
 
-For `string` fields, Solr adds an extra property [DocValues](https://lucene.apache.org/solr/guide/7_1/docvalues.html#docvalues) and sets it to true by default. This is an optimization that allows Solr to perform better when searching and faceting values in these fields but, as a result, fields with `docValue=true` behave as fields *indexed and stored* regardless of the value set for `stored` and `indexed` properties!
-
-You can prevent Solr from using `docValues` in a `string` field by setting `docValues=false`. This would allow you to control whether a field is really stored and indexed like we did for `text_general` fields. Unless you have a good reason to change the default value for `docValues` I would suggest not changing it. A good reason to set `docValues=false` in a string field is if you want to store more than 32K of data in such field. 
-
-Solr does not allow you to set `docValues=true` for `text_general` fields.
-
-## Recreating our Solr core
-
-Before we start the next section, where we will make customizations to the schema, let's delete the current core and re-create it empty.
-
-To delete the `bibdata` core issue:
-
-```
-$ solr delete -c bibdata
-
-  #
-  # Deleting core 'bibdata' using command:
-  # http://localhost:8983/solr/admin/cores?action=UNLOAD&core=bibdata...
-  #
-```
-
-To re-create the core issue:
-
-```
-$ solr create -c bibdata
-
-  #
-  # Created new core 'bibdata'
-  #
-```
-
-Making sure the core was created:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
-
-  #
-  # {
-  #  "responseHeader":{
-  #    "status":0,
-  #    "QTime":0,
-  #    "params":{
-  #      "q":"*:*"}},
-  #  "response":{"numFound":0,"start":0,"docs":[]
-  #  }}
-  #
-```
-
-## Adding a new field
-So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Let us now add and customize some of the fields in our core to have more control on how Solr indexes and searches data.
+Let's customize our schema a little bit to get the most out of Solr.
 
 
-### Customizing the author fields
-Our JSON file with the source data has a main author (the `author` property) and other authors (the `authorsOther` property). We know `author` is single value and `authorsOther` is multi-value. When we let Solr automatically create these fields both of them ended up being multi-value so let's define them manually in our schema so that we can customize author to be single value so that we can sort our results by it (you can only sort by single-value fields).
-
-Let's also create a new field (`authorsAll`) that will combine the main author with the other authors, that way we only need to search against a single field when searching by author. Notice that we are making this field `text_general` (rather than string) so that we can do partial matching.
+### Customizing the title field
+The first thing that we'll do is force Solr to store a string version of the title so we can sort results by title in addition to the text version that we are storing. To do this we'll add a `copy-field` directive to our Schema to tell Solr to copy the value of the `title_txt_en` to another field (`title_s`) so that we have a text version for searching and a string version for sorting.
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":[
-    {
-      "name":"author",
-      "type":"string",
-      "multiValued":false
-    },
-    {
-      "name":"authorsOther",
-      "type":"string",
-      "multiValued":true
-    },
-    {
-      "name":"authorsAll",
-      "type":"text_general",
-      "multiValued":true
-    }
-  ]
-}' http://localhost:8983/solr/bibdata/schema
-
-  #
-  # response will look like
-  # {
-  #   "responseHeader":{
-  #     "status":0,
-  #     "QTime":10}}
-  #
-```
-
-Now let's configure Solr to automatically copy the values of `author` and `authorOther` to our new `authorAll` field by defining two `copy-fields`:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-copy-field":[
-    {
-      "source":"author",
-      "dest":[ "authorsAll" ]
-    },
-    {
-      "source":"authorsOther",
-      "dest":[ "authorsAll" ]
-    }
-  ]
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-We can see how these changes are now part of the schema by looking at the definitions of the `author`, `authorsOther`, and `authorsAll` in the [Solr Admin](http://localhost:8983/solr/#/bibdata/schema) tool either via the *Schema* menu option or by looking at the `managed-schema` file under the *Files* option.
-
-We need to re-import our data for these changes to be applied to the data, but before we do this let's do another customization to the schema.
-
-
-### Customizing the title fields
-Most (if not all) the titles in our source JSON file are in English. Therefore let's configure the `title` field to be single-value and to use the `text_en` (text English) field type rather than the default multi-value `text_general` field type.
-
-Field type `text_general` uses the standard tokenizer and two basic filters (StopFilter and LowerCase). In contrast `text_en` uses a similar configuration but it adds three more filters to the definition (EnglishPossessive, KeywordMarker, and PorterStem) that allow for more sophisticated queries. We can run `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_general` and `curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en` to see the specifics for these field types.
-
-When we let Solr automatically create the `title` field based on the data that we imported, Solr also created a second field (`title_str`) with the string representation of the title. Now that we are explicitly defining the `title` field Solr won't automatically create the second field for us, but we can easily ask Solr to do it. We'll use the `_s` instead of `_str` because our new title field is single value.
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-    "name":"title",
-    "type":"text_en",
-    "multiValued":false
-  },
   "add-copy-field":{
-    "source":"title",
+    "source":"title_txt_en",
     "dest":[ "title_s" ]
   }
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
+We'll need to reindex our data for this change to take effect, but let's make a few other changes to our schema before we reindex the data.
+
+
+### Customizing the author fields
+Right now we have two separate fields for author information (`author_txt_en` for the main author and `authorsOther_txts_en` for additional authors) which means that if we want to find books by a particular author we have to issue a query against two separate fields: `author_txt_en:"Sarah" OR authorsOther_txts_en:"Sarah"`
+
+Let's use another `copy-field` directive to have Solr automatically copy the main author and the additional authors to a new field that combines all authors(`authorsAll_txt_en`):
+
+```
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field":[
+    {
+      "source":"author_txt_en",
+      "dest":[ "authorsAll_txt_en" ]
+    },
+    {
+      "source":"authorsOther_txts_en",
+      "dest":[ "authorsAll_txt_en" ]
+    }
+  ]
+}' http://localhost:8983/solr/bibdata/schema
+```
+
+
+### Customizing the subject fields
+
+One of the side effects of relying only the predefined `dynamicField` definitions when we first imported our data was that, because there was not a definition for `_txts_en`, Solr automatically used `text_general` for those fields (check the definition for `subjects_txts_en` for example). We can rectify this by replacing the definition of `subjects_txts_en` to use `text_en` and support multiple values:
+
+```
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "replace-field":{
+     "name":"subjects_txts_en",
+    "type":"text_en",
+    "multiValued":true }
+}' http://localhost:8983/solr/bibdata/schema
+```
+
+Technically we should do the same for all the fields that ended with `_txts_en` like `subjectsGeneral_txts_en` but we won't do that for now.
 
 ### Testing our changes
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
@@ -1223,7 +1171,7 @@ If look at the data in the source `books.json` file you'll notice that some of t
 {
   "id":"00000017",
   "author":"Tabb, John B.",
-  "publisher":"Boston,",
+  "publisher":"Boston",
   "urls_ss":["http://hdl.loc.gov/loc.gdc/scd0001.00162561418"],
   "subjects":["Children's poetry"]
 }
@@ -1480,6 +1428,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title:west+AND+authorsAll:na
 ```
 
 Notice the `debug` property, inside this property there is information about:
+
 * what value the server received for the search (`querystring`) which is useful to detect if you are not URL encoding properly the value sent to the sever
 * how the server parsed the query (`parsedquery`) which is useful to detect if the syntax on the `q` parameter was parsed as we expected (e.g. remember the example earlier when we passed two words `school teachers` without surrounding them in quotes and the parsed query showed that it was querying two different fields `title` for "school" and `_text_` for "teachers")
 * how each document was ranked (`explain`)
