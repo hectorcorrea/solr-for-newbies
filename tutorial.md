@@ -381,7 +381,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **subjectsChrono_txts_en**: (MARC 650y)
 * **subjectsGeo_txts_en**: (MARC 650z)
 
-The suffix added to each field (e.g. `_s` or `_txt_en`) are hints for Solr to pick the appropriate field type for each field (e.g. string vs text in English) as ingests the data. We will look closely into this in a later section.
+The suffix added to each field (e.g. `_s` or `_txt_en`) are hints for Solr to pick the appropriate field type for each field (e.g. string vs text in English) as it ingests the data. We will look closely into this in a later section.
 
 
 ### Fetching data
@@ -485,7 +485,7 @@ notice that Solr searched for the word "school" in the `title_txt_en` field but 
 One last thing to notice is that Solr returns results paginated, by default it returns the first 10 documents that match the query. We'll see later on this tutorial how we can request a large page size (via the `rows` parameter) or another page (via the `start` parameter). But for now just notice that at the top of the results Solr always tells us the total number of results found:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:education&fl=id,title'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&fl=id,title'
 
   #
   # response will include
@@ -525,12 +525,12 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_
 
 
 ## Updating documents
-To update a document in Solr you have two options. One option is to post the data for that document again to Solr and let Solr overwrite the old document with the new data. The key for this to work is to provide *the same ID in the new data* as the ID of an existing document.
+To update a document in Solr you have two options. The most common option is to post the data for that document again to Solr and let Solr overwrite the old document with the new data. The key for this to work is to provide *the same ID in the new data* as the ID of an existing document.
 
 For example, if we query the document with ID `00000034` we would get:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000034'
 
   # "response":{"numFound":1,"start":0,"docs":[
   # {
@@ -547,18 +547,18 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
   #
 ```
 
-If we post to Solr a new document with the **same ID** Solr will **overwrite** the existing document with the new data. Below is an example of how to update this document with new JSON data using `curl` to post the data to Solr:
+If we post to Solr a new document with the **same ID** Solr will **overwrite** the existing document with the new data. Below is an example of how to update this document with new JSON data using `curl` to post the data to Solr. Notice that the command is issued against the `update` endpoint rather than the `select` endpoint in our previous commands.
 
 ```
-$ curl -X POST --data '[{"id":"00000034","title_txt_en":"the new title"}]' "http://localhost:8983/solr/bibdata/update?commit=true"
+$ curl -X POST --data '[{"id":"00000034","title_txt_en":"the new title"}]' 'http://localhost:8983/solr/bibdata/update?commit=true'
 ```
 
 Out of the box Solr supports multiple input formats (JSON, XML, CSV), section [Uploading Data with Index Handlers](https://lucene.apache.org/solr/guide/7_0/uploading-data-with-index-handlers.html#uploading-data-with-index-handlers) in the Solr guide provides more details out this.
 
-If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide in the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title_txt_en`).
+If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide during the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title_txt_en`).
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000034'
 
   # "response":{"numFound":1,"start":0,"docs":[
   # {
@@ -568,22 +568,21 @@ $ curl "http://localhost:8983/solr/bibdata/select?q=id:00000034"
   #
 ```
 
-The second option to update a document is to update only parts of a document, but that is out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
+The second option to update a document is to update only parts of a document, but that's out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
 
 
 ## Deleting documents
-To delete all documents for the `bibdata` core we can submit a request to Solr's
-`update` endpoint (rather than the `select` endpoint) with a command like this:
+To delete documents from the `bibdata` core we also use the `update` endpoint but the structure of the command is as follows:
 
 ```
-$ curl "http://localhost:8983/solr/bibdata/update?commit=true" --data '<delete><query>id:00020424</query></delete>'
+$ curl 'http://localhost:8983/solr/bibdata/update?commit=true' --data '<delete><query>id:00020424</query></delete>'
 ```
 
 The body of the request (`--data`) indicates to Solr that we want to delete a specific document (notice the `id:00020424` query).
 
 We can also pass a less specific query like `title_txt_en:teachers` to delete all documents where the title includes the word "teachers" (or a variation of it). Or we can delete *all documents* with a query like `*:*`.
 
-Be aware that even if you delete all documents from a Solr core the schema and the core's configuration will remain intact. For example, the fields that were defined are still available even if no documents exist in the core anymore.
+Be aware that even if you delete all documents from a Solr core the schema and the core's configuration will remain intact. For example, the fields that were defined are still available in the schema even if no documents exist in the core anymore.
 
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
@@ -613,7 +612,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 Our newly created `bibdata` core already has a schema and you can view the definition through the Solr Admin web page via the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) or by exploring the `managed-schema` file via the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html).
 
-You can also view this information with the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The response will be rather long and it will be organized in four categories: `fieldTypes`, `fields`, `dynamicFields`, and `copyFields` as shown below:
+You can also view this information with the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The (rather long) response will be organized in four categories: `fieldTypes`, `fields`, `dynamicFields`, and `copyFields` as shown below:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema
@@ -678,7 +677,7 @@ The process that Solr follows when a new document is ingested into Solr is more 
 
 In the following sections we are going to drill down into some of specifics of the fields and dynamic field definitions that are configured in our Solr core.
 
-**Note:** You can disable automatic field creation if you don't want this behavior. Keep in mind that if automatic field creation is disabled Solr will *refuse* to import any documents with fields not defined in the schema. For more information about the different way in which the Solr Schema can be configured check out this [blog post](https://bryanbende.com/development/2015/11/14/solr-schemas).
+**Note:** You can disable automatic field creation if you don't want Solr to guess fields that are not explicitly defined or that cannot be matched to a `dynamicField` definition. Keep in mind that if automatic field creation is disabled Solr will *refuse* to import any documents with fields not defined in the schema. For more information about the different way in which the Solr Schema can be configured check out this [blog post](https://bryanbende.com/development/2015/11/14/solr-schemas).
 
 
 ### Field: id
@@ -854,7 +853,7 @@ That means that if we *index* the text "The Television is Broken!" in a `text_en
 
 Likewise, the definition for `text_en` included the additional filter `SynonymGraphFilter` at *query time*. So if we were to *query* for the text "The TV is Broken!" Solr will run this text through the filters indicated in the `queryAnalyzer` section and generate the following tokens: "televis", "tv", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to its synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those synonyms predefined in the `synonyms.txt` file.
 
-The Solr [Analysis Screen](https://lucene.apache.org/solr/guide/7_0/analysis-screen.html) in the [Solr Admin](http://localhost:8983/solr/#/bibdata/analysis) tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
+The [Analysis Screen](https://lucene.apache.org/solr/guide/7_0/analysis-screen.html) in the Solr Admin tool is a great way to see a particular text is either indexed or queried by Solr *depending on the field type*. Here is a few examples to try:
 
 * Enter "The quick brown fox jumps over the lazy dog" in the "Field Value (*index*)", select `string` as the field type and see how is indexed. Then select `text_general` and click "Analyze Values" to see how it's indexed. Lastly, select `text_en` and see how it's indexed. You might want to uncheck the "Verbose output" to see the differences more clearly.
 
@@ -1010,9 +1009,14 @@ Let's begin by recreating our Solr core so that we have a clean slate.
 $ cd ~/solr-7.4.0/bin
 $ ./solr delete -c bibdata
 $ ./solr create -c bibdata
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
+
+  #
+  # "response":{"numFound":0,"start":0,"docs":[]
+  #
 ```
 
-Before we import again the data in our `books.json` file we are going to add a few field definitions to the Schema to make sure the data is ingested in the way that we want to.
+Before we import the data in our `books.json` file we are going to add a few field definitions to the schema to make sure the data is indexed and stored in the way that we want to.
 
 
 ### Handling `_txts_en` fields
@@ -1027,7 +1031,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-this will make sure Solr indexes these fields `text_en` rather than the default `text_general` that it used when we did not have an `dynamicField` to account for them.
+this will make sure Solr indexes these fields as `text_en` rather than the default `text_general` that it used when we did not have an `dynamicField` to account for them.
 
 
 ### Customizing the title field
@@ -1065,7 +1069,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-We could also add another `copy-field` directive to copy the main author from a text field (`author_txt_en`) to a string field (`author_s`) so that we can sort search results by author. But we'll skip that for now.
+We could also add another `copy-field` directive to copy the main author from a text field (`author_txt_en`) to a string field (`author_s`) so that we can sort search results by author. We'll skip that for now.
 
 
 ### Customizing the subject and publisher fields
@@ -1154,17 +1158,21 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00009214&fl=id,author*'
 
 Likewise, let's search for books authored by "Gallop" using our new `authorsAll_txts_en` field (`q=authorsAll_txts_en:Gallop`) and notice how this document will be on the results regardless of whether Ruth Gallop is the main author or an additional author.
 
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=authorsAll_txts_en:Gallop'
+```
+
 
 ## What are others doing
 There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
 
 Here are a few examples:
 
-* Brown University Library Catalog (a Blacklight app): https://github.com/Brown-University-Library/bul-search/blob/master/solr_conf/blacklight-core/conf/schema.xml
+* [Brown University Library Catalog](https://github.com/Brown-University-Library/bul-search/blob/master/solr_conf/blacklight-core/conf/schema.xml) - a Blacklight app
 
-* Penn State ScholarSphere (a Hydra/SamVera app): https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml
+* [Penn State ScholarSphere](https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml) - a Hydra/SamVera app
 
-* Princeton University Library (a Blacklight app): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/catalog-production/conf/schema.xml
+* [Princeton University Library](https://github.com/pulibrary/pul_solr/blob/master/solr_configs/catalog-production/conf/schema.xml) - a Blacklight app
 
 
 <div style="page-break-after: always;"></div>
@@ -1212,7 +1220,7 @@ Below are some of the parameters that are supported by all parsers:
 * `fl`: List of fields to return in the result.
 * `fq`: Filters results without calculating a score.
 
-Below are a few sample queries to show these parameters in action. Notice that spaces are URL encoded as `+` in the commands below, you do not need to encode them if you are submitting these queries via the [Solr Admin interface](http://localhost:8983/solr/#/bibdata/query) in your browser.
+Below are a few sample queries to show these parameters in action. Notice that spaces are URL encoded as `+` in the commands below, you do not need to encode them if you are submitting these queries via the Solr Admin interface in your browser.
 
 * Retrieve the first 10 documents where the `title_txt_en` includes the word "washington" (`q=title_txt_en:washington`)
 ```
@@ -1334,7 +1342,7 @@ Notice the `debug` property, inside this property there is information about:
 
 When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
 
-Let's say that we want documents where either the `title_txt_en` or the `author` have the word "west", we would use `q=title_txt_en:west authorsAll_txts_en:west`
+Let's say that we want documents where either the title or the author have the word "west", we would use `q=title_txt_en:west authorsAll_txts_en:west`
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authorsAll_txts_en&q=title_txt_en:west+authorsAll_txts_en:west'
@@ -1377,12 +1385,20 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=west&debugQuery=on'
 
 notice the `parsedquery` indicates that is searching on the `_text_` field.
 
-You can overwrite the default field by passing the `df` parameter, for example to use the `title_txt_en` field as the default parameter we could pass `qf=title_txt_en:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
+You can overwrite the default field by passing the `df` parameter, for example to use the `title_txt_en` field as the default parameter we could pass `qf=title_txt_en`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=west&debugQuery=on&df=title_txt_en'
+```
 
 
 ### Filtering with ranges
 
 You can also filter a field to be within a range by using the bracket operator with the following syntax: `field:[firstValue TO lastValue]`. For example, to request documents with `id` between `00000018` and `00000028` we could do: `id:[00000018 TO 00000028]`. You can also indicate open-ended ranges by passing an asterisk as the value, for example: `id:[* TO 00000028]`.
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:\[00000018+TO+00000028\]'
+```
 
 Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` and `text_en` fields it will filter on the *terms indexed* not on the value of the field.
 
@@ -1810,7 +1826,7 @@ Solr provides spellcheck functionality out of the box that we can use to help us
 In our current `bibdata` core a search for "Washingon" will return zero results:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:washingon'
 
   #
   # response will indicate
