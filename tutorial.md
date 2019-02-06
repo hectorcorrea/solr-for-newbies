@@ -86,7 +86,7 @@ In this diagram the *client application* could be a program written in Ruby or P
 ### Prerequisites
 
 To run Solr on your machine you need to have the Java Development Kit (JDK)
-installed. To verify if that the JDK is installed run the following command
+installed. To verify if the JDK is installed run the following command
 from the Terminal (aka Command Prompt if you are on Windows):
 
 ```
