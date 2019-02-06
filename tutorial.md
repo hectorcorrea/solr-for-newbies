@@ -800,7 +800,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en
 
 This is obviously a much more complex definition than the ones we saw before. Although the basics are the same (e.g. the field type points to class `solr.TextField`) notice that there are two new sections `indexAnalyzer` and `queryAnalyzer` for this field type. We will explore those in the next section.
 
-**Note:** The fact that the Solr schema API does not show dynamically created fields (like `title_txt_en`) is a baffling, particularly since they do show in the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) of the Solr Admin screen. This has been a known issue for many years as shown in this [Stack Overflow question from 2010](https://stackoverflow.com/questions/3211139/solr-retrieve-field-names-from-a-solr-index) in which one of the answers suggests using the following command to list all fields, including those created via `dynamicField` definitions: `curl localhost:8983/solr/bibdata/admin/luke?numTerms=0`
+**Note:** The fact that the Solr schema API does not show dynamically created fields (like `title_txt_en`) is baffling, particularly since they do show in the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) of the Solr Admin screen. This has been a known issue for many years as shown in this [Stack Overflow question from 2010](https://stackoverflow.com/questions/3211139/solr-retrieve-field-names-from-a-solr-index) in which one of the answers suggests using the following command to list all fields, including those created via `dynamicField` definitions: `curl localhost:8983/solr/bibdata/admin/luke?numTerms=0`
 
 
 ## Analyzers, Tokenizers, and Filters
@@ -1003,56 +1003,102 @@ Also, although it's nice that we can do sophisticated searches by title (because
 Let's customize our schema a little bit to get the most out of Solr.
 
 
-### Customizing the title field
-The first thing that we'll do is force Solr to store a string version of the title so we can sort results by title in addition to the text version that we are storing. To do this we'll add a `copy-field` directive to our Schema to tell Solr to copy the value of the `title_txt_en` to another field (`title_s`) so that we have a text version for searching and a string version for sorting.
+### Recreating our Solr core
+Let's begin by recreating our Solr core so that we have a clean slate.
+
+```
+$ cd ~/solr-7.4.0/bin
+$ ./solr delete -c bibdata
+$ ./solr create -c bibdata
+```
+
+Before we import again the data in our `books.json` file we are going to add a few field definitions to the Schema to make sure the data is ingested in the way that we want to.
+
+
+### Handling `_txts_en` fields
+The first thing we'll do is add a new `dynamicField` definition to account for multi-value text fields in English for fields that end with `_txts_en` in our JSON data:
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-copy-field":{
-    "source":"title_txt_en",
-    "dest":[ "title_s" ]
-  }
+  "add-dynamic-field":{
+     "name":"*_txts_en",
+     "type":"text_en",
+     "multiValued":true}
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-We'll need to reindex our data for this change to take effect, but let's make a few other changes to our schema before we reindex the data.
+this will make sure Solr indexes these fields `text_en` rather than the default `text_general` that it used when we did not have an `dynamicField` to account for them.
 
 
-### Customizing the author fields
-Right now we have two separate fields for author information (`author_txt_en` for the main author and `authorsOther_txts_en` for additional authors) which means that if we want to find books by a particular author we have to issue a query against two separate fields: `author_txt_en:"Sarah" OR authorsOther_txts_en:"Sarah"`
-
-Let's use another `copy-field` directive to have Solr automatically copy the main author and the additional authors to a new field that combines all authors(`authorsAll_txt_en`):
+### Customizing the title field
+Secondly we'll ask Solr to store a string version of the title (in addition to the text version) so we can sort results by title. To do this we'll add a `copy-field` directive to our Schema to copy the value of the `title_txt_en` to another field (`title_s`). This way we'll have a text version for searching and a string version for sorting.
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-copy-field":[
     {
-      "source":"author_txt_en",
-      "dest":[ "authorsAll_txt_en" ]
-    },
-    {
-      "source":"authorsOther_txts_en",
-      "dest":[ "authorsAll_txt_en" ]
+      "source":"title_txt_en",
+      "dest":[ "title_s" ]
     }
   ]
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
 
-### Customizing the subject fields
+### Customizing the author fields
+Right now we have two separate fields for author information (`author_txt_en` for the main author and `authorsOther_txts_en` for additional authors) which means that if we want to find books by a particular author we have to issue a query against two separate fields: `author_txt_en:"Sarah" OR authorsOther_txts_en:"Sarah"`
 
-One of the side effects of relying only the predefined `dynamicField` definitions when we first imported our data was that, because there was not a definition for `_txts_en`, Solr automatically used `text_general` for those fields (check the definition for `subjects_txts_en` for example). We can rectify this by replacing the definition of `subjects_txts_en` to use `text_en` and support multiple values:
+Let's use a `copy-field` directive to have Solr automatically combine the main author and additional authors into a new field. Notice that the new field `authorsAll_txts_en` matches the `dynamicField` directive that we just created, meaning that it will be indexed as `text_en` multi-valued.
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "replace-field":{
-     "name":"subjects_txts_en",
-    "type":"text_en",
-    "multiValued":true }
+  "add-copy-field":[
+    {
+      "source":"author_txt_en",
+      "dest":[ "authorsAll_txts_en" ]
+    },
+    {
+      "source":"authorsOther_txts_en",
+      "dest":[ "authorsAll_txts_en" ]
+    }
+  ]
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-Technically we should do the same for all the fields that ended with `_txts_en` like `subjectsGeneral_txts_en` but we won't do that for now.
+We could also add another `copy-field` directive to copy the main author from a text field (`author_txt_en`) to a string field (`author_s`) so that we can sort search results by author. But we'll skip that for now.
+
+
+### Customizing the subject and publisher fields
+Another customization that we'll do is create a string representation of the `subjects_txts_en` field so that we can use subjects as facets (remember that facets require string fields).
+
+This string version of the field is something that we got for free when Solr automatically guessed the field type to use for this field (remember that Solr created an additional `subjects_txts_en_str` for us). Now that we are handling this field explicitly with our `*_txts_en dynamicField` definition we need to ask Solr to create this extra field for us:
+
+```
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field":[
+    {
+      "source":"subjects_txts_en",
+      "dest": "subjects_ss",
+      "maxChars": "100"
+    }
+  ]
+}' http://localhost:8983/solr/bibdata/schema
+```
+
+While we are at it, let's also create a string representation of the `publisher_txt_en` so that we can use publisher in the facets too.
+
+```
+$ curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-copy-field":[
+    {
+      "source":"publisher_txt_en",
+      "dest": "publisher_s",
+      "maxChars": "100"
+    }
+  ]
+}' http://localhost:8983/solr/bibdata/schema
+```
+
 
 ### Testing our changes
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
@@ -1063,210 +1109,63 @@ $ ./post -c bibdata books.json
 ```
 
 
+### Testing changes to the title field
+Now that we have a string version of the title field is possible for us to sort our search results by this field, for example, let's search for books that have the word "water" in the title (`q=title_txt_en:water`) and sort them by title (`sort=title_s+asc`):
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:water&sort=title_s+asc'
+
+  #
+  # response will include
+  #   ...
+  #   {"title_txt_en":"A unit of water, a unit of time : Joel White's last boat"},
+  #   {"title_txt_en":"Annotated list of birds of ... inland water-fowl ..."},
+  #   {"title_txt_en":"Boundary waters canoe camping /"},
+  #   {"title_txt_en":"Clean coastal waters : understand.."},
+  #   ...
+  #
+```
+
+notice that the result are sorted alphabetically by title because we are using the string version of the field (`title_s`) for sorting. Try and see what the results look like if you sort by the text version of the title (`title_txt_en`):
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:water&sort=title_txt_en+asc'
+```
+
+The results in this case will not look correct because Solr will be using the tokenized value of the `title_txt_en` field to sort rather than the string version.
+
+
 ### Testing changes to the author field
 
-Take a look at the data for this particular book that has many authors and notice how the `authorsAll` field has the combination of `author` and `authorOthers` (even though our source data didn't have an `authorsAll` field.)
+Take a look at the data for this particular book that has many authors and notice how the `authorsAll_txts_en` field has the combination of `author_txt_en` and `authorsOther_txts_en` even though our source data didn't have an `authorsAll_txts_en` field:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000154'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00009214&fl=id,author*'
 
   #
-  # notice that authorsAll combines the data from author and authorsOther
-  #
   # {
-  #   "id":"00000154",
-  #   ...
-  #   "author":"Kropotkin, Petr Alekseevich,",
-  #   ...
-  #   "authorsOther":["Brandes, Georg,",
-  #     "Agassiz, George R."],
-  #   ...
-  #   "authorsAll":["Kropotkin, Petr Alekseevich,",
-  #      "Brandes, Georg,",
-  #      "Agassiz, George R."],
-  #   ...
+  #   "id":"00009214",
+  #    "author_txt_en":"Everett, Barbara,",
+  #    "authorsOther_txts_en":["Gallop, Ruth,"]
+  #    "authorsAll_txts_en":["Everett, Barbara,", "Gallop, Ruth,"],
   # }
   #
 ```
 
-Likewise, let's search for books authored by "George" on the subject of "Throat" using our new `authorsAll` field (`q=authorsAll:george AND subjects:Throat`):
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,author,authorsAll,subjects&q=authorsAll:george+AND+subjects:Throat'
-
-  #
-  # response will include
-  # {
-  #   "id":"00006747",
-  #   "author":"Ballenger, William Lincoln,",
-  #   "authorsAll":["Ballenger, William Lincoln,",
-  #     "Wippern, Adolphus George,"],
-  #   "subjects":["Eye", "Ear", "Nose", "Throat"]
-  # }
-  #
-```
-
-notice that the result includes a book where "George" is one of the authors (even if he is not the main author.)
-
-Another benefit of our customized `author` field is that, because we made it *string* and *single value*, we now can sort the results by author, for example:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&sort=author+asc&fl=id,author'
-
-  #
-  # results will be sorted by author
-  #
-```
-
-### Testing changes to the title field
-
-Now run a query for books with the title "run" (`q=title:run`):
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=title&q=title:run'
-
-  #
-  # response will include
-  #   ...
-  #   {"title":"Marco's run /"},
-  #   {"title":"50 trail runs in Southern California /"},
-  #   {"title":"River running : canoeing, kayaking, rowing, rafting /"}
-  #   ...
-  #
-```
-
-notice that results include books with the title "run", "runs", and "running". This is thanks to the PorterStem filter that the `text_en` field type is using.
-
-Similarly, run a query for books with title `its a dogs new york`:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=title&q=title:"its+a+dogs+new+york"'
-
-  #
-  # response will include
-  #   ...
-  #   {"title":"It's a dog's New York /"}
-  #   ...
-  #
-```
-
-notice that the results include a book titled "It's a dog's New York". This book was considered a match for our search because the `text_en` field type uses the EnglishPossessive filter that drop the trailing `'s` from the search terms which allowed Solr to find a match despite the poor spelling used in our search terms.
+Likewise, let's search for books authored by "Gallop" using our new `authorsAll_txts_en` field (`q=authorsAll_txts_en:Gallop`) and notice how this document will be on the results regardless of whether Ruth Gallop is the main author or an additional author.
 
 
-Important: Sorting a `string` field in Solr works as you would expect it, however sorting a `text_en` or `text_general` field field **does not** work because the value has been tokenized. As an exercise try sorting results by `title` (a `text_en` field) and by `title_s` (a `string` field) and compare the results:
+## What are others doing
+There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
 
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title+asc'
-
-
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=*&sort=title_s+asc'
-
-```
-
-## Dynamic Fields
-
-If look at the data in the source `books.json` file you'll notice that some of the records have a property named `urls_ss` that includes a list of URLs for the given book. For example the book with ID 17 has the following data:
-
-```
-{
-  "id":"00000017",
-  "author":"Tabb, John B.",
-  "publisher":"Boston",
-  "urls_ss":["http://hdl.loc.gov/loc.gdc/scd0001.00162561418"],
-  "subjects":["Children's poetry"]
-}
-```
-
-You might be wondering what's the significance of the `_ss` in the URLs field. Why didn't we just name that property `urls`?
-
-Solr supports the concept of something called "dynamic fields". Dynamic fields are fields that we define in Solr without giving them a full name, instead we indicate a pattern for the name of the field and Solr will automatically use that pattern for any field that we index that matches the pattern.
-
-For example our `bibdata` core has already a set of dynamic fields defined. You can see them with the following command:
-
-```
-$ curl localhost:8983/solr/bibdata/schema/dynamicfields
-
-  #
-  # response will include one that looks like this
-  #   {
-  #     "name":"*_ss",
-  #     "type":"strings",
-  #     "indexed":true,
-  #     "stored":true},
-  #
-```
-
-notice that one of the definitions has the pattern `*_ss` which means any field that ends with `_ss` will be assigned the type `strings`, be indexed, and stored. You can dig further and figure out what the definition for the field type `strings` looks like with the following command:
-
-```
-$ curl localhost:8983/solr/bibdata/schema/fieldtypes/strings
-
-  #
-  # response will include
-  # {
-  #   "fieldType": {
-  #     "name":"strings",
-  #     "class":"solr.StrField",
-  #     "sortMissingLast":true,
-  #     "docValues":true,
-  #     "multiValued":true
-  #   }
-  # }
-```
-
-What this means for us is that, when we imported the data from our JSON file, Solr automatically assigned the type `strings` to the `urls_ss` field because it matched the `*_ss` pattern.
-
-There are lots of pre-defined dynamic fields in a standard Solr installation and you can also define your own dynamic fields.
-
-Take a look at the dynamic fields defined in the `schema.xml` for these projects:
+Here are a few examples:
 
 * Brown University Library Catalog (a Blacklight app): https://github.com/Brown-University-Library/bul-search/blob/master/solr_conf/blacklight-core/conf/schema.xml
+
 * Penn State ScholarSphere (a Hydra/SamVera app): https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml
-* Princeton University Library (a Blacklight app): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/orangelight/conf/schema.xml
 
-Notice the `*_tesim` vs `*_sim` dynamic field definitions in the Penn State configuration, the `*_sort` and `ignored_*` dynamic field definitions in Princeton's configuration, and the `*_display` vs `*_sort` definitions in Brown's configuration.
+* Princeton University Library (a Blacklight app): https://github.com/pulibrary/pul_solr/blob/master/solr_configs/catalog-production/conf/schema.xml
 
-## subjects_str field (optional)
-
-Of the fields in the schema there are a few of them that look like the values in our JSON file but are *not* identical, for example there is a field named `subjects` and another `subjects_str` but we only have `subjects` in the JSON file. Where does `subjects_str` come from?
-
-When we imported our data, because our `bibdata` core allows for automatic field creation, Solr guessed a type for the `subjects` field based on the data that we imported and assigned it `text_general` but *it also created a separate field* (`subjects_str`) to store a `string` version of the title values. This other field was created as a **copyField**. We can view its definition via the following command:
-
-```
-$ curl localhost:8983/solr/bibdata/schema/copyfields?dest.fl=subjects_str
-
-  # response will include
-  #
-  # {
-  #   "source":"subjects",
-  #   "dest":"subjects_str",
-  #   "maxChars":256
-  # },
-  #
-```
-
-This definition indicates that first 256 characters of the `subjects` will be copied to `subjects_str` field but it does not really tell us what kind of field `subjects_str` will be.
-
-However, the `_str` suffix in the name is a common pattern used in Solr to identify **dynamicFields**. Dynamic Fields are used to tell Solr that any field name imported that matches a particular pattern (e.g. `*_str`) will be created with a particular field definition. Let's look at the default definition for the `*_str` pattern:
-
-```
-$ curl "localhost:8983/solr/bibdata/schema/dynamicfields/*_str"
-
-  # response will include
-  #
-  # "dynamicField":{
-  #   "name":"*_str",
-  #   "type":"strings",
-  #   "docValues":true,
-  #   "indexed":false,
-  #   "stored":false
-  # }
-  #
-```
-
-Notice how the `*_str` dynamic field definition will create a `strings` field for any field that ends with `_str`. You can see the definition of the `strings` field type via `curl localhost:8983/solr/bibdata/schema/fieldtypes/strings`
-
-With all this information we can conclude that the first 256 characters of the `subjects` will be copied to a `subjects_str` field (via a **copyField**). The `subjects_str` will be created of the `*_txt` **dynamicField** definition as a `strings` type. `strings` in turn is a multi-value `string` field type.
 
 <div style="page-break-after: always;"></div>
 
@@ -1275,10 +1174,10 @@ With all this information we can conclude that the first 256 characters of the `
 When we issue a search to Solr we pass the search parameters in the query string. In previous examples we passed values in the `q` parameter to indicate the values that we want to search for and `fl` to indicate what fields we want to retrieve. For example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title_txt_en'
 ```
 
-In some instances we passed rather sophisticated values for these parameters, for example we used `q=title:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within a few word words of each other.
+In some instances we passed rather sophisticated values for these parameters, for example we used `q=title_txt_en:"school teachers"~3` when we wanted to search for books with the words "school" and "teachers" in the title within a few word words of each other.
 
 The components in Solr that parse these parameters are called Query Parsers. Their job is to extract the parameters and create a query that Lucene can understand. Remember that Lucene is the search engine underneath Solr.
 
@@ -1291,21 +1190,15 @@ Out of the box Solr comes with three query parsers: Standard, DisMax, and Extend
 
 * The [DisMax](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html) query parser (DisMax) on the other hand was designed to handle user entered queries and is very forgiving on errors when parsing a query, however this parser only supports simple query expressions.
 
-* The [Extended DisMax](https://lucene.apache.org/solr/guide/7_0/the-extended-dismax-query-parser.html) (eDisMax) query parser is an improved version of the DisMax parser that is also very forgiving to errors when parsing user entered queries and like the Standard query parser supports complex query expressions.
+* The [Extended DisMax](https://lucene.apache.org/solr/guide/7_0/the-extended-dismax-query-parser.html) (eDisMax) query parser is an improved version of the DisMax parser that is also very forgiving on errors when parsing user entered queries and like the Standard query parser supports complex query expressions.
 
-The selection of the parser has practical implication for us as developers of end user applications. For example, by using the eDisMax parser the syntax of the queries that we pass to Solr is a bit more user friendly than if we use the Standard parser.
-
-For example, let's say that we want to search for all books where "George Washington" exists in the `title` or in the `authorsAll` field, and we want to rank higher books where "George Washington" was the author than when he is referenced in the title.
-
-Using the *Standard* query parser we will need to pass all this information in the `q` parameter to Solr as follows: `q=title:"george washington" authorsAll:"george washington"^10` which we could easily do as developers but it would be rather outrageous to ask an end user to enter such syntax.
-
-By using the *eDisMax* parser we could pass a much simpler `q` parameter to Solr `q="george washington"` and send a separate parameter to configure the fields to search on and their boosting value `qf=title authorsAll^10`. This is possible because the eDisMax parameter supports the `qf` parameter but the Standard parameter does not.
+One key difference among these parsers is that they recognize different parameters. For example, the *DisMax* and *eDisMax* parsers supports a `qf` parameter to specify what fields should be searched for but this parameter is not supported by the *Standard* parser.
 
 The rest of the examples in this section are going to use the eDisMax parser, notice the `defType=edismax` in our queries to Solr to make this selection. As we will see later on this tutorial you can also set the default query parser of your Solr core to use eDisMax by updating the `defType` parameter in your `solrconfig.xml` so that you don't have to explicitly set it on every query.
 
 
 ## Basic searching in Solr
-The number of search parameters that you can pass to Solr is rather large and, as we've noticed, they also depend on what query parser you are using.
+The number of search parameters that you can pass to Solr is rather large and, as we've mentioned, they also depend on what query parser you are using.
 
 To see a list a comprehensive list of the parameters that apply to all parsers take a look at the [Common Query Parameters](https://lucene.apache.org/solr/guide/7_0/common-query-parameters.html#common-query-parameters) and the [Standard Query Parser](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) sections in the Solr Reference Guide.
 
@@ -1321,49 +1214,49 @@ Below are some of the parameters that are supported by all parsers:
 
 Below are a few sample queries to show these parameters in action. Notice that spaces are URL encoded as `+` in the commands below, you do not need to encode them if you are submitting these queries via the [Solr Admin interface](http://localhost:8983/solr/#/bibdata/query) in your browser.
 
-* Retrieve the first 10 documents where the `title` includes the word "washington" (`q=title:washington`)
+* Retrieve the first 10 documents where the `title_txt_en` includes the word "washington" (`q=title_txt_en:washington`)
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:washington'
 ```
 
 * The next 15 documents for the same query (notice the `start=10` and `rows=15` parameters)
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:washington&start=10&rows=15'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:washington&start=10&rows=15'
 ```
 
-* Retrieve the `id` and `title` (`fl=id,title`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title:"women writers"~1`) Technically the `~N` means "N edit distance away" (See Solr in Action, p. 63).
+* Retrieve the `id` and `title_txt_en` (`fl=id,title_txt_en`) where the title includes the words "women writers" but allowing for a word in between e.g. "women nature writers" (`q=title_txt_en:"women writers"~1`) Technically the `~N` means "N edit distance away" (See Solr in Action, p. 63).
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:"women+writers"~1&fl=id,title'
-```
-
-* Documents that have a main author (`q=author:*` means any author)
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=author:*'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:"women+writers"~1&fl=id,title_txt_en'
 ```
 
-* Documents that do *not* have an author (`q=NOT author:*` means author is not present)
+* Documents that have additional authors (`q=authorsOther_txt_en:*`), the `*` means "any value".
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=NOT+author:*'
-```
-
-* Documents where at least one of the subjects has a the word "com" (`q=subjects:com*`)
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=subjects:com*'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author_txt_en,authorsOther_txts_en&q=authorsOther_txts_en:*'
 ```
 
-* Documents where title include "story" *and* at least one of the subjects is "women" (`q=title:story AND subjects:women` notice that both search conditions are indicated in the `q` parameter) Again, please notice that the `AND` operator **must be in uppercase**.
+* Documents that do *not* have additional authors (`q=NOT authorsOther_txt_en:*`)
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story+AND+subjects:women'
-```
-
-* Similar to the previous query, documents where title include "story" (`q=title:story`) *and* at least one of the subjects is "women" (`fq=subjects:women`) but *without considering the subject in the ranking of the results* (notice that subjects are filtered via the `fq` parameter in this example)
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:story&fq=subjects:women'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=NOT+authorsOther_txt_en:*'
 ```
 
-* Documents where title *includes* the word "american" but *does not include* the word "story" (`q=title:american AND -title:story`)
+* Documents where at least one of the subjects has a word that starts with "com" (`q=subjects_txts_en:com*`)
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects&q=title:american+AND+-title:story'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects_txts_en&q=subjects_txts_en:com*'
+```
+
+* Documents where title include "courage" *and* at least one of the subjects is "women" (`q=title_txt_en:courage AND subjects_txts_en:women` notice that both search conditions are indicated in the `q` parameter) Again, please notice that the `AND` operator **must be in uppercase**.
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=title_txt_en:courage+AND+subjects_txts_en:women'
+```
+
+* Similar to the previous query, documents where title include "courage" (`q=title_txt_en:courage`) *and* at least one of the subjects has the word "women" (`fq=subjects_txts_en:women`) but *without considering the subject in the ranking of the results* (notice that subjects are filtered via the `fq` parameter in this example)
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=title_txt_en:courage&fq=subjects_txts_en:women'
+```
+
+* Documents where title *includes* the word "history" but *does not include* the word "america" (`q=title_txt_en:history AND -title_txt_en:america`)
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:history+AND+-title_txt_en:america'
 ```
 
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html#the-standard-query-parser) and
@@ -1395,29 +1288,30 @@ Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value
 
 The DisMax and eDisMax query parsers provide another parameter, Query Fields `qf`, that should not be confused with the `q` or `fq` parameters. The `qf` parameter is used to indicate the *list of fields* that the search should be executed on along with their boost values.
 
-As we saw in a previous example if we execute a search on multiple fields and give each of them a different boost value the `qf` parameter makes this relatively easily as we can indicate the search terms in the `q` parameter (`q="george washington"`) and list the fields and their boost values separately (`qf=title authorsAll^10`). Remember to select the eDisMax parser (`defType=edismax`) when using the `qf` parameter.
+As we saw in a previous example if we execute a search on multiple fields and give each of them a different boost value the `qf` parameter makes this relatively easily as we can indicate the search terms in the `q` parameter (`q="george washington"`) and list the fields and their boost values separately (`qf=title_txt_en authorsAll_txts_en^10`). Remember to select the eDisMax parser (`defType=edismax`) when using the `qf` parameter.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,authorsAll&q="george+washington"&qf=title+authorsAll^20&defType=edismax'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authorsAll_txts_en&q="george+washington"&qf=title_txt_en+authorsAll_txts_en^20&defType=edismax'
 ```
 
-Boost values are arbitrary, you can use 1, 20, 789, 76.2, 1000, or whatever number you like, you can even use negative numbers (`qf=title authorsAll^-20`). They are just a way for us to hint Solr which fields we consider more important in a particular search.
+Boost values are arbitrary, you can use 1, 20, 789, 76.2, 1000, or whatever number you like, you can even use negative numbers (`qf=title_txt_en authorsAll_txts_en^-10`). They are just a way for us to hint Solr which fields we consider more important in a particular search.
 
 
 ### debugQuery
 Solr provides an extra parameter `debugQuery=on` that we can use to get debug information about a query. This is particularly useful if the results that you get in a query are not what you were expecting. For example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title:west+AND+authorsAll:nancy&fl=id,title,authorsAll&defType=edismax&debugQuery=on'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:west+AND+authorsAll_txts_en:nancy&fl=id,title_txt_en,authorsAll_txts_en&defType=edismax&debugQuery=on'
 
   # response will include
   # {
   #   "responseHeader":{...}
   #   "response":{...}
   #   "debug":{
-  #     "querystring":"title:west AND authorsAll:nancy",
-  #     "parsedquery":"+(+title:west +authorsAll:nancy)",
-  #     "parsedquery_toString":"+(+title:west +authorsAll:nancy)",
+  #     "rawquerystring":"title_txt_en:west AND authorsAll_txts_en:nancy",
+  #     "querystring":"title_txt_en:west AND authorsAll_txts_en:nancy",
+  #     "parsedquery":"+(+title_txt_en:west +authorsAll_txts_en:nanci)",
+  #     "parsedquery_toString":"+(+title_txt_en:west +authorsAll_txts_en:nanci)",
   #     "explain":{
   #       ... tons of information here ...
   #     }
@@ -1430,7 +1324,8 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title:west+AND+authorsAll:na
 Notice the `debug` property, inside this property there is information about:
 
 * what value the server received for the search (`querystring`) which is useful to detect if you are not URL encoding properly the value sent to the sever
-* how the server parsed the query (`parsedquery`) which is useful to detect if the syntax on the `q` parameter was parsed as we expected (e.g. remember the example earlier when we passed two words `school teachers` without surrounding them in quotes and the parsed query showed that it was querying two different fields `title` for "school" and `_text_` for "teachers")
+* how the server parsed the query (`parsedquery`) which is useful to detect if the syntax on the `q` parameter was parsed as we expected (e.g. remember the example earlier when we passed two words `school teachers` without surrounding them in quotes and the parsed query showed that it was querying two different fields `title_txt_en` for "school" and `_text_` for "teachers")
+* you can also see that some of the search terms were stemmed (e.g. "nancy" was converted to "nanci")
 * how each document was ranked (`explain`)
 * what query parser (`QParser`) was used
 
@@ -1439,24 +1334,24 @@ Notice the `debug` property, inside this property there is information about:
 
 When Solr finds documents that match the query it ranks them so that the most relevant documents show up first. You can provide Solr guidance on what fields are more important to you so that Solr consider this when ranking documents that matches a given query.
 
-Let's say that we want documents where either the `title` or the `author` have the word "west", we would use `q=title:west author:west`
+Let's say that we want documents where either the `title_txt_en` or the `author` have the word "west", we would use `q=title_txt_en:west authorsAll_txts_en:west`
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authorsAll_txts_en&q=title_txt_en:west+authorsAll_txts_en:west'
 ```
 
-Now let's say that we want to boost the documents where the `author` have the word "west" ahead of the documents where "west" was found in the `title`. To this we update the `q` parameter as follow `q=title:west+author:west^5` (notice the `^5` to boost the `author` field)
+Now let's say that we want to boost the documents where the author have the word "west" ahead of the documents where "west" was found in the title. To this we update the `q` parameter as follow `q=title_txt_en:west+authorsAll_txts_en:west^5` (notice the `^5` to boost the `authorsAll_txts_en` field)
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west^5'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authorsAll_txts_en&q=title_txt_en:west+authorsAll_txts_en:west^5'
 ```
 
-Notice how documents where the `author` is named "West" come first, but we still get documents where the `title` includes the word "West".
+Notice how documents where the author is named "West" come first, but we still get documents where the title includes the word "West".
 
 If want to see why Solr ranked a result higher than another you can look at the `explain` information that Solr returns when passing the `debugQuery=on` parameter, for example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author&q=title:west+author:west&debugQuery=on&wt=xml'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authorsAll_txts_en&q=title_txt_en:west+authorsAll_txts_en:west&debugQuery=on&wt=xml'
 ```
 
 but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
@@ -1482,17 +1377,17 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=west&debugQuery=on'
 
 notice the `parsedquery` indicates that is searching on the `_text_` field.
 
-You can overwrite the default field by passing the `df` parameter, for example to use the `title` field as the default parameter we could pass `qf=title:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
+You can overwrite the default field by passing the `df` parameter, for example to use the `title_txt_en` field as the default parameter we could pass `qf=title_txt_en:west`. This is somewhat similar to the Query Fields `qf` parameter that we saw before except that you can only indicate one `df` field. The advantage of `df` over `qf` is that `df` is supported by all Query Parsers whereas `qf` requires you to use DisMax or eDisMax.
 
 
 ### Filtering with ranges
 
 You can also filter a field to be within a range by using the bracket operator with the following syntax: `field:[firstValue TO lastValue]`. For example, to request documents with `id` between `00000018` and `00000028` we could do: `id:[00000018 TO 00000028]`. You can also indicate open-ended ranges by passing an asterisk as the value, for example: `id:[* TO 00000028]`.
 
-Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` fields it will filter on the *terms indexed* not on the value of the field.
+Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` and `text_en` fields it will filter on the *terms indexed* not on the value of the field.
 
 
-### Minimum match (advanced)
+### Minimum match (optional)
 
 In addition to using the `AND/OR` operators in our searches, the eDisMax parser provides a powerful feature called *minimum match* (`mm`) that allows for more flexible matching conditions than what we can do with just boolean operators.
 
@@ -1505,26 +1400,26 @@ in order for a document to be considered a match.
 - [Solr in Action, p. 228]
 ```
 
-With the *minimum match* parameter is possible to tell Solr to consider a document a match if 75% of the terms searched for are found on it for all queries that have more than three words. For example, the following four word query `q=school teachers secondary classroom` on the title field (`qf=title`) will return any document where at least 50% of the search terms are found (`mm=3<50%`):
+With the *minimum match* parameter is possible to tell Solr to consider a document a match if 75% of the terms searched for are found on it for all queries that have more than three words. For example, the following four word query `q=school teachers secondary classroom` on the title field (`qf=title_txt_en`) will return any document where at least 50% of the search terms are found (`mm=3<50%`):
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title&mm=3%3C50%25&q=school%20teachers%20secondary%20classroom&qf=title'
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title_txt_en&mm=3%3C50%25&q=school%20teachers%20secondary%20classroom&qf=title_txt_en'
 
   #
   # results will include
   #
   # {
   #   "id":"00010001",
-  #   "title":["Succeeding in the secondary classroom : strategies for middle and high school teachers /"]},
+  #   "title_txt_en":["Succeeding in the secondary classroom : strategies for middle and high school teachers /"]},
   # {
   #   "id":"00002200",
-  #   "title":["Aids to teachers of School chemistry."]},
+  #   "title_txt_en":["Aids to teachers of School chemistry."]},
   # {
   #   "id":"00020157",
-  #   "title":["Standards in the classroom : how teachers and students negotiate learning /"]},
+  #   "title_txt_en":["Standards in the classroom : how teachers and students negotiate learning /"]},
   # {
   #   "id":"00008378",
-  #   "title":["Keys to the classroom : a teacher's guide to the first month of school /"]},
+  #   "title_txt_en":["Keys to the classroom : a teacher's guide to the first month of school /"]},
   #
 ```
 
@@ -1533,6 +1428,7 @@ We can indicate more than one minimum match value in a single query. For example
 
 ### Where to find more
 Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results. Chapter 3 on this book goes into great detail on how to read and understand the ranking of results.
+
 
 ## Facets
 One of the most popular features of Solr is the concept of *facets*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/faceting.html) defines it as:
@@ -1545,17 +1441,17 @@ One of the most popular features of Solr is the concept of *facets*. The [Solr R
     Faceting makes it easy for users to explore search results, narrowing
     in on exactly the results they are looking for.
 
-You can easily get facet information from a query by selecting what field (or fields) you want to use to generate the categories and the counts. The basic syntax is `facet=on` followed by `facet.field=name-of-field`. For example to facet our dataset by *subjects* we would use the following syntax: `facet.field=subjects_str` as in the following example:
+You can easily get facet information from a query by selecting what field (or fields) you want to use to generate the categories and the counts. The basic syntax is `facet=on` followed by `facet.field=name-of-field`. For example to facet our dataset by *subjects* we would use the following syntax: `facet.field=subjects_ss` as in the following example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subjects_str'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subjects_ss'
 
   # result will include
   #
   # "facet_counts":{
   #  "facet_queries":{},
   #  "facet_fields":{
-  #    "subjects_str":[
+  #    "subjects_ss":[
   #      "Women",179,
   #      "African Americans",159,
   #      "Christian life",119,
@@ -1566,20 +1462,20 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subje
   #
 ```
 
-You might have noticed that we are using the `string` representation of the subjects (`subjects_str`) to generate the facets rather than the `text_general` version stored in the `subjects` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subject` field is tokenized whereas the indexed version of `subject_str` is the entire string.
+You might have noticed that we are using the `string` representation of the subjects (`subjects_ss`) to generate the facets rather than the `text_en` version stored in the `subjects_txts_en` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subjects_txts_en` field is tokenized whereas the indexed version of `subjects_ss` is the entire string.
 
-You can indicate more than one `facet.field`, for example to get facets for publisher and subjects we would pass `facet.field=subjects_str&facet.field=publisher_str`
+You can indicate more than one `facet.field` in a query to Solr (e.g. `facet.field=publisher_s&facet.field=subjects_ss`) to get facets for more than one field.
 
-There are several extra parameters that you can pass to Solr to customize how many facets are returned on result set. For example, if you want to list only the top 20 publishers in the facets rather than all of them you can indicate this with the following syntax: `f.publisher_str.facet.limit=20`. You can also filter only get facets that have *at least* certain number of matches, for example only publishers that have at least 100 books `f.publisher_str.facet.mincount=100` as shown the following example:
+There are several extra parameters that you can pass to Solr to customize how many facets are returned on result set. For example, if you want to list only the top 20 subjects in the facets rather than all of them you can indicate this with the following syntax: `f.subjects_ss.facet.limit=20`. You can also filter only get facets that have *at least* certain number of matches, for example only subjects that have at least 50 books `f.subjects_ss.facet.mincount=50` as shown the following example:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=publisher_str&f.publisher_str.facet.mincount=100&f.publisher_str.facet.limit=20'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subjects_ss&f.subjects_ss.facet.mincount=50&f.subjects_ss.facet.limit=20'
 ```
 
 You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* you could issue the following command:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_str,publisher_str&facet.limit=5'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_ss,publisher_s&facet.limit=5'
 
   #
   # response will include facets organized as follows:
@@ -1617,26 +1513,27 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subje
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
 ).
 
-Let's say that we search for books where the one of the authors (`authorsAll`) or the `title` include the word "michael". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
+Let's say that we search for books where the one of the authors (`authorsAll_txts_en`) or the title (`title_txt_en`) include the word "michael". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=title+authorsAll&hl=on'
+$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=michael&qf=title_txt_en+authorsAll_txts_en&hl=on'
 
   #
   # response will include
   #
   # "highlighting":{
   #   "00008929":{
-  #     "title":["<em>Michael</em> Jackson /"]},
+  #     "title_txt_en":["<em>Michael</em> Jackson /"]},
   #   "00022067":{
-  #     "authorsAll":["Chinery, <em>Michael</em>."],
-  #     "title":["Partners and parents / by <em>Michael</em> Chinery."]},
+  #     "authorsAll_txts_en":["Chinery, <em>Michael</em>."],
+  #     "title_txt_en":["Partners and parents / by <em>Michael</em> Chinery."]},
   #   "00011434":{
-  #     "authorsAll":["Castleman, <em>Michael</em>."]},
+  #     "authorsAll_txts_en":["Castleman, <em>Michael</em>."]},
   #
 ```
 
-Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll` and/or `title`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
+Notice how the `highlighting` property includes the `id` of each document in the result (e.g. `00008929`), the field where the match was found (e.g. `authorsAll_txts_en` and/or `title_txt_en`) and the text that matched within the field (e.g. `<em>Michael</em> Jackson /"`). You can display this information along with your search results to allow the user to "preview" why each result was rendered.
+
 
 <div style="page-break-after: always;"></div>
 
@@ -1684,16 +1581,16 @@ As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. Th
 
 The `data` folder contains the data that Solr stores for this core. This is where the actual index is located. The only thing that you probably want to do with this folder is back it up regularly. Other than that, you should stay away from it :)
 
-The `conf` folder contains configuration files for this core. In the following sections we'll look at some of the files in this folder (e.g. `solrconfig.xml`, `stopwords.txt`, and `synonyms.txt`) and how they can be updated to configure different options in Solr.
+The `conf` folder contains configuration files for this core. In the following sections we'll look at some of the files in this folder (e.g. `solrconfig.xml`, `managed-schema`, `stopwords.txt`, and `synonyms.txt`) and how they can be updated to configure different options in Solr.
 
 ## Synonyms
 
-In a previous section, when we looked at the `text_general` field type, we noticed that it used a filter to handle synonyms at query time.
+In a previous section, when we looked at the `text_general` and `text_en` field types, we noticed that it used a filter to handle synonyms at query time.
 
 Here is how to view that definition again:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_general'
+$ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_en'
 
   #
   # "queryAnalyzer":{
@@ -1732,20 +1629,20 @@ $ cat ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
 
 In the data in our `bibdata` core several of the books have the words "twentieth century" in the title but these books would not be retrieved if a user were to search for "20th century".
 
-Let's try it, first let's search for `q=title:"twentieth century"`:
+Let's try it, first let's search for `q=title_txt_en:"twentieth century"`:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"twentieth+century"'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"twentieth+century"'
 
   #
   # result will include 29 results
   #
 ```
 
-And now let's search for `q=title:"20th century"`:
+And now let's search for `q=title_txt_en:"20th century"`:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"20th+century"'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"20th+century"'
 
   #
   # result will include 4 results
@@ -1784,21 +1681,19 @@ You can also reload the core via the [Solr Admin](http://localhost:8983/solr/#/)
 If you run the queries again they will both report "33 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:"twentieth+century"'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"twentieth+century"'
 
   #
   # result will include 33 results
   #
 ```
 
-
-### More info
-
 To find more about synonyms take a look at this [blog post](https://library.brown.edu/DigitalTechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.
+
 
 ## Core-specific configuration
 
-One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.4.0/server/solr/bibdata/conf/solr_config.xml`.
+One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
@@ -1837,13 +1732,13 @@ We can make changes to this section to indicate that we want to use the eDisMax 
     <str name="echoParams">explicit</str>
     <int name="rows">10</int>
     <str name="defType">edismax</str>
-    <str name="qf">title author</str>
+    <str name="qf">title_txt_en authorsAll_txts_en</str>
   </lst>
 ```
 
 We'll need to reload your core for changes to the `solrconfig.xml` to take effect.
 
-Be careful, an incorrect setting on this file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title, author` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
+Be careful, an incorrect setting on this file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authorsAll_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
@@ -1858,9 +1753,9 @@ In addition to the standard parameters in a request handler we can also define c
     ...
   </lst>
   <str name="custom_search_field">
-    title^10
-    authorsAll^5
-    subjects
+    title_txt_en^10
+    authorsAll_txts_en^5
+    subjectssubjects_txts_en
   </str>
 </requestHandler>
 ```
@@ -1906,6 +1801,7 @@ You can find the definition of the search components in the `solrconfig.xml` by 
 Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting results in  previous section are defined here.
 
 Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
+
 
 ## Spellchecker
 
@@ -1968,9 +1864,9 @@ The `spellcheck` component indicated above is already defined in the `solrconfig
 </searchComponent
 ```
 
-Notice how by default it will use the `_text_` field for spellcheck. The `_text_` field would be a good field to use if we were populating it, but we aren't in our current configuration. Instead let's update this setting to use the `title` field instead.
+Notice how by default it will use the `_text_` field for spellcheck. The `_text_` field would be a good field to use if we were populating it, but we aren't in our current configuration. Instead let's update this setting to use the `title_txt_en` field instead.
 
-Once these changes have been made to the `solr_config.xml` we must reload our core for the changes to take effect:
+Once these changes have been made to the `solrconfig.xml` we must reload our core for the changes to take effect:
 
 ```
 $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
@@ -1983,13 +1879,12 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
   #   }
   # }
   #
-
 ```
 
 Now that our `bibdata` core has been configured to use spellcheck let's try out misspelled query again:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:washingon'
 
   #
   # response will indicate
@@ -2008,7 +1903,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
   #     }],
   #     "collations":[
   #       "collation",{
-  #         "collationQuery":"title:washington",
+  #         "collationQuery":"title_txt_en:washington",
   #         "hits":21,
   #         "misspellingsAndCorrections":[
   #         "washingon","washington"]}]
@@ -2019,120 +1914,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title&q=title:washingon'
 
 Notice that even though we got zero results back, the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
 
-## Solr Replication
-
-Replication is a technique in which you "create multiple identical copies of your index and load balance traffic across each of the copies" [Solr in Action, p. 375](https://www.worldcat.org/title/solr-in-action/oclc/879605085).
-
-Solr supports replication out of the box and this is helpful to increase fault tolerance in systems. The basic idea is that if a server becomes unavailable a different server, with an exact copy of the data, can be used to handle search requests. You can also distribute the load between multiple servers at all times.
-
-Solr uses the *one-master, many-replica* model to handle replication in which there is a single *master* server where documents are indexed and multiple *replica* servers where searches can be executed. The replica servers pull data from the master server on a regular basis.
-
-    Fundamentally, replication requires a server to perform indexing (the master server),
-    and a server to pull a copy of the index from the master (the [replica] server).
-    - Solr in Action, p. 376
-
-To configure replication in Solr we need to add a new request handler in our `solrconfig.xml` and by convention this handler is named `/replication`.
-
-
-### Master server configuration
-
-To define the server that will act as the *master* in our replication we will add the following handler to `~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml` inside the `<config>` element:
-
-```
-<requestHandler name="/replication" class="solr.ReplicationHandler">
-  <lst name="master">
-    <str name="replicateAfter">optimize</str>
-    <str name="backupAfter">optimize</str>
-    <str name="confFiles">managed-schema,stopwords.txt</str>
-  </lst>
-</requestHandler>
-```
-
-Notice the settings under the `master` section. These setting designate this server as the master server in the replication, indicate when the replication will take place, and what configuration files will be replicated. For more details on what each of the settings mean take a look at the [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/index-replication.html)
-
-If you reload this core
-
-```
-$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
-```
-
-and look at its setting under the [Replication](http://localhost:8983/solr/#/bibdata/replication) tab in the Solr Admin web page you should see a green checkbox next to the "replication enable" setting.
-
-
-### Replica server configuration
-
-For replication to work we need to have other Solr core (or cores) where the data will be replicated to. In a production setting these replica copies will typically live in a different machine from the master, but to keep things simple on this tutorial we are going to define the replica on the same machine and Solr installation that we have been using.
-
-Let's start by defining a new core:
-
-```
-$ solr create -c theothercore
-```
-
-If you query `theothercore` it will have no documents since it is brand new.
-
-```
-$ curl http://localhost:8983/solr/theothercore/select?q=*
-
-  #
-  # {
-  #  "responseHeader":{
-  #    "status":0,
-  #    "QTime":3,
-  #    "params":{
-  #      "q":"*"}},
-  #  "response":{"numFound":0,"start":0,"docs":[]
-  #  }}
-  #
-```
-
-Let's configure `theothercore` to be the replica our `bibdata` core. We do this by adding a `/replication` handler to the `solrconfig.xml` of our new core, in other words to the file at `~/solr-7.4.0/server/solr/theothercore/conf/solrconfig.xml`. The replication handler in this case will be marked as "slave", rather than "master", as indicated below. Add the following inside the `<config>` element:
-
-```
-<requestHandler name="/replication" class="solr.ReplicationHandler">
-  <lst name="slave">
-    <str name="masterUrl">http://localhost:8983/solr/bibdata/replication</str>
-    <str name="pollInterval">00:00:20</str>
-    <str name="compression">internal</str>
-    <str name="httpConnTimeout">5000</str>
-    <str name="httpReadTimeout">10000</str>
-    <str name="httpBasicAuthUser">username</str>
-    <str name="httpBasicAuthPassword">password</str>
-  </lst>
-</requestHandler>
-```
-
-Notice that in these settings we indicate the URL of the master Solr index, in our case `http://localhost:8983/solr/bibdata/replication`. This is how the replica knows where to get the data from. We also indicated that we want the replicate to poll the master server every 20 seconds (`00:00:20`) for changes in the data (we will use a different interval if we were in production.)
-
-Let's reload reload this core for the changes to take effect:
-
-```
-$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=theothercore'
-```
-
-If we query the replica again we would see documents on it. Also, if we look at the settings under the [Replication](http://localhost:8983/solr/#/theothercore/replication) tab in the Solr Admin web page *for this new core* we would see information about the replication including the master URL and the polling interval.
-
-
-### Sharding
-
-Sharding is a different technique from replication that is used to execute *distributed queries* across multiple Solr cores. This is useful when you have too many documents to handle on a single server.
-
-Sharding is beyond the scope of this tutorial but Chapter 12 of [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) or the [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/legacy-scaling-and-distribution.html) are good places to start if you want to learn more about it.
-
-Trivia: "One of the upper limits in Solr is that an index cannot contain more than 2^31 documents, due to an underlying limitation in Lucene." (Solr in Action, p. 372). That's two billion documents (2,000,000,000) for those of us that use the [short scale](https://en.wikipedia.org/wiki/Long_and_short_scales).
-
-
-### SolrCloud
-
-Solr also provides a set of features known as SolrCloud that is the preferred way to handle fault tolerance and high availability in large scale environments. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/solrcloud.html) defines it as:
-
-    SolrCloud is flexible distributed search and indexing, without a master node
-    to allocate nodes, shards and replicas. Instead, Solr uses ZooKeeper to manage
-    these locations, depending on configuration files and schemas. Queries and
-    updates can be sent to any server. Solr will use the information in the
-    ZooKeeper database to figure out which servers need to handle the request.
-
-This is also out of the scope of this tutorial.
 
 ## Sources and where to find more
 
@@ -2151,6 +1932,6 @@ The steps to create the `books.json` file from the MARC data are as follow:
 * Unzip it: `gzip -d BooksAll.2014.part01.utf8.gz`
 * Process the unzipped file with [marcli](https://github.com/hectorcorrea/marcli) with the following command: `./marcli --file BooksAll.2014.part01.utf8 -format solr > books.json`
 
-The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of the tutorial I manually truncated the file to include only the first 10,000 books.
+The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of this tutorial I manually truncated the file to include only the first 10,000 books.
 
 `marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file.
