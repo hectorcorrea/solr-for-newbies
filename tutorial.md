@@ -1439,7 +1439,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title_tx
   #
 ```
 
-We can indicate more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though: `mm=2<2&3<2`
+We can use more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though (e.g. `mm=2<2&3<2`), check out the [Solr Guide](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html#mm-minimum-should-match-parameter) for more information.
 
 
 ### Where to find more
