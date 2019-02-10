@@ -86,8 +86,7 @@ In this diagram the *client application* could be a program written in Ruby or P
 ### Prerequisites
 
 To run Solr on your machine you need to have the Java Development Kit (JDK)
-installed. To verify if the JDK is installed run the following command
-from the Terminal (aka Command Prompt if you are on Windows):
+installed. The version of Solr that we'll use in this tutorial requires a recent version of Java (Java 8 or greater). To verify if the JDK is installed run the following command from the Terminal (aka Command Prompt if you are on Windows):
 
 ```
 $ java --version
@@ -100,9 +99,7 @@ $ java --version
 ```
 
 If the JDK is installed on your machine you'll see the text indicating
-the version that you have (e.g. "11.0.2" above). The specific Java version
-does not matter much as long as the previous command displays a version
-of Java, you should be OK.
+the version that you have (e.g. "11.0.2" above). If the version number is "11.x", "10.x", "9.x" or "1.8" you should be OK, otherwise, follow the steps below to install a recent version.
 
 If you don't have the JDK installed you'll see something like
 
@@ -112,9 +109,9 @@ If you don't have the JDK installed you'll see something like
   #
 ```
 
-**Note for Mac users:** After running the `java -version` command above if the JDK is not installed the Mac might give a prompt to install Java. If you follow the prompt's instructions you will be installing the Java Runtime Environment (JRE) which *it is not what you need to run Solr*. It won't hurt to install the JRE but you it won't help you either. You can ignore that prompt.
+**Note for Mac users:** After running the `java -version` command above if the JDK is not installed OS X might give a prompt indicating that "to use the java command-line tool you need to install a JDK" and instructions on how to install it. Those instructions are listed below.
 
-If Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine follow the steps below to install it.
+If a recent version of Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine or you have an old version follow the steps below to install a recent version.
 
 
 ### Installing Java
@@ -123,10 +120,12 @@ To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwo
 
 From there, under the "Java SE Development Kit 11.0.2", accept the license agreement  and select the file appropriated for your operating system. For Mac download the ".dmg" file (`jdk-11.0.2_osx-x64_bin.dmg`) and for Windows download the ".exe" file (`jdk-11.0.2_windows-x64_bin.exe`).
 
-Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed, *open a new Terminal window* and run the `java -version` command again. You should see the text with the Java version number this time.
+Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed run the `java -version` command again. You should see the text with the Java version number this time.
 
 
 ### Installing Solr
+
+Once Java has been installed on your machine installing Solr is pretty simple. You just need to *download* a zip file and *unzip* it on your machine.
 
 You can download Solr from the [Apache](https://lucene.apache.org/solr/) web site. To make it easy, below are the steps to download and install version 7.4 which is the one that we will be using.
 
@@ -375,7 +374,7 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **publisher_txt_en**: publisher name (MARC 260a)
 * **subjects_txts_en**: an array of subjects (MARC 650a)
 
-The suffix added to each field (e.g. `_txt_en`) are hints for Solr to pick the appropriate field type for each field as it ingests the data. We will look closely into this in a later section.
+The suffix added to each field (e.g. `_txt_en`) is a hint for Solr to pick the appropriate field type for each field as it ingests the data. We will look closely into this in a later section.
 
 
 ### Fetching data
@@ -988,7 +987,7 @@ There are many reasons to toggle the stored and indexed properties of a field. F
 
 
 ## Customizing our schema
-So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Because the fields in our source data had suffixes (`_ss`, `_txt_en`) that match with the default `dynamicField` definitions in a standard Solr installation most of our fields were created with the proper field type except, as we saw earlier, the `_txts_en` field which was created as a `text_general` field rather than at `text_en` field (because there was no definition for `_txts_en` fields).
+So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Because the fields in our source data had suffixes (e.g. `_txt_en`) that match with the default `dynamicField` definitions in a standard Solr installation most of our fields were created with the proper field type except, as we saw earlier, the `_txts_en` field which was created as a `text_general` field rather than at `text_en` field (because there was no definition for `_txts_en` fields).
 
 Also, although it's nice that we can do sophisticated searches by title (because it is a `text_en` field) we [could not sort](https://stackoverflow.com/a/7992380/446681) the results by this field because it's a tokenized field, technically we can sort by it but the results will not be what we expect.
 
