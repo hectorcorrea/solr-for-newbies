@@ -336,14 +336,14 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
   #     "QTime":36,
   #     "params":{
   #       "q":"*:*"}},
-  #   "response":{"numFound":1000,"start":0,"docs":[
+  #   "response":{"numFound":10000,"start":0,"docs":[
   #       ... lots of information will display here ...
   #     ]}
   # }
   #
 ```
 
-Notice how the number of documents found is greater than zero (e.g. `"numFound":1000`)
+Notice how the number of documents found is greater than zero (e.g. `"numFound":10000`)
 
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder in Solr that we can use in Windows. Here is what you'll need to to:
 
@@ -420,7 +420,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:teachers+author
 As we saw in the previous example, by default, Solr searches for either of the terms. If we want to force that both conditions are matched we must explicitly use the `AND` operator in the `q` value as in `q=title_txt_en:teachers AND author_txt_en:Alice` Notice that the `AND` operator **must be in uppercase**.
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:teachers+AND+author_txt_en:Alice'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:teachers+AND+author_txt_en:Alice'
 ```
 
 Now let's try something else. Let's issue a search for books where the title says "school teachers" using `q=title_txt_en:"school teachers"` (make sure the text "school teachers" is in quotes)
@@ -454,7 +454,7 @@ One other thing. When searching multi-word keywords for a given field make sure 
 You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. For example in the following command we surround both search terms in quotes:
 
 ```
-$ curl -s 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&debugQuery=on&q=title_txt_en:"school+teachers"' | grep parsedquery
+$ curl -s 'http://localhost:8983/solr/bibdata/select?debugQuery=on&q=title_txt_en:"school+teachers"' | grep parsedquery
 
   #
   # "parsedquery":"PhraseQuery(title_txt_en:\"school teachers\")",
@@ -466,7 +466,7 @@ notice that the `parsedQuery` shows that Solr is searching for, as we would expe
 Now let's look at the `parsedQuery` when we don't surround the search terms in quotes:
 
 ```
-$ curl -s 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&debugQuery=on&q=title_txt_en:school+teachers' | grep parsedquery
+$ curl -s 'http://localhost:8983/solr/bibdata/select?debugQuery=on&q=title_txt_en:school+teachers' | grep parsedquery
 
   #
   # "parsedquery":"title_txt_en:school _text_:teachers",
@@ -494,7 +494,7 @@ When we issue a search, Solr is able to return facet information about the data 
 For example, to search for all documents with title "education" (`q=title_txt_en:education`) and retrieve facets (`facet=on`) based on the subjects  (`facet.field=subjects_txts_en_str`) we'll use a query like this:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:education&facet=on&facet.field=subjects_txts_en_str'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&facet=on&facet.field=subjects_txts_en_str'
 
   # response will include something like this
   #
@@ -513,7 +513,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_
 You might have noticed that we used the "string" version of the subjects (`subjects_txts_en_str`) rather than the "text" version of them (`subjects_txts_en`). This is because using the "text" version would have generated facets based on the *tokenized* version of the subjects rather than the original subjects. We will review tokenization in a later section but if you want to see the difference run this command using the text version (`subjects_txts_en`) and notice the facets returned:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en&q=title_txt_en:education&facet=on&facet.field=subjects_txts_en'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&facet=on&facet.field=subjects_txts_en'
 ```
 
 
@@ -652,8 +652,7 @@ Solr automatically created most of these fields when we imported the data from t
   "authors_other_txts_en":["Tarbell, Martha,"],
   "title_txt_en":"The complete geography.",
   "publisher_txt_en":"New York,",
-  "subjects_txts_en":["Geography"],
-  "subjects_txts_en_str":["Geography"]
+  "subjects_txts_en":["Geography"]
 }
 ```
 
@@ -1136,7 +1135,7 @@ The results in this case will not look correct because Solr will be using the to
 Take a look at the data for this particular book that has many authors and notice how the `authors_all_txts_en` field has the combination of `author_txt_en` and `authors_other_txts_en` even though our source data didn't have an `authors_all_txts_en` field:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00009214&fl=id,author*'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00009214'
 
   #
   # {
@@ -1285,7 +1284,7 @@ Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value
 Below is an example querying documents where title include "history" (`q=title_txt_en:history`) *and* at least one of the subjects has the word "women" (`fq=subjects_txts_en:women`) but *without considering the subject in the ranking of the results*, in other words Solr will rank the results based only on the the match in the title:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=title_txt_en:history&fq=subjects_ss:women'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=title_txt_en:history&fq=subjects_txts_en:women'
 ```
 
 
@@ -1768,9 +1767,19 @@ We can make changes to this section to indicate that we want to use the eDisMax 
   </lst>
 ```
 
-We'll need to reload your core for changes to the `solrconfig.xml` to take effect.
+We'll need to reload your core for changes to the `solrconfig.xml` to take effect: 
 
-Be careful, an incorrect setting on this file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authors_all_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
+```
+$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
+```
+
+but notice that now we can issue a much simpler query since we don't have to specify the `qf` or `defType` parameters in the URL:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=west'
+```
+
+Be careful, an incorrect setting on the `solrconfig.xml` file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authors_all_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
