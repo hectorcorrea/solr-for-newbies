@@ -6,7 +6,7 @@ File [tutorial.md](https://github.com/hectorcorrea/solr-for-newbies/blob/master/
 
 File **tutorial.pdf** has the same content as tutorial.md but in PDF format and it's [downloadable]( https://github.com/hectorcorrea/solr-for-newbies/raw/master/tutorial.pdf).
 
-Files **slides.key** and **slides.pdf** are the slides with some "big picture" diagrams to support the material in workshop.md.
+Files **slides.key** and **slides.pdf** are the slides with some "big picture" diagrams to support the material in tutorial.md.
 
 File **books.json** has the sample data that we will use during the workshop.
 

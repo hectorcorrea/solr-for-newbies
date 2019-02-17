@@ -89,7 +89,7 @@ To run Solr on your machine you need to have the Java Development Kit (JDK)
 installed. The version of Solr that we'll use in this tutorial requires a recent version of Java (Java 8 or greater). To verify if the JDK is installed run the following command from the Terminal (aka Command Prompt if you are on Windows):
 
 ```
-$ java --version
+$ java -version
 
   #
   # java version "11.0.2" 2019-01-15 LTS
@@ -597,7 +597,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **Fields** are the specific fields that you define for your particular core. Fields are based of a field type, for example, we might define field `title` based on the `string` field type and a field `price` base of the `pfloat` field type.
 
-* **dynamicFields** are field patterns that we define to automatically create new fields when the data submitted to Solr matches the given pattern. For example, we can define that if receive data for a field that ends with `_txt` the field will be create it as a `text_general` field type.
+* **dynamicFields** are field patterns that we define to automatically create new fields when the data submitted to Solr matches the given pattern. For example, we can define that if we receive data for a field that ends with `_txt` the field will be create it as a `text_general` field type.
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to perform different transformation to the values as we ingest them. For example, we might want to remove punctuation characters for searching but preserve them for display purposes. 
 
@@ -670,7 +670,7 @@ In the following sections we are going to drill down into some of specifics of t
 
 
 ### Field: id
-Let's look at the details the `id` field in our schema
+Let's look at the details of the `id` field in our schema
 
 ```
 $ curl localhost:8983/solr/bibdata/schema/fields/id
@@ -988,7 +988,7 @@ There are many reasons to toggle the stored and indexed properties of a field. F
 ## Customizing our schema
 So far we have only worked with the fields that were automatically added to our `bibdata` core as we imported the data. Because the fields in our source data had suffixes (e.g. `_txt_en`) that match with the default `dynamicField` definitions in a standard Solr installation most of our fields were created with the proper field type except, as we saw earlier, the `_txts_en` field which was created as a `text_general` field rather than at `text_en` field (because there was no definition for `_txts_en` fields).
 
-Also, although it's nice that we can do sophisticated searches by title (because it is a `text_en` field) we [could not sort](https://stackoverflow.com/a/7992380/446681) the results by this field because it's a tokenized field, technically we can sort by it but the results will not be what we expect.
+Also, although it's nice that we can do sophisticated searches by title (because it is a `text_en` field) we [could not sort](https://stackoverflow.com/a/7992380/446681) the results by this field because it's a tokenized field (technically we can sort by it but the results will not be what we would expect.)
 
 Let's customize our schema a little bit to get the most out of Solr.
 
@@ -1232,7 +1232,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:"women+writers"
 
 * Documents that have additional authors (`q=authors_other_txts_en:*`), the `*` means "any value".
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,author_txt_en,authors_other_txts_en&q=authors_other_txts_en:*'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_en,authors_other_txts_en&q=authors_other_txts_en:*'
 ```
 
 * Documents that do *not* have additional authors (`q=NOT authors_other_txts_en:*`) be aware that the `NOT` **must be in uppercase**.
@@ -1242,7 +1242,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authors_all
 
 * Documents where at least one of the subjects has a word that starts with "com" (`q=subjects_txts_en:com*`)
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title,subjects_txts_en&q=subjects_txts_en:com*'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=subjects_txts_en:com*'
 ```
 
 * Documents where title include "courage" *and* at least one of the subjects is "women" (`q=title_txt_en:courage AND subjects_txts_en:women` notice that both search conditions are indicated in the `q` parameter) Again, notice that the `AND` operator must be in uppercase.
@@ -1277,7 +1277,7 @@ In [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085
 
 There are two reasons why this is important. The first reason is that because the values filtered via `fq` don't have a score assigned to them they can be cached and reused by Solr in subsequent queries. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application). 
 
-The second reason `fq` is important is because when we filter results from a category by selecting from a dropdown list or a facet, usually all the results belong to the category equaly, preventing Solr from scoring results by the selected category might improve the ranking of the results since only the user entered values (filtered via `q`) would be used to calculate the scores.
+The second reason `fq` is important is because when we filter results from a category by selecting from a dropdown list or a facet, usually all the results belong to the category equally. Preventing Solr from scoring results by the selected category might improve the ranking of the results since only the user entered values (filtered via `q`) would be used to calculate the scores.
 
 Both `q` and `fq` use the same syntax for filtering documents (e.g. `field:value`). However you can only have one `q` parameter in a query but you can have many `fq` parameters. Multiple `fq` parameters are ANDed (you cannot specify an OR operation among them).
 
@@ -1346,7 +1346,7 @@ Let's say that we want documents where the word "West" (`q=west`) is in the titl
 $ curl 'http://localhost:8983/solr/bibdata/select?&q=west&qf=title_txt_en+authors_all_txts_en&defType=edismax'
 ```
 
-Now let's say that we want to boost the documents where the author have the word "west" ahead of the documents where "west" was found in the title. To this we update the `qf` parameter as follows `qf=title_txt_en authors_all_txts_en^5` (notice the `^5` to boost the `authors_all_txts_en` field)
+Now let's say that we want to boost the documents where the author has the word "west" ahead of the documents where "west" was found in the title. To this we update the `qf` parameter as follows `qf=title_txt_en authors_all_txts_en^5` (notice the `^5` to boost the `authors_all_txts_en` field)
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?&q=west&qf=title_txt_en+authors_all_txts_en^5&defType=edismax'
@@ -1362,7 +1362,7 @@ If want to see why Solr ranked a result higher than another you can look at the 
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:west+authors_all_txts_en:west&debugQuery=on&wt=xml'
 ```
 
-but be aware that the default `explain` output from Solr is rather convoluted. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
+but be aware that the default `explain` output from Solr is rather convoluted. Also, notice that we used the XML output in the previous example (`wt=xml`) because Solr does a better job formatting the explain out in XML than in JSON. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get primer on how to interpret this information.
 
 
 ### Default Field (optional)
@@ -1953,6 +1953,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt
 
 Notice that even though we got zero results back (`numFound:0`), the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
 
+# REFERENCES 
 
 ## Sources and where to find more
 
@@ -1961,7 +1962,7 @@ Notice that even though we got zero results back (`numFound:0`), the response no
 * [Relevant search with applications for Solr and Elasticsearch](http://www.worldcat.org/title/relevant-search-with-applications-for-solr-and-elasticsearch/oclc/980984111) by Doug Turnbull and John Berryman
 
 
-### Sample data
+## Sample data
 
 File `books.json` contains 10,000 books taken from Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
 
@@ -1974,3 +1975,4 @@ The steps to create the `books.json` file from the MARC data are as follow:
 The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of this tutorial I manually truncated the file to include only the first 10,000 books.
 
 `marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file.
+
