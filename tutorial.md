@@ -197,11 +197,11 @@ You can also issue the `status` command again from the Terminal and Solr will re
 $ cd ~/solr-7.4.0/bin
 $ ./solr status
 
-  # Found 1 Solr nodes: 
+  # Found 1 Solr nodes:
   #
   # Solr process 16861 running on port 8983
-  # INFO  - 2019-02-09 22:11:48.801; 
-  #      org.apache.solr.util.configuration.SSLCredentialProviderFactory; 
+  # INFO  - 2019-02-09 22:11:48.801;
+  #      org.apache.solr.util.configuration.SSLCredentialProviderFactory;
   #      Processing SSL Credential Provider chain: env;sysprop
   # {
   #   "solr_home":"/Users/your-name/solr-7.4.0/server/solr",
@@ -599,7 +599,7 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **dynamicFields** are field patterns that we define to automatically create new fields when the data submitted to Solr matches the given pattern. For example, we can define that if we receive data for a field that ends with `_txt` the field will be create it as a `text_general` field type.
 
-* **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to perform different transformation to the values as we ingest them. For example, we might want to remove punctuation characters for searching but preserve them for display purposes. 
+* **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to perform different transformation to the values as we ingest them. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
 Our newly created `bibdata` core already has a schema and you can view the definition through the Solr Admin web page via the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) at http://localhost:8983/solr/#/bibdata/schema or by exploring the `managed-schema` file via the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html).
 
@@ -1275,7 +1275,7 @@ In [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085
       * To supply the relevancy algorithm with a list of terms
         to be used for relevancy scoring
 
-There are two reasons why this is important. The first reason is that because the values filtered via `fq` don't have a score assigned to them they can be cached and reused by Solr in subsequent queries. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application). 
+There are two reasons why this is important. The first reason is that because the values filtered via `fq` don't have a score assigned to them they can be cached and reused by Solr in subsequent queries. The authors of Solr in Action recommend using the `q` parameter for values entered by the user and `fq` for values selected from a list (e.g. from a dropdown or a facet in an application).
 
 The second reason `fq` is important is because when we filter results from a category by selecting from a dropdown list or a facet, usually all the results belong to the category equally. Preventing Solr from scoring results by the selected category might improve the ranking of the results since only the user entered values (filtered via `q`) would be used to calculate the scores.
 
@@ -1292,9 +1292,9 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_tx
 
 The DisMax and eDisMax query parsers provide another parameter, Query Fields `qf`, that should not be confused with the `q` or `fq` parameters. The `qf` parameter is used to indicate the *list of fields* that the search should be executed on along with their boost values.
 
-If we want to search for the same value in multiple fields at once (e.g. if we want to find all books where *the title or the author* includes the text "George Washington") we must indicate each field/value pair individually: `q=title_txt_en:"George Washington" authors_all_txts_en:"George Washington"`. 
+If we want to search for the same value in multiple fields at once (e.g. if we want to find all books where *the title or the author* includes the text "George Washington") we must indicate each field/value pair individually: `q=title_txt_en:"George Washington" authors_all_txts_en:"George Washington"`.
 
-The `qf` parameter allows us specify the fields separate from the terms so that we can use instead: `q="George Washington"` and `qf=title_txt_en authors_all_txts_en`. This is really handy if we want to customize what fields are searched in an application in which the user enters a single text (say "George Washington") and the application automatically searches multiple fields. 
+The `qf` parameter allows us specify the fields separate from the terms so that we can use instead: `q="George Washington"` and `qf=title_txt_en authors_all_txts_en`. This is really handy if we want to customize what fields are searched in an application in which the user enters a single text (say "George Washington") and the application automatically searches multiple fields.
 
 Below is an example of this (remember to select the eDisMax parser (`defType=edismax`) when using the `qf` parameter):
 
@@ -1532,8 +1532,8 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subje
   #
 ```
 
-Notice how the results for the subject "Women" (179 results) are 
-broken down by publisher under the "pivot" section. 
+Notice how the results for the subject "Women" (179 results) are
+broken down by publisher under the "pivot" section.
 
 
 ## Hit highlighting
@@ -1577,7 +1577,7 @@ Assuming we unzipped this zip file in our home directory we would have a folder 
 ~/solr-7.4.0/
 |-- bin/
 |-- dist/
-|-- examples/
+|-- example/
 |-- server/
     |-- solr/
     |-- solr-webapp/
@@ -1587,7 +1587,7 @@ Directory `bin/` contains the scripts to start/stop Solr and post data to it.
 
 Directory `dist/` contains the Java Archive (JAR) files. These are the binaries that make up Solr.
 
-Directory `examples/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
+Directory `example/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
 
 Directory `server/solr/` contains one folder for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
 
@@ -1767,7 +1767,7 @@ We can make changes to this section to indicate that we want to use the eDisMax 
   </lst>
 ```
 
-We'll need to reload your core for changes to the `solrconfig.xml` to take effect: 
+We'll need to reload your core for changes to the `solrconfig.xml` to take effect:
 
 ```
 $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
@@ -1953,7 +1953,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt
 
 Notice that even though we got zero results back (`numFound:0`), the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
 
-# REFERENCES 
+# REFERENCES
 
 ## Sources and where to find more
 
@@ -1976,3 +1976,6 @@ The MARC file has 250,000 books and therefore the resulting `books.json` will ha
 
 `marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file.
 
+
+## Acknowledgements
+I would like to thank my team at the Brown University Library for their support and recommendations as I prepared this tutorial as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018. A special thank you goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly test each of the examples.
