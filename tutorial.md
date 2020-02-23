@@ -116,9 +116,9 @@ If a recent version of Java *is installed* on your machine skip the "Installing 
 
 ### Installing Java
 
-To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and click the "DOWNLOAD" button at the top of the page to download the "Java Platform (JDK) 11".
+To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and click the "JDK Download" link.
 
-From there, under the "Java SE Development Kit 11.0.2", accept the license agreement  and select the file appropriated for your operating system. For Mac download the ".dmg" file (`jdk-11.0.2_osx-x64_bin.dmg`) and for Windows download the ".exe" file (`jdk-11.0.2_windows-x64_bin.exe`).
+From there, under the "Java SE Development Kit 13.0.2" select the file appropriated for your operating system. For Mac download the ".dmg" file (`jdk-13.0.2_osx-x64_bin.dmg`) and for Windows download the ".exe" file (`jdk-13.0.2_windows-x64_bin.exe`). Accept the license and download the file.
 
 Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed run the `java -version` command again. You should see the text with the Java version number this time.
 
@@ -127,13 +127,13 @@ Run the installer that you downloaded and follow the instructions on screen. Onc
 
 Once Java has been installed on your machine installing Solr is pretty simple. You just need to *download* a zip file and *unzip* it on your machine.
 
-You can download Solr from the [Apache](https://lucene.apache.org/solr/) web site. To make it easy, below are the steps to download and install version 7.4 which is the one that we will be using.
+You can download Solr from the [Apache](https://lucene.apache.org/solr/) web site. To make it easy, below are the steps to download and install version 8.4 which is the one that we will be using.
 
 First, download Solr and save it to a file on your machine:
 
 ```
 $ cd
-$ curl http://archive.apache.org/dist/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.4.0.zip
+$ curl http://archive.apache.org/dist/lucene/solr/8.4.1/solr-8.4.1.zip > solr-8.4.1.zip
 
   #
   # You'll see something like this...
@@ -146,21 +146,21 @@ $ curl http://archive.apache.org/dist/lucene/solr/7.4.0/solr-7.4.0.zip > solr-7.
 Then unzip the downloaded file with the following command:
 
 ```
-$ unzip solr-7.4.0.zip
+$ unzip solr-8.4.1.zip
 
   #
   # A ton of information will be displayed here as Solr is being
   # decompressed/unzipped. Most of the lines will say something like
-  # "inflating: solr-7.4.0/the-name-of-a-file"
+  # "inflating: solr-8.4.1/the-name-of-a-file"
   #
 ```
 
-...and that's it, Solr is now available on your machine under the `solr-7.4.0` folder. Most of the utilities that we will use in this tutorial are under the `solr-7.4.0/bin` folder.
+...and that's it, Solr is now available on your machine under the `solr-8.4.1` folder. Most of the utilities that we will use in this tutorial are under the `solr-8.4.1/bin` folder.
 
 First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr status
 
   #
@@ -178,12 +178,13 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 To start Solr run the `solr` script again but with the `start` parameter:
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr start
 
+  # [a couple of WARN messages plus...]
   #
-  # Waiting up to 180 seconds to see Solr running on port 8983 [-]
-  # Started Solr server on port 8983 (pid=85830). Happy searching!
+  # Waiting up to 180 seconds to see Solr running on port 8983 [/]  
+  # Started Solr server on port 8983 (pid=31160). Happy searching!
   #
 ```
 
@@ -194,21 +195,19 @@ You can validate this by opening your browser and going to http://localhost:8983
 You can also issue the `status` command again from the Terminal and Solr will report something like this:
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr status
 
-  # Found 1 Solr nodes:
-  #
-  # Solr process 16861 running on port 8983
-  # INFO  - 2019-02-09 22:11:48.801;
-  #      org.apache.solr.util.configuration.SSLCredentialProviderFactory;
-  #      Processing SSL Credential Provider chain: env;sysprop
+  # Found 1 Solr nodes: 
+  # 
+  # Solr process 31160 running on port 8983
   # {
-  #   "solr_home":"/Users/your-name/solr-7.4.0/server/solr",
-  #    "version":"7.4.0 ... - jpountz - 2018-06-18 16:55:13",
-  #    "startTime":"2019-02-10T01:21:12.603Z",
-  #    "uptime":"0 days, 1 hours, 35 minutes, 26 seconds",
-  #    "memory":"112.2 MB (%22.9) of 490.7 MB"}
+  #   "solr_home":"/Users/your-username/solr-8.4.1/server/solr",
+  #   "version":"8.4.1 832bf13dd9187095831caf69783179d41059d013 - ishan - 2020-01-10 13:40:28",
+  #   "startTime":"2020-02-23T21:31:36.602Z",
+  #   "uptime":"0 days, 0 hours, 1 minutes, 44 seconds",
+  #   "memory":"83.9 MB (%16.4) of 512 MB"}
+  #
 ```
 
 Notice how Solr now reports that it has "Found 1 Solr node". Yay!
@@ -216,21 +215,21 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 ### Adding Solr to your path (optional)
 
-In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-7.4.0`) you can run the following commands:
+In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-8.4.1`) you can run the following commands:
 
 ```
 $ cd
-$ PATH=~/solr-7.4.0/bin:$PATH
+$ PATH=~/solr-8.4.1/bin:$PATH
 $ which solr
 
   #
-  # /your-home-folder/solr-7.4.0/bin/solr
+  # /your-home-folder/solr-8.4.1/bin/solr
   #
 ```
 
 Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
 
-If you don't do this you will need to `cd` into the `~/solr-7.4.0/bin` folder before executing these commands or make sure that you always refer to Solr with the full path, for example `~/solr-7.4.0/bin/solr`.
+If you don't do this you will need to `cd` into the `~/solr-8.4.1/bin` folder before executing these commands or make sure that you always refer to Solr with the full path, for example `~/solr-8.4.1/bin/solr`.
 
 
 ## Creating our first Solr core
@@ -242,18 +241,16 @@ we configure data schemas and store data. This is similar to the concept of a
 For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr create -c bibdata
 
+  # WARNING: Using _default configset with data driven schema functionality. 
+  # NOT RECOMMENDED for production use.
   #
-  # WARNING: Using _default configset. Data driven schema functionality is enabled by default, which is
-  #          NOT RECOMMENDED for production use.
-  #
-  #          To turn it off:
-  #             curl http://localhost:8983/solr/bibdata/config -d '{"set-user-property": {"update.autoCreateFields":"false"}}'
-  #
+  #           To turn off: bin/solr config -c bibdata -p 8983 -action set-user-property -property update.autoCreateFields -value false
+  # 
   # Created new core 'bibdata'
-  #
+  # 
 ```
 
 Now we have a new core available to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
@@ -285,7 +282,7 @@ in either case you'll see `"numFound":0` indicating that there are no documents 
 Now let's add a few documents to our `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file:
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 
   #
@@ -312,7 +309,7 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./post -c bibdata books.json
 
   #
@@ -348,8 +345,8 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder in Solr that we can use in Windows. Here is what you'll need to to:
 
 ```
-> cd C:\Users\you\solr-7.4.0\examples\exampledocs
-> copy path\to\books.json .
+> cd C:\Users\you\solr-8.4.1\examples\exampledocs
+> curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 > java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
 
   #
@@ -559,7 +556,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000034'
   #
 ```
 
-The second option to update a document is to update only parts of a document, but that's out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/7_0/updating-parts-of-documents.html) provides information on how this works.
+The second option to update a document is to update only parts of a document, but that's out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/8_4/updating-parts-of-documents.html) provides information on how this works.
 
 
 ## Deleting documents
@@ -578,7 +575,7 @@ Be aware that even if you delete all documents from a Solr core the schema and t
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr delete -c bibdata
 ```
 
@@ -788,7 +785,7 @@ $ curl localhost:8983/solr/bibdata/schema/fieldtypes/text_en
 
 This is obviously a much more complex definition than the ones we saw before. Although the basics are the same (e.g. the field type points to class `solr.TextField`) notice that there are two new sections `indexAnalyzer` and `queryAnalyzer` for this field type. We will explore those in the next section.
 
-**Note:** The fact that the Solr schema API does not show dynamically created fields (like `title_txt_en`) is baffling, particularly since they do show in the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) of the Solr Admin screen. This has been a known issue for many years as shown in this [Stack Overflow question from 2010](https://stackoverflow.com/questions/3211139/solr-retrieve-field-names-from-a-solr-index) in which one of the answers suggests using the following command to list all fields, including those created via `dynamicField` definitions: `curl localhost:8983/solr/bibdata/admin/luke?numTerms=0`
+**Note:** The fact that the Solr schema API does not show dynamically created fields (like `title_txt_en`) is baffling, particularly since they do show in the [Schema Browser Screen](https://lucene.apache.org/solr/guide/8_4/schema-browser-screen.html) of the Solr Admin screen. This has been a known issue for many years as shown in this [Stack Overflow question from 2010](https://stackoverflow.com/questions/3211139/solr-retrieve-field-names-from-a-solr-index) in which one of the answers suggests using the following command to list all fields, including those created via `dynamicField` definitions: `curl localhost:8983/solr/bibdata/admin/luke?numTerms=0`
 
 
 ## Analyzers, Tokenizers, and Filters
@@ -997,7 +994,7 @@ Let's customize our schema a little bit to get the most out of Solr.
 Let's begin by recreating our Solr core so that we have a clean slate.
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./solr delete -c bibdata
 $ ./solr create -c bibdata
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
@@ -1099,7 +1096,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
-$ cd ~/solr-7.4.0/bin
+$ cd ~/solr-8.4.1/bin
 $ ./post -c bibdata books.json
 ```
 
@@ -1159,7 +1156,7 @@ There are lots of pre-defined dynamic fields in a standard Solr installation as 
 
 Here are a few examples:
 
-* [Brown University Library Catalog](https://github.com/Brown-University-Library/bul-search/blob/master/solr_conf/blacklight-core/conf/schema.xml) - a Blacklight app
+* [Brown University Library Catalog](https://github.com/Brown-University-Library/bul-traject/blob/master/solr7/) - a Blacklight app
 
 * [Penn State ScholarSphere](https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml) - a Hydra/SamVera app
 
@@ -1569,12 +1566,12 @@ Notice how the `highlighting` property includes the `id` of each document in the
 
 ## Solr directories
 
-In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-7.4.0.zip` file.
+In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-8.4.1.zip` file.
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-7.4.0/` with several directories underneath:
+Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-8.4.1/` with several directories underneath:
 
 ```
-~/solr-7.4.0/
+~/solr-8.4.1/
 |-- bin/
 |-- dist/
 |-- example/
@@ -1599,7 +1596,7 @@ Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that
 As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
 
 ```
-~/solr-7.4.0/
+~/solr-8.4.1/
 |-- server/
     |-- solr/
         |-- bibdata/
@@ -1642,10 +1639,10 @@ $ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_en'
 
 Notice how one of the filter uses the `SynonymGraphFilterFactory` to handle synonyms and references a file `synonyms.txt`.
 
-The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
+The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
 
 ```
-$ cat ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
+$ cat ~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt
 
   #
   # will include a few lines including
@@ -1691,7 +1688,7 @@ We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `s
 You can do this with your favorite editor or with a command like this:
 
 ```
-$ echo "20th,twentieth" >> ~/solr-7.4.0/server/solr/bibdata/conf/synonyms.txt
+$ echo "20th,twentieth" >> ~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt
 ```
 
 You *must reload your core* for the changes to the `synonyms.txt` to take effect. You can do this as follow:
@@ -1724,11 +1721,11 @@ To find more about synonyms take a look at this [blog post](https://library.brow
 
 ## Core-specific configuration
 
-One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml`.
+One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-8.4.1/server/solr/bibdata/conf/solrconfig.xml`.
 
 A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
-**Note:** Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-7.4.0/server/solr/solr.xml`. This file is out of the scope of this tutorial.
+**Note:** Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-8.4.1/server/solr/solr.xml`. This file is out of the scope of this tutorial.
 
 
 ### Request Handlers
@@ -1742,7 +1739,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 The `/select` in the URL points to a request handler defined in `solrconfig.xml`. If we look at the content of this file you'll notice a definition like this:
 
 ```
-$ cat ~/solr-7.4.0/server/solr/bibdata/conf/solrconfig.xml
+$ cat ~/solr-8.4.1/server/solr/bibdata/conf/solrconfig.xml
 
   #
   # notice the "/select" in this requestHandler definition
