@@ -125,7 +125,7 @@ Run the installer that you downloaded and follow the instructions on screen. Onc
 
 ### Installing Solr
 
-Once Java has been installed on your machine installing Solr is pretty simple. You just need to *download* a zip file and *unzip* it on your machine.
+Once Java has been installed on your machine to install Solr you just need to *download* a zip file, *unzip* it on your machine, and run it.
 
 You can download Solr from the [Apache](https://lucene.apache.org/solr/) web site. To make it easy, below are the steps to download and install version 8.4 which is the one that we will be using.
 
@@ -644,7 +644,7 @@ Notice that unlike a relational database, where only a handful field types are a
 
 You might be wondering how did the fields like `id`, `title_txt_en`, `author_txt_en`, `subjects_txts_en`, and `subjects_txts_en_str` in our `bibdata` core were created if we never explicitly defined them.
 
-Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match most of the fields defined in our schema. Below is the data for one of the records in our sample data:
+Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match *most* of the fields defined in our schema. Below is the data for one of the records in our sample data:
 
 ```
 {
@@ -659,15 +659,13 @@ Solr automatically created most of these fields when we imported the data from t
 
 The process that Solr follows when a new document is ingested into Solr is more or less as follows:
 
-* If there is an exact match for a field being ingested and the fields defined in the schema then Solr will use the definition in the schema to ingest the data. This is what happened for the `id` field. Our JSON data has an `id` field and so does the schema, therefore Solr stored the `id` value in the `id` field as indicated in the schema (i.e. as single-value string.)
+1. If there is an exact match for a field being ingested and the fields defined in the schema then Solr will use the definition in the schema to ingest the data. This is what happened for the `id` field. Our JSON data has an `id` field and so does the schema, therefore Solr stored the `id` value in the `id` field as indicated in the schema (i.e. as single-value string.)
 
-* If there is no exact match in the schema then Solr will look at the **dynamicFields** definitions to see if the field can be handled with some predefined settings. This is what happened with the `title_txt_en` field. Because there is not `title_txt_en` definition in the schema Solr used the dynamic field definition for `*_txt_en` that indicated that the value should be indexed using the text in English (`text_en`) field definition.
+2. If there is no exact match in the schema then Solr will look at the **dynamicFields** definitions to see if the field can be handled with some predefined settings. This is what happened with the `title_txt_en` field. Because there is not `title_txt_en` definition in the schema Solr used the dynamic field definition for `*_txt_en` that indicated that the value should be indexed using the text in English (`text_en`) field definition.
 
-* If no match is found in the dynamic fields either Solr will make a guess on what is the best type to use based on the data for this field in the source document. This is what happened with the `subjects_txts_en` field (notice that it ends with `_txts_en` rather than `_txt_en`). In this instance Solr guessed and created the field as `text_general` multi-valued. Additionally, Solr has built-in logic to automatically create a string representation of these text fields and hence you'll also see a `subjects_txts_en_str` in the schema.
+3. If no match is found in the dynamic fields either Solr will [guess what is the best type to use](https://bryanbende.com/development/2015/11/14/solr-schemas) based on the data for this field in the first document. This is what happened with the `subjects_txts_en` field (notice that this field ends with `_txts_en` rather than `_txt_en`). In this case, since there is no dynamic field definition to handle this ending, Solr guessed and created field `subjects_txts_en` as `text_general` (and additionally created a string version `subjects_txts_en_str` of the field). For production use Solr recommends to disable this automatic guessing, this is what the "WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use" was about when we first created our Solr core.
 
 In the following sections we are going to drill down into some of specifics of the fields and dynamic field definitions that are configured in our Solr core.
-
-**Note:** You can disable automatic field creation if you don't want Solr to guess fields that are not explicitly defined or that cannot be matched to a `dynamicField` definition. Keep in mind that if automatic field creation is disabled Solr will *refuse* to import any documents with fields not defined in the schema. For more information about the different way in which the Solr Schema can be configured check out this [blog post](https://bryanbende.com/development/2015/11/14/solr-schemas).
 
 
 ### Field: id
