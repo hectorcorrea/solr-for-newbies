@@ -22,7 +22,7 @@ Although Solr could technically be described as a NoSQL database (i.e. it allows
 
 ### Solr's document model
 
-Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://lucene.apache.org/solr/guide/7_0/overview-of-documents-fields-and-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
+Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://lucene.apache.org/solr/guide/8_4/overview-of-documents-fields-and-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
 
 Something important to know about documents in Solr is that they are self-contained and don't contain nested fields:
 
@@ -68,7 +68,7 @@ Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr use
 
 ### What is Lucene
 
-The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brain behind](https://lucene.apache.org/solr/guide/7_0/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
+The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brain behind](https://lucene.apache.org/solr/guide/8_0/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
 
 But Lucene is a Java Library than can only be used from other Java programs. Solr on the other hand is a wrapper around Lucene that allows us to use the Lucene functionality from any programming language that can submit HTTP requests.
 
@@ -393,7 +393,7 @@ We can use the `fl` parameter to indicate what fields we want to fetch. For exam
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title_txt_en'
 ```
 
-Note: When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title_txt_en` and not `fl=id,` `title_txt_en`. If the parameter includes spaces Solr will not return any results and give you a cryptic error message instead.
+**Note:** When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title_txt_en` and not `fl=id,` `title_txt_en`. If the parameter includes spaces Solr will not return any results and give you a cryptic error message instead.
 
 Try adding and removing some other fields to this list, for example, `fl=id,title_txt_en,author_txt_en` or `fl=id,title_txt_en,author_txt_en,subjects_txts_en`
 
@@ -541,7 +541,7 @@ If we post to Solr a new document with the **same ID** Solr will **overwrite** t
 $ curl -X POST --data '[{"id":"00000034","title_txt_en":"the new title"}]' 'http://localhost:8983/solr/bibdata/update?commit=true'
 ```
 
-Out of the box Solr supports multiple input formats (JSON, XML, CSV), section [Uploading Data with Index Handlers](https://lucene.apache.org/solr/guide/7_0/uploading-data-with-index-handlers.html#uploading-data-with-index-handlers) in the Solr guide provides more details out this.
+Out of the box Solr supports multiple input formats (JSON, XML, CSV), section [Uploading Data with Index Handlers](https://lucene.apache.org/solr/guide/8_0/uploading-data-with-index-handlers.html#uploading-data-with-index-handlers) in the Solr guide provides more details out this.
 
 If we query for the document with ID `00000034` again we will see the new data and notice that the fields that we did not provide during the update are now gone from the document, that's because Solr overwrote the old document with ID `00000034` with our new data that included only two fields (`id` and `title_txt_en`).
 
@@ -598,9 +598,9 @@ There are three kind of fields that can be defined in a Solr schema:
 
 * **copyFields** are instructions to tell Solr how to automatically copy the value given for one field to another field. This is useful if we want to perform different transformation to the values as we ingest them. For example, we might want to remove punctuation characters for searching but preserve them for display purposes.
 
-Our newly created `bibdata` core already has a schema and you can view the definition through the Solr Admin web page via the [Schema Browser Screen](https://lucene.apache.org/solr/guide/7_0/schema-browser-screen.html) at http://localhost:8983/solr/#/bibdata/schema or by exploring the `managed-schema` file via the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html).
+Our newly created `bibdata` core already has a schema and you can view the definition through the Solr Admin web page via the [Schema Browser Screen](https://lucene.apache.org/solr/guide/8_4/schema-browser-screen.html) at http://localhost:8983/solr/#/bibdata/schema or by exploring the `managed-schema` file via the [Files Screen](https://lucene.apache.org/solr/guide/8_4/files-screen.html).
 
-You can also view this information with the [Schema API](https://lucene.apache.org/solr/guide/7_1/schema-api.html) as shown in the following example. The (rather long) response will be organized in four categories: `fieldTypes`, `fields`, `dynamicFields`, and `copyFields` as shown below:
+You can also view this information with the [Schema API](https://lucene.apache.org/solr/guide/8_4/schema-api.html) as shown in the following example. The (rather long) response will be organized in four categories: `fieldTypes`, `fields`, `dynamicFields`, and `copyFields` as shown below:
 
 ```
 $ curl localhost:8983/solr/bibdata/schema
@@ -790,7 +790,7 @@ This is obviously a much more complex definition than the ones we saw before. Al
 
 ## Analyzers, Tokenizers, and Filters
 
-The `indexAnalyzer` section defines the transformations to perform *as the data is indexed* in Solr and `queryAnalyzer` defines transformations to perform *as we query for data* out of Solr. It's important to notice that the output of the `indexAnalyzer` affects the terms *indexed*, but not the value *stored*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/analyzers.html) says:
+The `indexAnalyzer` section defines the transformations to perform *as the data is indexed* in Solr and `queryAnalyzer` defines transformations to perform *as we query for data* out of Solr. It's important to notice that the output of the `indexAnalyzer` affects the terms *indexed*, but not the value *stored*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/analyzers.html) says:
 
     The output of an Analyzer affects the terms indexed in a given field
     (and the terms used when parsing queries against those fields) but
@@ -807,28 +807,28 @@ We can customize field type definitions to use different filters and tokenizers 
 
 ### Tokenizers
 
-For most purposes we can think of a tokenizer as something that splits a given text into individual tokens or words. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/tokenizers.html) defines Tokenizers as follows:
+For most purposes we can think of a tokenizer as something that splits a given text into individual tokens or words. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/tokenizers.html) defines Tokenizers as follows:
 
     Tokenizers are responsible for breaking
     field data into lexical units, or tokens.
 
 For example if we give the text "hello world" to a tokenizer it might split the text into two tokens like "hello" and "word".
 
-Solr comes with several [built-in tokenizers](https://lucene.apache.org/solr/guide/7_0/tokenizers.html) that handle a variety of data. For example if we expect a field to have information about a person's name the [Standard Tokenizer](https://lucene.apache.org/solr/guide/7_0/tokenizers.html#standard-tokenizer) might be appropriated for it. However, for a field that contains e-mail addresses the [UAX29 URL Email Tokenizer](https://lucene.apache.org/solr/guide/7_0/tokenizers.html#uax29-url-email-tokenizer) might be a better option.
+Solr comes with several [built-in tokenizers](https://lucene.apache.org/solr/guide/8_4/tokenizers.html) that handle a variety of data. For example if we expect a field to have information about a person's name the [Standard Tokenizer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html#standard-tokenizer) might be appropriated for it. However, for a field that contains e-mail addresses the [UAX29 URL Email Tokenizer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html#uax29-url-email-tokenizer) might be a better option.
 
-You can only have [one tokenizer per analyzer](https://lucene.apache.org/solr/guide/7_0/tokenizers.html)
+You can only have [one tokenizer per analyzer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html)
 
 
 ### Filters
 
-Whereas a `tokenizer` takes a string of text and produces a set of tokens, a `filter` takes a set of tokens, process them, and produces a different set of tokens. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/about-filters.html) says that
+Whereas a `tokenizer` takes a string of text and produces a set of tokens, a `filter` takes a set of tokens, process them, and produces a different set of tokens. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/about-filters.html) says that
 
     in most cases a filter looks at each token in the stream sequentially
     and decides whether to pass it along, replace it or discard it.
 
 Notice that unlike tokenizers, whose job is to split text into tokens, the job of filters is a bit more complex since they might replace the token with a new one or discard it altogether.
 
-Solr comes with many [built-in Filters](https://lucene.apache.org/solr/guide/7_0/filter-descriptions.html) that we can use to perform useful transformations. For example the ASCII Folding Filter converts non-ASCII characters to their ASCII equivalent (e.g. "México" is converted to "Mexico"). Likewise the English Possessive Filter removes singular possessives (trailing 's) from words. Another useful filter is the Porter Stem Filter that calculates word stems using English language rules (e.g. both "jumping" and "jumped" will be reduced to "jump".)
+Solr comes with many [built-in Filters](https://lucene.apache.org/solr/guide/8_4/filter-descriptions.html) that we can use to perform useful transformations. For example the ASCII Folding Filter converts non-ASCII characters to their ASCII equivalent (e.g. "México" is converted to "Mexico"). Likewise the English Possessive Filter removes singular possessives (trailing 's) from words. Another useful filter is the Porter Stem Filter that calculates word stems using English language rules (e.g. both "jumping" and "jumped" will be reduced to "jump".)
 
 
 ### Putting it all together
@@ -839,7 +839,7 @@ That means that if we *index* the text "The Television is Broken!" in a `text_en
 
 Likewise, the definition for `text_en` included the additional filter `SynonymGraphFilter` at *query time*. So if we were to *query* for the text "The TV is Broken!" Solr will run this text through the filters indicated in the `queryAnalyzer` section and generate the following tokens: "televis", "tv", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to its synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those synonyms predefined in the `synonyms.txt` file.
 
-The [Analysis Screen](https://lucene.apache.org/solr/guide/7_0/analysis-screen.html) in the Solr Admin tool is a great way to see how a particular text is either indexed or queried by Solr *depending on the field type*. Point your browser to http://localhost:8983/solr/#/bibdata/analysis and try the following examples:
+The [Analysis Screen](https://lucene.apache.org/solr/guide/8_4/analysis-screen.html) in the Solr Admin tool is a great way to see how a particular text is either indexed or queried by Solr *depending on the field type*. Point your browser to http://localhost:8983/solr/#/bibdata/analysis and try the following examples:
 
 Here are a few examples to try:
 
@@ -1152,7 +1152,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=authors_all_txts_en:Gallop'
 
 
 ## What are others doing
-There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://lucene.apache.org/solr/guide/7_0/files-screen.html). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
+There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://lucene.apache.org/solr/guide/8_4/files-screen.html). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
 
 Here are a few examples:
 
@@ -1184,11 +1184,11 @@ The components in Solr that parse these parameters are called Query Parsers. The
 
 Out of the box Solr comes with three query parsers: Standard, DisMax, and Extended DisMax (eDisMax). Each of them has its own advantages and disadvantages.
 
-* The [Standard](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like `AND` or `OR` operations.
+* The [Standard](https://lucene.apache.org/solr/guide/8_4/the-standard-query-parser.html) query parser (aka the Lucene Parser) is the default parser and is very powerful, but it's rather unforgiving if there is an error in the query submitted to Solr. This makes the Standard query parser a poor choice if we want to allow user entered queries, particular if we allow queries with expressions like `AND` or `OR` operations.
 
-* The [DisMax](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html) query parser (DisMax) on the other hand was designed to handle user entered queries and it's very forgiving on errors when parsing a query, however this parser only supports simple query expressions.
+* The [DisMax](https://lucene.apache.org/solr/guide/8_4/the-dismax-query-parser.html) query parser (DisMax) on the other hand was designed to handle user entered queries and it's very forgiving on errors when parsing a query, however this parser only supports simple query expressions.
 
-* The [Extended DisMax](https://lucene.apache.org/solr/guide/7_0/the-extended-dismax-query-parser.html) (eDisMax) query parser is an improved version of the DisMax parser that is also very forgiving on errors when parsing user entered queries and like the Standard query parser supports complex query expressions.
+* The [Extended DisMax](https://lucene.apache.org/solr/guide/8_4/the-extended-dismax-query-parser.html) (eDisMax) query parser is an improved version of the DisMax parser that is also very forgiving on errors when parsing user entered queries and like the Standard query parser supports complex query expressions.
 
 One key difference among these parsers is that they recognize different parameters. For example, the *DisMax* and *eDisMax* parsers supports a `qf` parameter to specify what fields should be searched for but this parameter is not supported by the *Standard* parser.
 
@@ -1198,7 +1198,7 @@ The rest of the examples in this section are going to use the eDisMax parser, no
 ## Basic searching in Solr
 The number of search parameters that you can pass to Solr is rather large and, as we've mentioned, they also depend on what query parser you are using.
 
-To see a list a comprehensive list of the parameters that apply to all parsers take a look at the [Common Query Parameters](https://lucene.apache.org/solr/guide/7_0/common-query-parameters.html#common-query-parameters) and the [Standard Query Parser](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html) sections in the Solr Reference Guide.
+To see a list a comprehensive list of the parameters that apply to all parsers take a look at the [Common Query Parameters](https://lucene.apache.org/solr/guide/8_4/common-query-parameters.html#common-query-parameters) and the [Standard Query Parser](https://lucene.apache.org/solr/guide/8_4/the-standard-query-parser.html) sections in the Solr Reference Guide.
 
 Below are some of the parameters that are supported by all parsers:
 
@@ -1252,7 +1252,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_tx
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:history+AND+-title_txt_en:art'
 ```
 
-The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/the-standard-query-parser.html#the-standard-query-parser) and
+The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/the-standard-query-parser.html#the-standard-query-parser) and
 [this Lucene tutorial](http://www.solrtutorial.com/solr-query-syntax.html) are good places to check for quick reference on the query syntax.
 
 
@@ -1444,7 +1444,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title_tx
   #
 ```
 
-We can use more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though (e.g. `mm=2<2&3<2`), check out the [Solr Guide](https://lucene.apache.org/solr/guide/7_0/the-dismax-query-parser.html#mm-minimum-should-match-parameter) for more information.
+We can use more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though (e.g. `mm=2<2&3<2`), check out the [Solr Guide](https://lucene.apache.org/solr/guide/8_4/the-dismax-query-parser.html#mm-minimum-should-match-parameter) for more information.
 
 
 ### Where to find more
@@ -1452,7 +1452,7 @@ Searching is a large topic and complex topic. I've found the book "Relevant sear
 
 
 ## Facets
-One of the most popular features of Solr is the concept of *facets*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/faceting.html) defines it as:
+One of the most popular features of Solr is the concept of *facets*. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/faceting.html) defines it as:
 
     Faceting is the arrangement of search results into categories
     based on indexed terms.
@@ -1493,7 +1493,7 @@ There are several extra parameters that you can pass to Solr to customize how ma
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subjects_ss&f.subjects_ss.facet.limit=20&f.subjects_ss.facet.mincount=50'
 ```
 
-You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/7_0/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* (`facet.pivot=subjects_ss,publisher_s`) you could issue the following command:
+You can also facet **by multiple fields at once** this is called [Pivot Faceting](https://lucene.apache.org/solr/guide/8_4/faceting.html#pivot-decision-tree-faceting). The way to do this is via the `facet.pivot` parameter. This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* (`facet.pivot=subjects_ss,publisher_s`) you could issue the following command:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_ss,publisher_s&facet.limit=5'
@@ -1535,7 +1535,7 @@ broken down by publisher under the "pivot" section.
 
 ## Hit highlighting
 
-Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/7_0/highlighting.html
+Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://lucene.apache.org/solr/guide/8_4/highlighting.html
 ).
 
 Let's say that we search for books where the one of the authors (`authors_all_txts_en`) or the title (`title_txt_en`) include the word "michael". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
@@ -1778,10 +1778,10 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=west'
 
 Be careful, an incorrect setting on the `solrconfig.xml` file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authors_all_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
-The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
+The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
 
-### LocalParams and dereferencing
+### LocalParams and dereferencing (optional)
 
 In addition to the standard parameters in a request handler we can also define custom settings and use them in our search queries. For example is possible to define a new setting (`custom_search_field`) to group a list of fields and their boost values as shown below:
 
@@ -1798,7 +1798,7 @@ In addition to the standard parameters in a request handler we can also define c
 </requestHandler>
 ```
 
-We can then use this new setting in our queries by using the [Local Parameters](https://lucene.apache.org/solr/guide/7_0/local-parameters-in-queries.html#parameter-dereferencing) and [Dereferencing](https://lucene.apache.org/solr/guide/7_0/local-parameters-in-queries.html#parameter-dereferencing) features of Solr.
+We can then use this new setting in our queries by using the [Local Parameters and Dereferencing](https://lucene.apache.org/solr/guide/8_4/local-parameters-in-queries.html) features of Solr.
 
 For example to use our newly defined `custom_search_field` in a query we could pass the following to Solr:
 
@@ -1806,12 +1806,14 @@ For example to use our newly defined `custom_search_field` in a query we could p
 q={! qf=$custom_search_field}teachers
 ```
 
-The syntax to use local parameters and dereferencing looks a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`. You can see an example of how this is used in a Blacklight application in the following [blog post](https://library.brown.edu/DigitalTechnologies/solr-localparams-and-dereferencing/).
+The syntax to use local parameters and dereferencing looks a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`. 
+
+**Note:** Please be aware that support for Local Params and Dereferencing was [restricted significantly starting in Solr 7.2](https://lucene.apache.org/solr/guide/7_5/solr-upgrade-notes.html#solr-7-2). 
 
 
 ### Search Components
 
-Request handlers in turn use search components to execute different operations on a search. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html) defines search components as:
+Request handlers in turn use search components to execute different operations on a search. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html) defines search components as:
 
     A search component is a feature of search, such as highlighting or faceting.
     The search component is defined in solrconfig.xml separate from the request
@@ -1836,7 +1838,7 @@ You can find the definition of the search components in the `solrconfig.xml` by 
 
 Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting results in  previous section are defined here.
 
-Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/7_0/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
+Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
 
 
 ## Spellchecker
@@ -1954,7 +1956,7 @@ Notice that even though we got zero results back (`numFound:0`), the response no
 
 ## Sources and where to find more
 
-* [Solr Reference Guide](https://lucene.apache.org/solr/guide/7_0/)
+* [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/)
 * [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) by Trey Grainger and Timothy Potter
 * [Relevant search with applications for Solr and Elasticsearch](http://www.worldcat.org/title/relevant-search-with-applications-for-solr-and-elasticsearch/oclc/980984111) by Doug Turnbull and John Berryman
 
@@ -1975,4 +1977,4 @@ The MARC file has 250,000 books and therefore the resulting `books.json` will ha
 
 
 ## Acknowledgements
-I would like to thank my team at the Brown University Library for their support and recommendations as I prepared this tutorial as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018. A special thank you goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly test each of the examples.
+I would like to thank my team at the Brown University Library for their support and recommendations as I prepared this tutorial as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018 and San Jose, CA in 2019. A special thank you goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly test each of the examples.
