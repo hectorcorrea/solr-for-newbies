@@ -551,12 +551,16 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000034'
   # "response":{"numFound":1,"start":0,"docs":[
   # {
   #   "id":"00000034",
-  #   "title_txt_en":"the new title"
+  #   "title_txt_en":"the new title for book 00000034"
   # }]}
   #
 ```
 
-The second option to update a document is to update only parts of a document, but that's out of scope for this tutorial. The [Solr Guide](https://lucene.apache.org/solr/guide/8_4/updating-parts-of-documents.html) provides information on how this works.
+The second option to update a document in Solr is to via [atomic updates](https://lucene.apache.org/solr/guide/8_4/updating-parts-of-documents.html) in which we can indicate what fields of the document will be updated. Details of this method are out of scope for this tutorial but below is a very simple example to show the basic syntax, notice how we are using the `set` parameter in the `title_txt_en` field to indicate a different kind of update: 
+
+```
+$ curl -X POST --data '[{"id":"00000043","title_txt_en":{"set":"the new title for 00000043"}}]' 'http://localhost:8983/solr/bibdata/update?commit=true'
+```
 
 
 ## Deleting documents
