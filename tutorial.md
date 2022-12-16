@@ -22,17 +22,9 @@ Although Solr could technically be described as a NoSQL database (i.e. it allows
 
 ### Solr's document model
 
-Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://lucene.apache.org/solr/guide/8_4/overview-of-documents-fields-and-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
+Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://solr.apache.org/guide/solr/9_0/getting-started/documents-fields-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
 
-Something important to know about documents in Solr is that they are self-contained and don't contain nested fields:
-
-    a document in a search engine like Solr has a flat structure and doesn’t
-    depend on other documents. The flat concept is slightly relaxed in Solr,
-    in that a field can have multiple values, but fields don’t contain
-    subfields. You can store multiple values in a single field, but you
-    can’t nest fields inside of other fields. [Solr in Action, p. 6]
-
-This is different from other document stores, like MongoDB, that allow nested fields inside a document.
+In earlier versions of Solr documents were self-contained and did not support nested documents. Since version 8 Solr provides [support for nested documents](https://solr.apache.org/guide/8_0/indexing-nested-documents.html). This tutorial does not cover nested documents.
 
 
 ### Inverted index
@@ -68,7 +60,7 @@ Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr use
 
 ### What is Lucene
 
-The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brain behind](https://lucene.apache.org/solr/guide/8_0/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
+The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brain behind](https://lucene.apache.org/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
 
 But Lucene is a Java Library than can only be used from other Java programs. Solr on the other hand is a wrapper around Lucene that allows us to use the Lucene functionality from any programming language that can submit HTTP requests.
 
@@ -116,9 +108,9 @@ If a recent version of Java *is installed* on your machine skip the "Installing 
 
 ### Installing Java
 
-To install the Java Development Kit (JDK) go to  http://www.oracle.com/technetwork/java/javase/downloads/index.html and click the "JDK Download" link.
+To install the Java Development Kit (JDK) go to [ http://www.oracle.com/technetwork/java/javase/downloads/index.html](https://www.oracle.com/java/technologies/downloads/) and download the JDK for your operating system.
 
-From there, under the "Java SE Development Kit 13.0.2" select the file appropriated for your operating system. For Mac download the ".dmg" file (`jdk-13.0.2_osx-x64_bin.dmg`) and for Windows download the ".exe" file (`jdk-13.0.2_windows-x64_bin.exe`). Accept the license and download the file.
+For macOS download the ".dmg" file (`jdk-19_macos-x64_bin.dmg `) and for Windows download the ".exe" file (`jdk-19_windows-x64_bin.exe`). Accept the license and download the file.
 
 Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed run the `java -version` command again. You should see the text with the Java version number this time.
 
@@ -127,40 +119,41 @@ Run the installer that you downloaded and follow the instructions on screen. Onc
 
 Once Java has been installed on your machine to install Solr you just need to *download* a zip file, *unzip* it on your machine, and run it.
 
-You can download Solr from the [Apache](https://lucene.apache.org/solr/) web site. To make it easy, below are the steps to download and install version 8.4 which is the one that we will be using.
+You can download Solr from the [Apache Solr](https://solr.apache.org/) web site. To make it easy, below are the steps to download and install version 8.4 which is the one that we will be using.
 
 First, download Solr and save it to a file on your machine:
 
 ```
 $ cd
-$ curl http://archive.apache.org/dist/lucene/solr/8.4.1/solr-8.4.1.zip > solr-8.4.1.zip
+$ curl https://archive.apache.org/dist/solr/solr/9.1.0/solr-9.1.0.tgz > solr-9.1.0.tgz
 
   #
   # You'll see something like this...
-  # % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-  #                                Dload  Upload   Total   Spent    Left  Speed
-  # 100  146M  100  146M    0     0  7081k      0  0:00:21  0:00:21 --:--:-- 8597k
-  #
+  #  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+  #                                 Dload  Upload   Total   Spent    Left  Speed
+  # 100  219M  100  219M    0     0  15.4M      0  0:00:14  0:00:14 --:--:-- 17.4M
 ```
 
-Then unzip the downloaded file with the following command:
+Then extract the downloaded file with the following command:
 
 ```
-$ unzip solr-8.4.1.zip
+$ tar -xvzf solr-9.1.0.tgz
 
   #
   # A ton of information will be displayed here as Solr is being
   # decompressed/unzipped. Most of the lines will say something like
-  # "inflating: solr-8.4.1/the-name-of-a-file"
+  # "solr-9.1.0/name-of-file"
   #
 ```
 
-...and that's it, Solr is now available on your machine under the `solr-8.4.1` folder. Most of the utilities that we will use in this tutorial are under the `solr-8.4.1/bin` folder.
+TODO: Add instructions for Windows users (no curl, no tar)
+
+...and that's it, Solr is now available on your machine under the `solr-9.1.0` folder. Most of the utilities that we will use in this tutorial are under the `solr-9.1.0/bin` folder.
 
 First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr status
 
   #
@@ -178,12 +171,12 @@ The "No Solr nodes are running" message is a bit anticlimactic but it's exactly 
 To start Solr run the `solr` script again but with the `start` parameter:
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr start
 
   # [a couple of WARN messages plus...]
   #
-  # Waiting up to 180 seconds to see Solr running on port 8983 [/]  
+  # Waiting up to 180 seconds to see Solr running on port 8983 [/]
   # Started Solr server on port 8983 (pid=31160). Happy searching!
   #
 ```
@@ -195,18 +188,18 @@ You can validate this by opening your browser and going to http://localhost:8983
 You can also issue the `status` command again from the Terminal and Solr will report something like this:
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr status
 
-  # Found 1 Solr nodes: 
-  # 
+  # Found 1 Solr nodes:
+  #
   # Solr process 31160 running on port 8983
   # {
-  #   "solr_home":"/Users/your-username/solr-8.4.1/server/solr",
-  #   "version":"8.4.1 832bf13dd9187095831caf69783179d41059d013 - ishan - 2020-01-10 13:40:28",
-  #   "startTime":"2020-02-23T21:31:36.602Z",
-  #   "uptime":"0 days, 0 hours, 1 minutes, 44 seconds",
-  #   "memory":"83.9 MB (%16.4) of 512 MB"}
+  #   "solr_home":"/Users/correah/solr-9.1.0/server/solr",
+  #   "version":"9.1.0 aa4f3d98ab19c201e7f3c74cd14c99174148616d - ishan - 2022-11-11 13:00:47",
+  #   "startTime":"2022-12-16T20:38:57.688Z",
+  #   "uptime":"0 days, 0 hours, 0 minutes, 35 seconds",
+  #   "memory":"99.1 MB (%19.4) of 512 MB"}
   #
 ```
 
@@ -215,21 +208,21 @@ Notice how Solr now reports that it has "Found 1 Solr node". Yay!
 
 ### Adding Solr to your path (optional)
 
-In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-8.4.1`) you can run the following commands:
+In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-9.1.0`) you can run the following commands:
 
 ```
 $ cd
-$ PATH=~/solr-8.4.1/bin:$PATH
+$ PATH=~/solr-9.1.0/bin:$PATH
 $ which solr
 
   #
-  # /your-home-folder/solr-8.4.1/bin/solr
+  # /your-home-folder/solr-9.1.0/bin/solr
   #
 ```
 
 Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
 
-If you don't do this you will need to `cd` into the `~/solr-8.4.1/bin` folder before executing these commands or make sure that you always refer to Solr with the full path, for example `~/solr-8.4.1/bin/solr`.
+If you don't do this you will need to `cd` into the `~/solr-9.1.0/bin` folder before executing these commands or make sure that you always refer to Solr with the full path, for example `~/solr-9.1.0/bin/solr`.
 
 
 ## Creating our first Solr core
@@ -241,16 +234,16 @@ we configure data schemas and store data. This is similar to the concept of a
 For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr create -c bibdata
 
-  # WARNING: Using _default configset with data driven schema functionality. 
+  # WARNING: Using _default configset with data driven schema functionality.
   # NOT RECOMMENDED for production use.
   #
   #           To turn off: bin/solr config -c bibdata -p 8983 -action set-user-property -property update.autoCreateFields -value false
-  # 
+  #
   # Created new core 'bibdata'
-  # 
+  #
 ```
 
 Now we have a new core available to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
@@ -282,7 +275,7 @@ in either case you'll see `"numFound":0` indicating that there are no documents 
 Now let's add a few documents to our `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file:
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 
   #
@@ -309,7 +302,7 @@ Then, import this file to our `bibdata` core with the `post` utility that Solr
 provides out of the box (Windows users see note below):
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./post -c bibdata books.json
 
   #
@@ -345,7 +338,7 @@ Notice how the number of documents found is greater than zero (e.g. `"numFound":
 **Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder in Solr that we can use in Windows. Here is what you'll need to to:
 
 ```
-> cd C:\Users\you\solr-8.4.1\examples\exampledocs
+> cd C:\Users\you\solr-9.1.0\examples\exampledocs
 > curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
 > java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
 
@@ -556,10 +549,21 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000034'
   #
 ```
 
-The second option to update a document in Solr is to via [atomic updates](https://lucene.apache.org/solr/guide/8_4/updating-parts-of-documents.html) in which we can indicate what fields of the document will be updated. Details of this method are out of scope for this tutorial but below is a very simple example to show the basic syntax, notice how we are using the `set` parameter in the `title_txt_en` field to indicate a different kind of update: 
+The second option to update a document in Solr is to via [atomic updates](https://lucene.apache.org/solr/guide/8_4/updating-parts-of-documents.html) in which we can indicate what fields of the document will be updated. Details of this method are out of scope for this tutorial but below is a very simple example to show the basic syntax, notice how we are using the `set` parameter in the `title_txt_en` field to indicate a different kind of update:
 
 ```
-$ curl -X POST --data '[{"id":"00000043","title_txt_en":{"set":"the new title for 00000043"}}]' 'http://localhost:8983/solr/bibdata/update?commit=true'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000017'
+  #
+  # title will say "Child verse; poems grave and gay"
+  #
+
+$ curl -X POST --data '[{"id":"00000017","title_txt_en":{"set":"the new title for 00000017"}}]' 'http://localhost:8983/solr/bibdata/update?commit=true'
+
+$ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000017'
+  #
+  # title will say "the new title for 00000017"
+  #
+...
 ```
 
 
@@ -579,7 +583,7 @@ Be aware that even if you delete all documents from a Solr core the schema and t
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr delete -c bibdata
 ```
 
@@ -996,7 +1000,7 @@ Let's customize our schema a little bit to get the most out of Solr.
 Let's begin by recreating our Solr core so that we have a clean slate.
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./solr delete -c bibdata
 $ ./solr create -c bibdata
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
@@ -1098,7 +1102,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 Now that we have configured our schema with a few specific field definitions let's re-import the data so that fields are indexed using the new configuration.
 
 ```
-$ cd ~/solr-8.4.1/bin
+$ cd ~/solr-9.1.0/bin
 $ ./post -c bibdata books.json
 ```
 
@@ -1808,9 +1812,9 @@ For example to use our newly defined `custom_search_field` in a query we could p
 q={! qf=$custom_search_field}teachers
 ```
 
-The syntax to use local parameters and dereferencing looks a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`. 
+The syntax to use local parameters and dereferencing looks a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`.
 
-**Note:** Please be aware that support for Local Params and Dereferencing was [restricted significantly starting in Solr 7.2](https://lucene.apache.org/solr/guide/7_5/solr-upgrade-notes.html#solr-7-2). 
+**Note:** Please be aware that support for Local Params and Dereferencing was [restricted significantly starting in Solr 7.2](https://lucene.apache.org/solr/guide/7_5/solr-upgrade-notes.html#solr-7-2).
 
 
 ### Search Components
