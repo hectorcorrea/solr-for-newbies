@@ -73,210 +73,129 @@ But Lucene is a Java Library than can only be used from other Java programs. Sol
 
 In this diagram the *client application* could be a program written in Ruby or Python. In fact, as we will see throughout this tutorial, it can also be a system utility like cURL or a web browser. Anything that can submit HTTP requests can communicate with Solr.
 
+
 ## Installing Solr for the first time
 
-### Prerequisites
+To install Solr we are going to use another tool called Docker that allows us to download small virtual machines (called containers) with pre-installed software. In our case we'll download a container with Solr 9.1.0 installed on it and use that during the workshop.
 
-To run Solr on your machine you need to have the Java Development Kit (JDK)
-installed. The version of Solr that we'll use in this tutorial requires a recent version of Java (Java 8 or greater). To verify if the JDK is installed run the following command from the Terminal (aka Command Prompt if you are on Windows):
+To start, go to https://www.docker.com/, download the "Docker Desktop", and install it.
+
+Once installed run the following command from the terminal to make sure it's running:
 
 ```
-$ java -version
+$ docker ps
 
   #
-  # java version "11.0.2" 2019-01-15 LTS
-  # Java(TM) SE Runtime Environment 18.9 (build 11.0.2+9-LTS)
-  # Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.2+9-LTS, mixed mode)
-  #
+  # You'll see something like this
+  # CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
 
-If the JDK is installed on your machine you'll see the text indicating
-the version that you have (e.g. "11.0.2" above). If the version number is "11.x", "10.x", "9.x" or "1.8" you should be OK, otherwise, follow the steps below to install a recent version.
-
-If you don't have the JDK installed you'll see something like
+If Docker is *not* running we'll see an error that will indicate something along the lines of
 
 ```
-  #
-  # -bash: java: command not found
-  #
+Error response from daemon: dial unix docker.raw.sock: connect: connection refused
 ```
 
-**Note for Mac users:** After running the `java -version` command above if the JDK is not installed OS X might give a prompt indicating that "to use the java command-line tool you need to install a JDK" and instructions on how to install it. Those instructions are listed below.
-
-If a recent version of Java *is installed* on your machine skip the "Installing Java" section below and jump to the "Installing Solr" section. If Java *is not installed* on your machine or you have an old version follow the steps below to install a recent version.
+If we see this error it could be that the Docker Desktop app has not fully started. Wait a few seconds and try again. We can also open the "Docker Desktop" app and see its status.
 
 
-### Installing Java
+### Creating a Solr container
 
-To install the Java Development Kit (JDK) go to [ http://www.oracle.com/technetwork/java/javase/downloads/index.html](https://www.oracle.com/java/technologies/downloads/) and download the JDK for your operating system.
-
-For macOS download the ".dmg" file (`jdk-19_macos-x64_bin.dmg `) and for Windows download the ".exe" file (`jdk-19_windows-x64_bin.exe`). Accept the license and download the file.
-
-Run the installer that you downloaded and follow the instructions on screen. Once the installer has completed run the `java -version` command again. You should see the text with the Java version number this time.
-
-
-### Installing Solr
-
-Once Java has been installed on your machine to install Solr you just need to *download* a zip file, *unzip* it on your machine, and run it.
-
-You can download Solr from the [Apache Solr](https://solr.apache.org/) web site. To make it easy, below are the steps to download and install version 8.4 which is the one that we will be using.
-
-First, download Solr and save it to a file on your machine:
+Once Docker has been installed and it's up and running we can create a container to host Solr 9.1.0 with the following command:
 
 ```
-$ cd
-$ curl https://archive.apache.org/dist/solr/solr/9.1.0/solr-9.1.0.tgz > solr-9.1.0.tgz
+$ docker run -d -p 8983:8983 --name solr-container solr:9.1.0
 
   #
   # You'll see something like this...
-  #  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-  #                                 Dload  Upload   Total   Spent    Left  Speed
-  # 100  219M  100  219M    0     0  15.4M      0  0:00:14  0:00:14 --:--:-- 17.4M
+  #
+  # Unable to find image 'solr:9.1.0' locally
+  # 9.1.0: Pulling from library/solr
+  # 846c0b181fff: Pull complete
+  # ...
+  # fc8f2125142b: Pull complete
+  # Digest: sha256:971cd7a5c682390f8b1541ef74a8fd64d56c6a36e5c0849f6b48210a47b16fa2
+  # Status: Downloaded newer image for solr:9.1.0
+  # 47e8cd4d281db5a19e7bfc98ee02ca73e19af66e392e5d8d3532938af5a76e96
+
 ```
 
-Then extract the downloaded file with the following command:
+The parameter `-d` the previous command tells Docker to run the container in the background (i.e. detached) and the parameter `-p 8983:8983` tells Docker to forwards calls to *our* local port `8983` to the port `8983` on the container.
+
+We can check that the new container is running with the following command:
 
 ```
-$ tar -xvzf solr-9.1.0.tgz
+$ docker ps -f name=solr-container
 
   #
-  # A ton of information will be displayed here as Solr is being
-  # decompressed/unzipped. Most of the lines will say something like
-  # "solr-9.1.0/name-of-file"
+  # You'll see something like this...
   #
+  # CONTAINER ID   IMAGE        COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+  # 47e8cd4d281d   solr:9.1.0   "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:8983->8983/tcp, :::8983->8983/tcp   solr-container
 ```
 
-TODO: Add instructions for Windows users (no curl, no tar)
-
-...and that's it, Solr is now available on your machine under the `solr-9.1.0` folder. Most of the utilities that we will use in this tutorial are under the `solr-9.1.0/bin` folder.
-
-First, let's make sure we can run Solr by executing the `solr` shell script with the `status` parameter:
+Notice that now we have a container NAMED `solr-container` using the IMAGE `solr:9.1.0`. We can check the status of Solr with the following command:
 
 ```
-$ cd ~/solr-9.1.0/bin
-$ ./solr status
-
-  #
-  # No Solr nodes are running.
-  #
-```
-
-The "No Solr nodes are running" message is a bit anticlimactic but it's exactly what we want since it indicates that Solr is ready to be run.
-
-**Note for Windows users:** In Windows use the `solr.cmd` batch file instead of the `solr` shell script, in other words, use `solr.cmd status` instead of `./solr status`.
-
-
-### Let's get Solr started
-
-To start Solr run the `solr` script again but with the `start` parameter:
-
-```
-$ cd ~/solr-9.1.0/bin
-$ ./solr start
-
-  # [a couple of WARN messages plus...]
-  #
-  # Waiting up to 180 seconds to see Solr running on port 8983 [/]
-  # Started Solr server on port 8983 (pid=31160). Happy searching!
-  #
-```
-
-Notice that the message says that Solr is now running on port `8983`.
-
-You can validate this by opening your browser and going to http://localhost:8983/. This will display the Solr Admin page from where you can perform administrative tasks as well as add, update, and query data from Solr.
-
-You can also issue the `status` command again from the Terminal and Solr will report something like this:
-
-```
-$ cd ~/solr-9.1.0/bin
-$ ./solr status
+$ docker exec -it solr-container solr status
 
   # Found 1 Solr nodes:
   #
-  # Solr process 31160 running on port 8983
+  # Solr process 15 running on port 8983
   # {
-  #   "solr_home":"/Users/correah/solr-9.1.0/server/solr",
+  #   "solr_home":"/var/solr/data",
   #   "version":"9.1.0 aa4f3d98ab19c201e7f3c74cd14c99174148616d - ishan - 2022-11-11 13:00:47",
-  #   "startTime":"2022-12-16T20:38:57.688Z",
-  #   "uptime":"0 days, 0 hours, 0 minutes, 35 seconds",
-  #   "memory":"99.1 MB (%19.4) of 512 MB"}
-  #
+  #   "startTime":"2023-01-12T20:48:46.084Z",
+  #   "uptime":"0 days, 0 hours, 9 minutes, 15 seconds",
+  #   "memory":"178.3 MB (%34.8) of 512 MB"}
 ```
 
-Notice how Solr now reports that it has "Found 1 Solr node". Yay!
+We can also see Solr running by pointing your browser to http://localhost:8983/solr/ which will show the Solr Admin web page. In this page we can see that we do not have any cores defined to store data, we'll fix that in the next section. WARNING: Do not attempt to create a Solr cores via "Add Core" button in the Solr Admin page -- that button only leads to pain.
 
 
-### Adding Solr to your path (optional)
+### Creating our first Solr core
 
-In the previous examples we always made sure we were at the Solr `bin` folder in order to run the Solr commands. You can eliminate this step by making sure Solr is in your PATH. For example if Solr is installed on your home folder (`~/solr-9.1.0`) you can run the following commands:
+Solr uses the concept of *cores* to represent independent environments in which we configure data schemas and store data. This is similar to the concept of a "database" in MySQL or PostgreSQL.
 
-```
-$ cd
-$ PATH=~/solr-9.1.0/bin:$PATH
-$ which solr
-
-  #
-  # /your-home-folder/solr-9.1.0/bin/solr
-  #
-```
-
-Notice that setting the PATH this way will make it available for your *current* Terminal session. You might want to edit the PATH setting in your `~/.bash_profile` or `~/.bashrc` to make the change permanent.
-
-If you don't do this you will need to `cd` into the `~/solr-9.1.0/bin` folder before executing these commands or make sure that you always refer to Solr with the full path, for example `~/solr-9.1.0/bin/solr`.
-
-
-## Creating our first Solr core
-
-Solr uses the concept of *cores* to represent independent environments in which
-we configure data schemas and store data. This is similar to the concept of a
-"database" in MySQL or PostgreSQL.
-
-For our purposes, let's create a core named `bibdata` as follows (notice these commands require that Solr be running, if you stopped it, make sure you run `solr start` first)
+For our purposes, let's create a core named `bibdata` with the following command:
 
 ```
-$ cd ~/solr-9.1.0/bin
-$ ./solr create -c bibdata
+$ docker exec -it solr-container solr create_core -c bibdata
 
-  # WARNING: Using _default configset with data driven schema functionality.
-  # NOT RECOMMENDED for production use.
   #
-  #           To turn off: bin/solr config -c bibdata -p 8983 -action set-user-property -property update.autoCreateFields -value false
+  # WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use.
+  #          To turn off: bin/solr config -c bibdata -p 8983 -action set-user-property -property update.autoCreateFields -value false
   #
   # Created new core 'bibdata'
-  #
 ```
 
-Now we have a new core available to store documents. We'll ignore the warning because we are not in production, but we'll discuss this later on.
+If we go back to http://localhost:8983/solr/ on our browser (we might need to refresh the page) we should see our newly created `bibdata` core available in the "Core Selector" dropdown list.
 
-For now our core is empty (since we haven't added any thing to it) and you can check this with the following command from the terminal:
+Now that our core has been created we can query it with the following command:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 
   #
   # {
-  #  "responseHeader":{
-  #    "status":0,
-  #    "QTime":0,
-  #    "params":{
-  #      "q":"*:*"}},
-  #  "response":{"numFound":0,"start":0,"docs":[]
-  #  }}
-  #
+  # "responseHeader":{
+  #   "status":0,
+  #   "QTime":0,
+  #   "params":{
+  #     "q":"*"}},
+  # "response":{"numFound":0,"start":0,"numFoundExact":true,"docs":[]
+  # }}
 ```
 
-(or you can also point your browser to http://localhost:8983/solr#bibdata/query and click the "Execute Query" button at the bottom of the page)
-
-in either case you'll see `"numFound":0` indicating that there are no documents on it.
+and we'll see `"numFound":0` indicating that there are no documents on it. We can also point our browser to http://localhost:8983/solr#bibdata/query and click the "Execute Query" button at the bottom of the page and see the same result.
 
 
-## Adding documents to Solr
+### Adding documents to Solr
 
-Now let's add a few documents to our `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json) file:
+Now let's add a few documents to our `bibdata` core. First, [download this sample data](https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/main/books.json) file:
 
 ```
-$ cd ~/solr-9.1.0/bin
-$ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
+$ curl -OL https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/main/books.json
 
   #
   # You'll see something like this...
@@ -286,8 +205,7 @@ $ curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/b
   #
 ```
 
-File `books.json` contains a small sample data a set with information about a
-few thousand books. You can take a look at it via `cat books.json` or using the text editor of your choice. Below is an example on one of the books in this file:
+File `books.json` contains a small sample data a set with information about a few thousand books. We can take a look at it with something like `head books.json` or using the text editor of our choice. Below is an example on one of the books in this file:
 
 ```
 {
@@ -298,58 +216,47 @@ few thousand books. You can take a look at it via `cat books.json` or using the 
 }
 ```
 
-Then, import this file to our `bibdata` core with the `post` utility that Solr
-provides out of the box (Windows users see note below):
+To import this data to our Solr we'll first *copy* the file to the Docker container
 
 ```
-$ cd ~/solr-9.1.0/bin
-$ ./post -c bibdata books.json
+$ docker cp books.json solr-container:/opt/solr-9.1.0/books.json
+```
+
+and then we *load it* to Solr:
+
+```
+$ docker exec -it solr-container post -c bibdata books.json
 
   #
-  # (some text here...)
+  # /opt/java/openjdk/bin/java -classpath /opt/solr/server/solr-webapp/webapp/WEB-INF/lib/solr-core-9.1.0.jar ...
+  # SimplePostTool version 5.0.0
+  # Posting files to [base] url http://localhost:8983/solr/bibdata/update...
   # POSTing file books.json (application/json) to [base]/json/docs
   # 1 files indexed.
   # COMMITting Solr index changes to http://localhost:8983/solr/bibdata/update...
-  # Time spent: 0:00:00.324
+  # Time spent: 0:00:01.951
+```
+
+Now if we re-run our query we should see some results:
+
+```
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*'
+
   #
-```
-
-Now if we run our query again we should see some results
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*:*'
-
-  # Response would be something like...
   # {
-  #   "responseHeader":{
-  #     "status":0,
-  #     "QTime":36,
-  #     "params":{
-  #       "q":"*:*"}},
-  #   "response":{"numFound":10000,"start":0,"docs":[
-  #       ... lots of information will display here ...
-  #     ]}
-  # }
+  #  "responseHeader":{
+  #    "status":0,
+  #    "QTime":0,
+  #    "params":{
+  #      "q":"*"}},
+  #  "response":{"numFound":10000,"start":0,"numFoundExact":true,"docs":[
+  #      {
+  #      ...the information for the first 10 documents will be displayed here..
   #
 ```
 
 Notice how the number of documents found is greater than zero (e.g. `"numFound":10000`)
 
-**Note for Windows users:** Unfortunately the `post` utility that comes out the box with Solr only works for Linux and Mac. However, there is another `post` utility buried under the `exampledocs` folder in Solr that we can use in Windows. Here is what you'll need to to:
-
-```
-> cd C:\Users\you\solr-9.1.0\examples\exampledocs
-> curl 'https://raw.githubusercontent.com/hectorcorrea/solr-for-newbies/master/books.json' > books.json
-> java -Dtype=application/json -Dc=bibdata -jar post.jar books.json
-
-  #
-  # you should see something along the lines of
-  #
-  # POSTing file books.json
-  # 1 files indexed
-  # COMMITting Solr index changes to http://...
-  #
-```
 
 ## Searching for documents
 
@@ -562,6 +469,7 @@ $ curl -X POST --data '[{"id":"00000017","title_txt_en":{"set":"the new title fo
 $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00000017'
   #
   # title will say "the new title for 00000017"
+  # and the rest of the fields will remain unchanged
   #
 ...
 ```
@@ -583,8 +491,10 @@ Be aware that even if you delete all documents from a Solr core the schema and t
 If you want to delete the entire core (documents, schema, and other configuration associated with it) you can use the Solr delete command instead:
 
 ```
-$ cd ~/solr-9.1.0/bin
-$ ./solr delete -c bibdata
+$ docker exec -it solr-container solr delete -c bibdata
+
+  # Deleting core 'bibdata' using command:
+  # http://localhost:8983/solr/admin/cores?action=UNLOAD&core=bibdata&deleteIndex=true&deleteDataDir=true&deleteInstanceDir=true
 ```
 
 You will need to re-create the core if you want to re-import data to it.
@@ -1572,14 +1482,14 @@ Notice how the `highlighting` property includes the `id` of each document in the
 
 ## Solr directories
 
-In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-8.4.1.zip` file.
+In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-9.1.0.tgz` file.
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-8.4.1/` with several directories underneath:
+Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-9.1.0/` with several directories underneath:
 
 ```
-~/solr-8.4.1/
+~/solr-9.1.0/
 |-- bin/
-|-- dist/
+|-- docker/
 |-- example/
 |-- server/
     |-- solr/
@@ -1588,7 +1498,7 @@ Assuming we unzipped this zip file in our home directory we would have a folder 
 
 Directory `bin/` contains the scripts to start/stop Solr and post data to it.
 
-Directory `dist/` contains the Java Archive (JAR) files. These are the binaries that make up Solr.
+Directory `docker/` contains files to create a local Solr from source. More information https://solr.apache.org/guide/solr/latest/deployment-guide/solr-in-docker.html
 
 Directory `example/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
 
@@ -1602,7 +1512,7 @@ Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that
 As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
 
 ```
-~/solr-8.4.1/
+~/solr-9.1.0/
 |-- server/
     |-- solr/
         |-- bibdata/
