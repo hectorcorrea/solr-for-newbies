@@ -34,23 +34,24 @@ Search engines like Solr use a data structure called [inverted index](https://en
 Let's illustrate this with an example. Suppose we have three books that we want to index. With a traditional index we would create something like this:
 
 ```
-ID      TITLE
---      ----------------
-1       DC guide for dogs
-2       DC tour guide
-3       cats and dogs
+ID          TITLE
+--          ------------------------------
+1           Princeton guide for dog owners
+2           Princeton tour guide
+3           Cats and dogs
 ```
 
 With an inverted index Solr would take each of the words in the title of our books and use those words as the index key:
 
 ```
-KEY     DOCUMENT ID
-----    -----------------
-DC      1, 2
-guide   1, 2
-dogs    1, 3
-tour    2
-cats    3
+KEY         DOCUMENT ID
+---------   -----------
+princeton	  1, 2
+owners	    1
+dogs	      1, 3
+guide	      1, 2
+tour	      2
+cats	      3
 ```
 
 Notice that the inverted index allow us to do searches for individual *words within the title*. For example a search for the word "guide" immediately tell us that documents 1 and 2 are a match. Likewise a search for "tour" will tells that document 2 is a match.
@@ -76,7 +77,7 @@ In this diagram the *client application* could be a program written in Ruby or P
 
 ## Installing Solr for the first time
 
-To install Solr we are going to use another tool called Docker that allows us to download small virtual machines (called containers) with pre-installed software. In our case we'll download a container with Solr 9.1.0 installed on it and use that during the workshop.
+To install Solr we are going to use a tool called Docker that allows us to download small virtual machines (called containers) with pre-installed software. In our case we'll download a container with Solr 9.1.0 installed on it and use that during the workshop.
 
 To start, go to https://www.docker.com/, download the "Docker Desktop", and install it.
 
@@ -723,28 +724,28 @@ We can customize field type definitions to use different filters and tokenizers 
 
 ### Tokenizers
 
-For most purposes we can think of a tokenizer as something that splits a given text into individual tokens or words. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/tokenizers.html) defines Tokenizers as follows:
+For most purposes we can think of a tokenizer as something that splits a given text into individual tokens or words. The [Solr Reference Guide](https://solr.apache.org/guide/solr/9_0/indexing-guide/tokenizers.html) defines Tokenizers as follows:
 
     Tokenizers are responsible for breaking
     field data into lexical units, or tokens.
 
 For example if we give the text "hello world" to a tokenizer it might split the text into two tokens like "hello" and "word".
 
-Solr comes with several [built-in tokenizers](https://lucene.apache.org/solr/guide/8_4/tokenizers.html) that handle a variety of data. For example if we expect a field to have information about a person's name the [Standard Tokenizer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html#standard-tokenizer) might be appropriated for it. However, for a field that contains e-mail addresses the [UAX29 URL Email Tokenizer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html#uax29-url-email-tokenizer) might be a better option.
+Solr comes with several [built-in tokenizers](https://solr.apache.org/guide/solr/9_0/indexing-guide/tokenizers.html) that handle a variety of data. For example if we expect a field to have information about a person's name the [Standard Tokenizer](https://solr.apache.org/guide/solr/9_0/indexing-guide/tokenizers.html#standard-tokenizer) might be appropriated for it. However, for a field that contains e-mail addresses the [UAX29 URL Email Tokenizer](https://solr.apache.org/guide/solr/9_0/indexing-guide/tokenizers.html#uax29-url-email-tokenizer) might be a better option.
 
-You can only have [one tokenizer per analyzer](https://lucene.apache.org/solr/guide/8_4/tokenizers.html)
+You can only have [one tokenizer per analyzer](https://solr.apache.org/guide/solr/9_0/indexing-guide/tokenizers.html)
 
 
 ### Filters
 
-Whereas a `tokenizer` takes a string of text and produces a set of tokens, a `filter` takes a set of tokens, process them, and produces a different set of tokens. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/about-filters.html) says that
+Whereas a `tokenizer` takes a string of text and produces a set of tokens, a `filter` takes a set of tokens, process them, and produces a different set of tokens. The [Solr Reference Guide](https://solr.apache.org/guide/solr/9_0/indexing-guide/filters.html) says that
 
     in most cases a filter looks at each token in the stream sequentially
     and decides whether to pass it along, replace it or discard it.
 
 Notice that unlike tokenizers, whose job is to split text into tokens, the job of filters is a bit more complex since they might replace the token with a new one or discard it altogether.
 
-Solr comes with many [built-in Filters](https://lucene.apache.org/solr/guide/8_4/filter-descriptions.html) that we can use to perform useful transformations. For example the ASCII Folding Filter converts non-ASCII characters to their ASCII equivalent (e.g. "México" is converted to "Mexico"). Likewise the English Possessive Filter removes singular possessives (trailing 's) from words. Another useful filter is the Porter Stem Filter that calculates word stems using English language rules (e.g. both "jumping" and "jumped" will be reduced to "jump".)
+Solr comes with many [built-in Filters](https://solr.apache.org/guide/solr/9_0/indexing-guide/filters.html) that we can use to perform useful transformations. For example the ASCII Folding Filter converts non-ASCII characters to their ASCII equivalent (e.g. "México" is converted to "Mexico"). Likewise the English Possessive Filter removes singular possessives (trailing 's) from words. Another useful filter is the Porter Stem Filter that calculates word stems using English language rules (e.g. both "jumping" and "jumped" will be reduced to "jump".)
 
 
 ### Putting it all together
@@ -755,7 +756,7 @@ That means that if we *index* the text "The Television is Broken!" in a `text_en
 
 Likewise, the definition for `text_en` included the additional filter `SynonymGraphFilter` at *query time*. So if we were to *query* for the text "The TV is Broken!" Solr will run this text through the filters indicated in the `queryAnalyzer` section and generate the following tokens: "televis", "tv", and "broken". Notice that an additional transformation was done to this text, namely, the word "TV" was expanded to its synonyms. This is because the `queryAnalyzer` uses the `SynonymGraphFilter` and a standard Solr configuration comes with those synonyms predefined in the `synonyms.txt` file.
 
-The [Analysis Screen](https://lucene.apache.org/solr/guide/8_4/analysis-screen.html) in the Solr Admin tool is a great way to see how a particular text is either indexed or queried by Solr *depending on the field type*. Point your browser to http://localhost:8983/solr/#/bibdata/analysis and try the following examples:
+The [Analysis Screen](https://solr.apache.org/guide/solr/9_0/indexing-guide/analysis-screen.html) in the Solr Admin tool is a great way to see how a particular text is either indexed or queried by Solr *depending on the field type*. Point your browser to http://localhost:8983/solr/#/bibdata/analysis and try the following examples:
 
 Here are a few examples to try:
 
@@ -803,99 +804,14 @@ The data for this section was taken from this [blog post](https://opensourceconn
 
 ## Stored vs indexed fields (optional)
 
-There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both. Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter). Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter). Technically is also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond the scope of this tutorial.
+There are two properties on a Solr field that control whether its values are `stored`, `indexed`, or both.
 
-For example, let's say that we add the following fields to our Solr core:
+* Fields that are *stored but not indexed* can be fetched once a document has been found, but you cannot search by those fields (i.e. you cannot reference them in the `q` parameter).
+* Fields that are *indexed but not stored* are the reverse, you can search by them but you cannot fetch their values once a document has been found (i.e. you cannot reference them in the `fl` parameter).
 
-* f_stored: a field stored but not indexed
-* f_indexed: a field indexed but not stored
-* f_both: a field both indexed and stored
+Technically it's also possible to [add a field that is neither stored nor indexed](https://stackoverflow.com/a/22298265/446681) but that's beyond the scope of this tutorial.
 
-Create `f_stored` field:
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-    "name":"f_stored",
-    "type":"text_general",
-    "multiValued":false,
-    "stored":true,
-    "indexed":false
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-Create `f_indexed` field:
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-    "name":"f_indexed",
-    "type":"text_general",
-    "multiValued":false,
-    "stored":false,
-    "indexed":true
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-Create `f_both` field:
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '{
-  "add-field":{
-    "name":"f_both",
-    "type":"text_general",
-    "multiValued":false,
-    "stored":true,
-    "indexed":true
-  }
-}' http://localhost:8983/solr/bibdata/schema
-```
-
-And now let's add a document with data for these new fields:
-
-```
-$ curl -X POST -H 'Content-type:application/json' --data-binary '[{
-  "id": "f_demo",
-  "f_stored": "stored",
-  "f_indexed": "indexed",
-  "f_both": "both",
-  "name": "test stored vs indexed fields"
-}]' http://localhost:8983/solr/bibdata/update?commit=true
-```
-
-If we query for this document notice how `f_stored` and `f_both` will be fetched but *not* `f_indexed` (even though we list it in the `fl` parameter) because `f_indexed` is not stored.
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=id:f_demo&fl=id,f_indexed,f_stored,f_both'
-
-  # "response":{"numFound":1,"start":0,"docs":[
-  # {
-  #   "id":"f_demo",
-  #   "f_stored":"stored",
-  #   "f_both":"both"}]
-  # }}
-```
-
-Keep in mind that we can search by `f_indexed` because it is indexed:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=f_indexed:indexed'
-
-  # will find the document, but again, the value of field f_indexed
-  # will not be included in results.
-```
-
-Notice that even though we are able to fetch the value for the `f_stored` field we cannot use it for searches:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=f_stored:stored'
-
-  # will return no results
-  #   "response":{"numFound":0,"start":0,"docs":[]
-```
-
-Lastly, our indexed and stored field (`f_both`) can be searched for and fetched.
-
-There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values. Conversely, perhaps we want to create a field with a combination of values and search on that field but we don't want to display it to the users (the default `_text_` field in our schema is such an example).
+There are many reasons to toggle the stored and indexed properties of a field. For example, perhaps we want to store a complex object as string in Solr so that we can display it to the user but we really don't want to index its values because we don't expect to ever search by this field. Conversely, perhaps we want to create a field with a combination of values to optimize a particular kind of search, but we don't want to display it to the users (the default `_text_` field in our schema is such an example).
 
 
 ## Customizing our schema
@@ -1068,17 +984,13 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=authors_all_txts_en:Gallop'
 
 
 ## What are others doing
-There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://lucene.apache.org/solr/guide/8_4/files-screen.html). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
+There are lots of pre-defined dynamic fields in a standard Solr installation as you can see in the `managed-schema` file under the [Files Screen](https://solr.apache.org/guide/solr/9_0/configuration-guide/configuration-files.html#files-screen). You can also see at the `schema.xml` for some of the open source projects that are using Solr.
 
 Here are a few examples:
 
-* [Brown University Library Catalog](https://github.com/Brown-University-Library/bul-traject/blob/master/solr7/) - a Blacklight app
-
-* [Penn State ScholarSphere](https://github.com/psu-stewardship/scholarsphere/blob/develop/solr/config/schema.xml) - a Hydra/SamVera app
-
-* [Princeton University Library](https://github.com/pulibrary/pul_solr/blob/master/solr_configs/catalog-production/conf/schema.xml) - a Blacklight app
-
-* [Stanford University Digital Library](https://github.com/sul-dlss/sul-solr-configs) - lots of Solr configuration settings for many of their projects.
+* [Penn State ScholarSphere](https://github.com/psu-libraries/scholarsphere/tree/main/solr/conf)
+* [Princeton University Library](https://github.com/pulibrary/pul_solr/tree/main/solr_configs)
+* [Stanford University Digital Library](https://github.com/sul-dlss/sul-solr-configs)
 
 
 <div style="page-break-after: always;"></div>
@@ -1555,19 +1467,21 @@ $ curl 'http://localhost:8983/solr/bibdata/schema/fieldtypes/text_en'
 
 Notice how one of the filter uses the `SynonymGraphFilterFactory` to handle synonyms and references a file `synonyms.txt`.
 
-The file `synonyms.txt` can be found on the configuration folder for our `bibdata` core under `~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt` If you take a look at the contents of this file you'll see a definition for synonyms for "television"
+You can view the contents of the `synonyms.txt` file for our `bibdata` core through the Files option in the Solr Admin web page: http://localhost:8983/solr/#/bibdata/files?file=synonyms.txt
+
+The contents of this file looks more or less like this:
 
 ```
-$ cat ~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt
+  # Some synonym groups specific to this example
+  GB,gib,gigabyte,gigabytes
+  MB,mib,megabyte,megabytes
+  Television, Televisions, TV, TVs
+  #notice we use "gib" instead of "GiB" so any WordDelimiterGraphFilter coming
+  #after us won't split it into two words.
 
-  #
-  # will include a few lines including
-  #
-  # GB,gib,gigabyte,gigabytes
-  # Television, Televisions, TV, TVs
-  #
+  # Synonym mappings can be used for spelling correction too
+  pixima => pixma
 ```
-
 
 ### Life without synonyms
 
@@ -1595,19 +1509,19 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt
 
 ### Adding synonyms
 
-We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `synonyms.txt` file by adding a like as follows:
+We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `synonyms.txt` file by adding a line as follows:
 
 ```
 20th,twentieth
 ```
 
-You can do this with your favorite editor or with a command like this:
+Because our Solr is running inside a Docker container we need to update the `synonyms.txt` through Docker. We can use a command like this:
 
 ```
-$ echo "20th,twentieth" >> ~/solr-8.4.1/server/solr/bibdata/conf/synonyms.txt
+$ docker exec -it solr-container /bin/bash -c 'echo "20th,twentieth" >> /var/solr/data/bibdata/conf/synonyms.txt'
 ```
 
-You *must reload your core* for the changes to the `synonyms.txt` to take effect. You can do this as follow:
+If we refresh the page http://localhost:8983/solr/#/bibdata/files?file=synonyms.txt on our browser we should see that the new line has been added to the `synonyms.txt` file.  However, we *must reload our core* for the changes to take effect. We can do this as follow:
 
 ```
 $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
@@ -1695,36 +1609,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=west'
 Be careful, an incorrect setting on the `solrconfig.xml` file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authors_all_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
 The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
-
-
-### LocalParams and dereferencing (optional)
-
-In addition to the standard parameters in a request handler we can also define custom settings and use them in our search queries. For example is possible to define a new setting (`custom_search_field`) to group a list of fields and their boost values as shown below:
-
-```
-<requestHandler name="/select" class="solr.SearchHandler">
-  <lst name="defaults">
-    ...
-  </lst>
-  <str name="custom_search_field">
-    title_txt_en^10
-    authors_all_txts_en^5
-    subjects_txts_en
-  </str>
-</requestHandler>
-```
-
-We can then use this new setting in our queries by using the [Local Parameters and Dereferencing](https://lucene.apache.org/solr/guide/8_4/local-parameters-in-queries.html) features of Solr.
-
-For example to use our newly defined `custom_search_field` in a query we could pass the following to Solr:
-
-```
-q={! qf=$custom_search_field}teachers
-```
-
-The syntax to use local parameters and dereferencing looks a bit scary at first since you have to pass your parameters in the following format: `{! key=value}` where `key` is the parameter that you want to pass and `value` the value to use for that parameter. Dereferencing (asking Solr use a pre-existing value rather than a literal) is triggered by prefixing the `value` with a `$` as in `{! key=$value}`.
-
-**Note:** Please be aware that support for Local Params and Dereferencing was [restricted significantly starting in Solr 7.2](https://lucene.apache.org/solr/guide/7_5/solr-upgrade-notes.html#solr-7-2).
 
 
 ### Search Components
@@ -1872,25 +1756,22 @@ Notice that even though we got zero results back (`numFound:0`), the response no
 
 ## Sources and where to find more
 
-* [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/)
+* [Solr Reference Guide](https://solr.apache.org/guide/solr/9_0/)
 * [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) by Trey Grainger and Timothy Potter
 * [Relevant search with applications for Solr and Elasticsearch](http://www.worldcat.org/title/relevant-search-with-applications-for-solr-and-elasticsearch/oclc/980984111) by Doug Turnbull and John Berryman
 
 
 ## Sample data
+File `books.json` contains roughly 30,000 books taken from the Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
 
-File `books.json` contains 10,000 books taken from Library of Congress' [MARC Distribution Services](https://www.loc.gov/cds/products/marcDist.php).
+The steps to create the `books.json` file from the original MARC data are as follow:
 
-The steps to create the `books.json` file from the MARC data are as follow:
-
-* Download file `BooksAll.2014.part01.utf8.gz` from https://www.loc.gov/cds/downloads/MDSConnect/BooksAll.2014.part01.utf8.gz.
+* Download file `BooksAll.2016.part01.utf8.gz` from https://www.loc.gov/cds/downloads/MDSConnect/BooksAll.2016.part01.utf8.gz.
 * Unzip it: `gzip -d BooksAll.2014.part01.utf8.gz`
-* Process the unzipped file with [marcli](https://github.com/hectorcorrea/marcli) with the following command: `./marcli --file BooksAll.2014.part01.utf8 -format solr > books.json`
+* Process the unzipped file with [marcli](https://github.com/hectorcorrea/marcli) with the following command: `marcli -file BooksAll.2016.part01.utf8 -match 2001 -matchFields 260 -format solr > books.json` to include only books published in 2001. The original MARC file has 250,000 books but the resulting file only includes 30,424 records.
 
-The MARC file has 250,000 books and therefore the resulting `books.json` will have 250,000 too. For the purposes of this tutorial I manually truncated the file to include only the first 10,000 books.
-
-`marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/master/processorSolr.go) file.
+`marcli` is a small utility program that I wrote in Go to parse MARC files. If you are interested in the part that generates the JSON out of the MARC record take a look at the [processorSolr.go](https://github.com/hectorcorrea/marcli/blob/main/cmd/marcli/solr.go) file.
 
 
 ## Acknowledgements
-I would like to thank my team at the Brown University Library for their support and recommendations as I prepared this tutorial as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018 and San Jose, CA in 2019. A special thank you goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly test each of the examples.
+I would like to thank my former team at the Brown University Library for their support and recommendations as I prepared the initial version of this tutorial back in 2017 as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018 and San Jose, CA in 2019. A special thanks goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly test each of the examples.
