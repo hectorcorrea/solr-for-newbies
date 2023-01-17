@@ -1226,45 +1226,6 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:\[00010500+TO+00012050\]'
 Be aware that range filtering with `string` fields would work as you would expect it to, but with `text_general` and `text_en` fields it will filter on the *terms indexed* not on the value of the field.
 
 
-### Minimum match (optional)
-
-In addition to using the `AND/OR` operators in our searches, the eDisMax parser provides a powerful feature called *minimum match* (`mm`) that allows for more flexible matching conditions than what we can do with just boolean operators.
-
-```
-The eDisMax query parser provides the ability to blur the lines of
-traditional Boolean logic through the use of the mm (minimum match)
-parameter. The mm parameter allows you to define either a specific
-number of terms or a percentage of terms in a query that must match
-in order for a document to be considered a match.
-- [Solr in Action, p. 228]
-```
-
-With the *minimum match* parameter is possible to tell Solr to consider a document a match if 75% of the terms searched for are found on it for all queries that have more than three words. For example, the following four word query `q=school teachers secondary classroom` on the title field (`qf=title_txt_en`) will return any document where at least 50% of the search terms are found (`mm=3<50%`):
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&fl=id,title_txt_en&mm=3%3C50%25&q=school%20teachers%20secondary%20classroom&qf=title_txt_en'
-
-  #
-  # results will include
-  #
-  # {
-  #   "id":"00010001",
-  #   "title_txt_en":["Succeeding in the secondary classroom : strategies for middle and high school teachers /"]},
-  # {
-  #   "id":"00002200",
-  #   "title_txt_en":["Aids to teachers of School chemistry."]},
-  # {
-  #   "id":"00020157",
-  #   "title_txt_en":["Standards in the classroom : how teachers and students negotiate learning /"]},
-  # {
-  #   "id":"00008378",
-  #   "title_txt_en":["Keys to the classroom : a teacher's guide to the first month of school /"]},
-  #
-```
-
-We can use more than one minimum match value in a single query. For example, we can indicate that if two words are entered in a query both of them are required, but if more than two words are entered we are OK if only 66% (2 out of 3 words) are found. The syntax for this kind of queries is a bit tricky, though (e.g. `mm=2<2&3<2`), check out the [Solr Guide](https://lucene.apache.org/solr/guide/8_4/the-dismax-query-parser.html#mm-minimum-should-match-parameter) for more information.
-
-
 ### Where to find more
 Searching is a large topic and complex topic. I've found the book "Relevant search with applications for Solr and Elasticsearch" (see references) to be a good conceptual reference with specifics on how to understand and configure Solr to improve search results. Chapter 3 on this book goes into great detail on how to read and understand the ranking of results.
 
@@ -1377,49 +1338,51 @@ Notice how the `highlighting` property includes the `id` of each document in the
 
 # PART IV: MISCELLANEOUS (optional)
 
-## Solr directories
+In the next sections we'll make a few changes to the configuration of our `bidata` core in order to enable some other features of Solr like synonyms and spell checking.
 
-In the next sections we'll make a few changes to the configuration of our `bidata` core. Before we do that let's take a look at the files and directories that were created when we unzipped the `solr-9.1.0.tgz` file.
+## Solr's directories and configuration files
 
-Assuming we unzipped this zip file in our home directory we would have a folder `~/solr-9.1.0/` with several directories underneath:
+In Linux, Solr is typically installed under the `/opt/solr` folder and the data for our cores is stored under the `/var/solr/data` folder. We can see this in our Docker container if we log into it.
 
-```
-~/solr-9.1.0/
-|-- bin/
-|-- docker/
-|-- example/
-|-- server/
-    |-- solr/
-    |-- solr-webapp/
-```
-
-Directory `bin/` contains the scripts to start/stop Solr and post data to it.
-
-Directory `docker/` contains files to create a local Solr from source. More information https://solr.apache.org/guide/solr/latest/deployment-guide/solr-in-docker.html
-
-Directory `example/` hold sample data that Solr provides out of the box. You should be able to import this data via the `post` tool like we did for our `bibdata` core.
-
-Directory `server/solr/` contains one folder for each of the cores defined by default. For example, there should be a `bibdata` folder here for our core.
-
-Directory `server/solr-webapp/` contains the code to power the "Solr Admin" that we see when we visit http://localhost:8983/solr/#/
-
-
-### Your bibdata core
-
-As noted above, our `bibdata` core is under the `server/solr/bibdata` folder. The structure of this folder is as follows:
+*Open a separate terminal window* and execute the following command to login into the container and see the files inside it:
 
 ```
-~/solr-9.1.0/
-|-- server/
-    |-- solr/
-        |-- bibdata/
-            |-- conf/
-            |-- data/
+$ docker exec -it solr-container /bin/bash
+$ ls -la
+
+  #
+  # You'll see something like this
+  #
+  # bin	    CHANGES.txt  docker   lib	    LICENSE.txt  NOTICE.txt	      README.txt
+  # books.json  contrib	 example  licenses  modules	 prometheus-exporter  server
+  #
 ```
 
-The `data` folder contains the data that Solr stores for this core. This is where the actual Solr/Lucene index is located. The only thing that you probably want to do with this folder is back it up regularly. Other than that, you should stay away from it :)
+While still on the Docker container issue a command as follow to see the files with the configuration for our `bibdata` core:
 
-The `conf` folder contains configuration files for this core. In the following sections we'll look at some of the files in this folder (e.g. `solrconfig.xml`, `managed-schema`, `stopwords.txt`, and `synonyms.txt`) and how they can be updated to configure different options in Solr.
+```
+$ ls -la /var/solr/data/bibdata/conf/
+
+  #
+  # You'll see something like this
+  #
+  # drwxr-xr-x 2 solr solr     4096 Nov 11 07:31 lang
+  # -rw-r--r-- 1 solr solr    26665 Jan 15 18:07 managed-schema.xml
+  # -rw-r--r-- 1 solr solr      873 Nov 11 07:31 protwords.txt
+  # -rw-r--r-- 1  503 dialout 48192 Jan 15 19:45 solrconfig.xml
+  # -rw-r--r-- 1 solr solr      781 Nov 11 07:31 stopwords.txt
+  # -rw-r--r-- 1 solr solr     1124 Nov 11 07:31 synonyms.txt
+```
+
+Notice the `solrconfig.xml`, `managed-schema.xml` and the `synonyms.txt` files. These are the files that we saw before under the "Files" option in the Solr Admin web page.
+
+File `managed-schema.xml` is where field definitions are declared. File `solrconfig.xml` is where we configure many of the features of Solr for our particular `bibdata` core. File `synonyms.txt` is where we define what words are considered synonyms and we'll look closely into this next.
+
+Before we continue let's exit from the Docker container with the `exit` command (don't worry the Docker container is still up and running in the background):
+
+```
+$ exit
+```
 
 
 ## Synonyms
@@ -1478,7 +1441,7 @@ Let's try it, first let's search for `q=title_txt_en:"twentieth century"`:
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"twentieth+century"'
 
   #
-  # result will include 29 results
+  # result will include 84 results
   #
 ```
 
@@ -1488,7 +1451,7 @@ And now let's search for `q=title_txt_en:"20th century"`:
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"20th+century"'
 
   #
-  # result will include 4 results
+  # result will include 22 results
   #
 ```
 
@@ -1500,10 +1463,49 @@ We can indicate Solr that "twentieth" and "20th" are synonyms by updating the `s
 20th,twentieth
 ```
 
-Because our Solr is running inside a Docker container we need to update the `synonyms.txt` through Docker. We can use a command like this:
+Because our Solr is running inside a Docker container we need to update the `synonyms.txt` file *inside* the container. We are going to do this in four steps:
+
+1. First we'll copy `synonyms.txt` from the Docker container to our machine
+2. Then we'll update the file in our machine (with whatever editor we are comfortable with)
+3. Next we'll copy our updated local copy back to the container
+4. And lastly, we'll tell Solr to reload the core's configuration so the changes take effect.
+
+To copy the `synonyms.txt` from the container to our machine we'll issue the following command:
 
 ```
-$ docker exec -it solr-container /bin/bash -c 'echo "20th,twentieth" >> /var/solr/data/bibdata/conf/synonyms.txt'
+$ docker cp solr-container:/var/solr/data/bibdata/conf/synonyms.txt .
+$ ls
+
+  #
+  # drwxr-xr-x   3 user-id  staff    96 Jan 16 18:02 .
+  # drwxr-xr-x  51 user-id  staff  1632 Jan 12 20:10 ..
+  # -rw-r--r--@  1 user-id  staff  1124 Nov 11 02:31 synonyms.txt
+  #
+```
+
+We can view the contents of the file with a command as follows:
+
+```
+$ cat synonyms.txt
+
+  #
+  # will include a few lines including
+  #
+  # GB,gib,gigabyte,gigabytes
+  # Television, Televisions, TV, TVs
+  #
+```
+
+Let's edit this file with whatever editor your are comfortable. Our goal is to add a new line to make `20th` and `twentieth` synonyms, we can do it like this:
+
+```
+$ echo "20th,twentieth" >> synonyms.txt
+```
+
+Now that we have updated our local copy of the synonyms file we need to copy this new version back to the Docker container, we can do this with a command like this:
+
+```
+$ docker cp synonyms.txt solr-container:/var/solr/data/bibdata/conf/
 ```
 
 If we refresh the page http://localhost:8983/solr/#/bibdata/files?file=synonyms.txt on our browser we should see that the new line has been added to the `synonyms.txt` file.  However, we *must reload our core* for the changes to take effect. We can do this as follow:
@@ -1521,13 +1523,14 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
 
 You can also reload the core via the [Solr Admin](http://localhost:8983/solr/#/) page. Select "Core Admin", then "bibdata", and click "Reload".
 
-If you run the queries again they will both report "33 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
+If you run the queries again they will both report "106 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"twentieth+century"'
 
   #
-  # result will include 33 results
+  # result will include 106 results
+  # 88 with "twentieth century" plus 22 with "20th century"
   #
 ```
 
@@ -1536,11 +1539,31 @@ To find more about synonyms take a look at this [blog post](https://library.brow
 
 ## Core-specific configuration
 
-One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. In our `bibdata` core it would be located under  `~/solr-8.4.1/server/solr/bibdata/conf/solrconfig.xml`.
+One of the most important configuration files for a Solr core is `solrconfig.xml` located in the configuration folder for the core. We can view the content of this file in our `bibdata` core in this URL http://localhost:8983/solr/#/bibdata/files?file=solrconfig.xml
 
-A default `solrconfig.xml` file is about 1300 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
+A default `solrconfig.xml` file is about 1100 lines of heavily documented XML. We won't need to make changes to most of the content of this file, but there are a couple of areas that are worth knowing about: request handlers and search components.
 
-**Note:** Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file. There is a separate file for Solr-wide configuration settings. In our Solr installation it will be under `~/solr-8.4.1/server/solr/solr.xml`. This file is out of the scope of this tutorial.
+**Note:** Despite its name, file `solrconfig.xml` controls the configuration *for our core*, not for the entire Solr installation. Each core has its own `solrconfig.xml` file.
+
+To make things easier for the rest of this section let's download two copies of this file to our local machine:
+
+```
+$ docker cp solr-container:/var/solr/data/bibdata/conf/solrconfig.xml solrconfig.xml
+$ docker cp solr-container:/var/solr/data/bibdata/conf/solrconfig.xml solrconfig.bak
+$ ls
+
+  #
+  # drwxr-xr-x   4 user-id  staff    128 Jan 16 18:19 .
+  # drwxr-xr-x  51 user-id  staff   1632 Jan 12 20:10 ..
+  # -rw-r--r--@  1 user-id  staff  47746 Jan 16 18:36 solrconfig.bak
+  # -rw-r--r--@  1 user-id  staff  47746 Jan 16 18:36 solrconfig.xml
+  # -rw-r--r--@  1 user-id  staff   1151 Jan 16 18:12 synonyms.txt
+  #
+```
+
+`solrconfig.xml` is the file that we will be working on. Like with the `synonyms.txt` file before, the general workflow will be to make changes to this local version of the file, copy the updated file to the Docker container, and reload the Solr core to pick up the changes.
+
+`solrconfig.bak` on the other hand is just backup, in case we mess up `solrconfig.xml` and need to go back to a well-known state.
 
 
 ### Request Handlers
@@ -1551,14 +1574,11 @@ When we submit a request to Solr the request is processed by a request handler. 
 $ curl 'http://localhost:8983/solr/bibdata/select?q=*'
 ```
 
-The `/select` in the URL points to a request handler defined in `solrconfig.xml`. If we look at the content of this file you'll notice a definition like this:
+The `/select` in the URL points to a request handler defined in `solrconfig.xml`. If we look at the content of this file you'll notice (around like 733) a definition that looks like the one below, notice the `"/select"` in this request handler definition:
 
 ```
-$ cat ~/solr-8.4.1/server/solr/bibdata/conf/solrconfig.xml
-
   #
-  # notice the "/select" in this requestHandler definition
-  #
+  # <!-- Primary search handler, expected by most clients, examples and UI frameworks -->
   # <requestHandler name="/select" class="solr.SearchHandler">
   #   <lst name="defaults">
   #     <str name="echoParams">explicit</str>
@@ -1571,21 +1591,24 @@ $ cat ~/solr-8.4.1/server/solr/bibdata/conf/solrconfig.xml
 We can make changes to this section to indicate that we want to use the eDisMax query parser (`defType`) by default and set the default query fields (`qf`) to title and author. To do so we could update the "defaults" section as follows:
 
 ```
-  <lst name="defaults">
-    <str name="echoParams">explicit</str>
-    <int name="rows">10</int>
-    <str name="defType">edismax</str>
-    <str name="qf">title_txt_en authors_all_txts_en</str>
-  </lst>
+  <requestHandler name="/select" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <int name="rows">10</int>
+      <str name="defType">edismax</str>
+      <str name="qf">title_txt_en authors_all_txts_en</str>
+    </lst>
+  </requestHandler>
 ```
 
-We'll need to reload your core for changes to the `solrconfig.xml` to take effect:
+We need to copy our updated file back to the Docker container and reload the core for the changes to take effect, let's do this with the following commands:
 
 ```
+$ docker cp solrconfig.xml solr-container:/var/solr/data/bibdata/conf/
 $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
 ```
 
-but notice that now we can issue a much simpler query since we don't have to specify the `qf` or `defType` parameters in the URL:
+notice now now we we can issue a much simpler query since we don't have to specify the `qf` or `defType` parameters in the URL:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?q=west'
@@ -1593,16 +1616,12 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=west'
 
 Be careful, an incorrect setting on the `solrconfig.xml` file can take our core down or cause queries to give unexpected results. For example, entering the `qf` value as `title_txt_en, authors_all_txts_en` (notice the comma to separate the fields) will cause Solr to ignore this parameter.
 
-The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
+The [Solr Reference Guide](https://solr.apache.org/guide/solr/latest/configuration-guide/requesthandlers-searchcomponents.html) has excellent documentation on what the values for a request handler mean and how we can configure them.
 
 
 ### Search Components
 
-Request handlers in turn use search components to execute different operations on a search. The [Solr Reference Guide](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html) defines search components as:
-
-    A search component is a feature of search, such as highlighting or faceting.
-    The search component is defined in solrconfig.xml separate from the request
-    handlers, and then registered with a request handler as needed.
+Request handlers in turn use *search components* to execute different operations on a search. Solr comes with several built-in [default search components](https://solr.apache.org/guide/solr/latest/configuration-guide/requesthandlers-searchcomponents.html#default-components) to implement faceting, highlighting, and spell checking to name a few.
 
 You can find the definition of the search components in the `solrconfig.xml` by looking at the `searchComponent` elements defined in this file. For example, in our `solrconfig.xml` there is a section like this for the highlighting feature that we used before:
 
@@ -1623,10 +1642,8 @@ You can find the definition of the search components in the `solrconfig.xml` by 
 
 Notice that the HTML tokens (`<em>` and `</em>`) that we saw in the highlighting results in  previous section are defined here.
 
-Although search components are defined in `solrconfig.xml` it's a bit tricky to notice their relationship to request handlers in the config because Solr defines a [set of default search components](https://lucene.apache.org/solr/guide/8_4/requesthandlers-and-searchcomponents-in-solrconfig.html#default-components) that are automatically applied *unless we overwrite them*.
 
-
-## Spellchecker
+### Spellchecker
 
 Solr provides spellcheck functionality out of the box that we can use to help users when they misspell a word in their queries. For example, if a user searches for "Washingon" (notice the missing "t") most likely Solr will return zero results, but with the spellcheck turned on Solr is able to suggest the correct spelling for the query (i.e. "Washington").
 
@@ -1648,7 +1665,9 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt
   #
 ```
 
-Spellchecking is configured under the `/select` request handler in `solrconfig.xml`. To enable it we need to update the `defaults` settings and enable the `spellcheck` search component. To do this update the `/select` request handler as follows:
+Spellchecking is configured under the `/select` request handler in `solrconfig.xml`. To enable it we need to update the `defaults` settings and enable the `spellcheck` search component.
+
+To do this let's edit our local `solrconfig.xml` and replace the `<requestHandler name="/select" class="solr.SearchHandler">` node again but now with the following content:
 
 ```
 <requestHandler name="/select" class="solr.SearchHandler">
@@ -1673,6 +1692,13 @@ Spellchecking is configured under the `/select` request handler in `solrconfig.x
 </requestHandler>
 ```
 
+and copy our updated version back to the Docker container and reload it:
+
+```
+$ docker cp solrconfig.xml solr-container:/var/solr/data/bibdata/conf/
+$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
+```
+
 The `spellcheck` component indicated above is already defined in the `solrconfig.xml` with the following defaults.
 
 ```
@@ -1687,55 +1713,37 @@ The `spellcheck` component indicated above is already defined in the `solrconfig
 </searchComponent
 ```
 
-Notice how by default it will use the `_text_` field for spellcheck. The `_text_` field would be a good field to use if we were populating it, but we aren't in our current configuration. Instead let's update this setting to use the `title_txt_en` field instead.
+Notice how by default it will use the `_text_` field for spellcheck.
 
-Once these changes have been made to the `solrconfig.xml` we must reload our core for the changes to take effect:
-
-```
-$ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
-
-  #
-  # {
-  #   "responseHeader":{
-  #      "status":0,
-  #      "QTime":10392
-  #   }
-  # }
-  #
-```
-
-Now that our `bibdata` core has been configured to use spellcheck let's try our misspelled query again:
+Now that our `bibdata` core has been configured to use spellcheck let's try our misspelled "washingon" query again:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:washingon'
 
   #
-  # response will indicate
+  # response will still indicate zero documents found,
+  # but the spellcheck node will be populated
   #
-  # {
-  #   "responseHeader":{
-  #     "response":{"numFound":0,"start":0,"docs":[]
-  #   },
-  #   "spellcheck":{
-  #     "suggestions":[
-  #       "washingon",{
-  #         "numFound":1,
-  #         "startOffset":6,
-  #         "endOffset":15,
-  #         "suggestion":["washington"]
-  #     }],
-  #     "collations":[
-  #       "collation",{
-  #         "collationQuery":"title_txt_en:washington",
-  #         "hits":21,
-  #         "misspellingsAndCorrections":[
-  #         "washingon","washington"]}]
-  #   }
-  # }
-  #
+  # "response":{"numFound":0,"start":0,"numFoundExact":true,"docs":[]},
+  # "spellcheck":{
+  #   "suggestions":[
+  #     "washingon",{
+  #       "numFound":3,
+  #       "startOffset":13,
+  #       "endOffset":22,
+  #       "suggestion":["washington",
+  #         "washigton",
+  #         "washing"]}],
+  #   "collations":[
+  #     "collation",{
+  #       "collationQuery":"title_txt_en:washington",
+  #       "hits":41,
+  #       "misspellingsAndCorrections":[
+  #         "washingon","washington"]},
 ```
 
-Notice that even though we got zero results back (`numFound:0`), the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
+Notice that even though we still got zero results back (`numFound:0`), the response now includes a `spellcheck` section *with the words that were misspelled and the suggested spelling for it*. We can use this information to alert the user that perhaps they misspelled a word or perhaps re-submit the query with the correct spelling.
+
 
 # REFERENCES
 
