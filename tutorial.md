@@ -79,7 +79,9 @@ In this diagram the *client application* could be a program written in Ruby or P
 
 To install Solr we are going to use a tool called Docker that allows us to download small virtual machines (called containers) with pre-installed software. In our case we'll download a container with Solr 9.1.0 installed on it and use that during the workshop.
 
-To start, go to https://www.docker.com/, download the "Docker Desktop", install it, and run it.
+NOTE: You can also download and install the Solr binaries directly on your machine without using Docker. You'll need to have the Java Development Kit (JDK) for this to method to work. If you are interested in this approach take a look at [these instructions](https://github.com/hectorcorrea/solr-for-newbies/blob/code4lib-2023/install_solr_jdk.md) instead.
+
+For the Docker installation let's start by going to https://www.docker.com/, download the "Docker Desktop", install it, and run it.
 
 Once installed run the following command from the terminal to make sure it's running:
 
