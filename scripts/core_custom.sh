@@ -1,7 +1,6 @@
-# Recreates the bibdata core empty
-solr delete -c bibdata
-solr create -c bibdata
-
+#
+# NOTE: Make sure to recreate your Solr core before running these commands
+#
 
 # Add support for multi-value text in english dynamic fields (*_txts_en)
 curl -X POST -H 'Content-type:application/json' --data-binary '{
@@ -50,13 +49,12 @@ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 
 
-# Copy publisher to a (single-value) string field (for faceting)
-curl -X POST -H 'Content-type:application/json' --data-binary '{ 
+# Populate the _text_ field
+curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-copy-field":[
-    { 
-      "source":"publisher_txt_en", 
-      "dest": "publisher_s", 
-      "maxChars": "100"
-    } 
+    {
+      "source":"*",
+      "dest":[ "_text_" ]
+    }
   ]
 }' http://localhost:8983/solr/bibdata/schema

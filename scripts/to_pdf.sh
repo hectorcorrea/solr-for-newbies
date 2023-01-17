@@ -1,4 +1,4 @@
-# Creates a PDF version of tutorial.md 
+# Creates a PDF version of tutorial.md
 # via pandoc and wkhtmltopdf.
 
 # Convert the markdown file to HTML
@@ -13,6 +13,7 @@ pandoc tutorial.md \
 
 # Convert the HTML file to PDF
 # https://wkhtmltopdf.org/usage/wkhtmltopdf.txt
+# (use the installer from wkhtmltopdf.org, not from Homebrew)
 #
 wkhtmltopdf \
 --footer-line \
@@ -24,6 +25,7 @@ wkhtmltopdf \
 --margin-bottom 30 \
 --margin-right 15 \
 --dpi 120 \
+--enable-local-file-access \
 tutorial.html tutorial.pdf
 
 # Other settings that I tried
