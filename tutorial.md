@@ -20,43 +20,7 @@ The fact that Solr is a search engine means that there is a strong focus on spee
 Although Solr could technically be described as a NoSQL database (i.e. it allows us to store and retrieve data in a non-relational form) it is better to think of it as a search engine to emphasize the fact that it is better suited for text-centric and read-mostly environments [Solr in Action, p. 4].
 
 
-### Solr's document model
 
-Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://solr.apache.org/guide/solr/9_0/getting-started/documents-fields-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
-
-In earlier versions of Solr documents were self-contained and did not support nested documents. Starting with version 8 Solr provides [support for nested documents](https://solr.apache.org/guide/8_0/indexing-nested-documents.html). This tutorial does not cover nested documents.
-
-
-### Inverted index
-
-Search engines like Solr use a data structure called [inverted index](https://en.wikipedia.org/wiki/Inverted_index) to support fast retrieval of documents even with complex query expression on large datasets. The basic idea of an inverted index is to use the *terms* inside a document as the *key* of the index rather than the *document's ID* as the key.
-
-Let's illustrate this with an example. Suppose we have three books that we want to index. With a traditional index we would create something like this:
-
-```
-ID          TITLE
---          ------------------------------
-1           Princeton guide for dog owners
-2           Princeton tour guide
-3           Cats and dogs
-```
-
-With an inverted index Solr would take each of the words in the title of our books and use those words as the index key:
-
-```
-KEY         DOCUMENT ID
----------   -----------
-princeton	  1, 2
-owners	    1
-dogs	      1, 3
-guide	      1, 2
-tour	      2
-cats	      3
-```
-
-Notice that the inverted index allow us to do searches for individual *words within the title*. For example a search for the word "guide" immediately tell us that documents 1 and 2 are a match. Likewise a search for "tour" will tells that document 2 is a match.
-
-Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr uses inverted indexes to allow for partial matches as well as to aid with the ranking of the results.
 
 
 ### What is Lucene
@@ -515,6 +479,45 @@ You will need to re-create the core if you want to re-import data to it.
 
 # PART II: SCHEMA
 
+## Solr's document model
+
+Solr uses a document model to represent data. Documents are [Solr's basic unit of information](https://solr.apache.org/guide/solr/9_0/getting-started/documents-fields-schema-design.html#how-solr-sees-the-world) and they can contain different fields depending on what information they represent. For example a book in a library catalog stored as a document in Solr might contain fields for author, title, and subjects, whereas information about a house in a real estate system using Solr might include fields for address, taxes, price, and number of rooms.
+
+In earlier versions of Solr documents were self-contained and did not support nested documents. Starting with version 8 Solr provides [support for nested documents](https://solr.apache.org/guide/8_0/indexing-nested-documents.html). This tutorial does not cover nested documents.
+
+
+## Inverted index
+
+Search engines like Solr use a data structure called [inverted index](https://en.wikipedia.org/wiki/Inverted_index) to support fast retrieval of documents even with complex query expression on large datasets. The basic idea of an inverted index is to use the *terms* inside a document as the *key* of the index rather than the *document's ID* as the key.
+
+Let's illustrate this with an example. Suppose we have three books that we want to index. With a traditional index we would create something like this:
+
+```
+ID          TITLE
+--          ------------------------------
+1           Princeton guide for dog owners
+2           Princeton tour guide
+3           Cats and dogs
+```
+
+With an inverted index Solr would take each of the words in the title of our books and use those words as the index key:
+
+```
+KEY         DOCUMENT ID
+---------   -----------
+princeton	  1, 2
+owners	    1
+dogs	      1, 3
+guide	      1, 2
+tour	      2
+cats	      3
+```
+
+Notice that the inverted index allow us to do searches for individual *words within the title*. For example a search for the word "guide" immediately tell us that documents 1 and 2 are a match. Likewise a search for "tour" will tells that document 2 is a match.
+
+Chapter 3 in Solr in Action has a more comprehensive explanation of how Solr uses inverted indexes to allow for partial matches as well as to aid with the ranking of the results.
+
+## Field types, fields, dynamic fields, and copy fields
 The schema in Solr is the definition of the *field types* and *fields* configured for a given core.
 
 **Field Types** are the building blocks to define fields in our schema. Examples of field types are: `binary`, `boolean`, `pfloat`, `string`, `text_general`, and `text_en`. These are similar to the field types that are supported in a relational database like MySQL but, as we will see later, they are far more configurable than what you can do in a relational database.
@@ -1754,6 +1757,7 @@ Notice that even though we still got zero results back (`numFound:0`), the respo
 * [Solr Reference Guide](https://solr.apache.org/guide/solr/9_0/)
 * [Solr in Action](https://www.worldcat.org/title/solr-in-action/oclc/879605085) by Trey Grainger and Timothy Potter
 * [Relevant search with applications for Solr and Elasticsearch](http://www.worldcat.org/title/relevant-search-with-applications-for-solr-and-elasticsearch/oclc/980984111) by Doug Turnbull and John Berryman
+* [Let's build a Full-Text Search engine](https://artem.krylysov.com/blog/2020/07/28/lets-build-a-full-text-search-engine/) by Artem Krylysov
 
 
 ## Sample data
