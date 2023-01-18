@@ -123,7 +123,7 @@ $ docker run -d -p 8983:8983 --name solr-container solr:9.1.0
 
 ```
 
-The parameter `-d` the previous command tells Docker to run the container in the background (i.e. detached) and the parameter `-p 8983:8983` tells Docker to forwards calls to *our* local port `8983` to the port `8983` on the container.
+The parameter `-d` in the previous command tells Docker to run the container in the background (i.e. detached) and the parameter `-p 8983:8983` tells Docker to forwards calls to *our* local port `8983` to the port `8983` on the container.
 
 We can check that the new container is running with the following command:
 
@@ -1525,7 +1525,7 @@ $ curl 'http://localhost:8983/solr/admin/cores?action=RELOAD&core=bibdata'
 
 You can also reload the core via the [Solr Admin](http://localhost:8983/solr/#/) page. Select "Core Admin", then "bibdata", and click "Reload".
 
-If you run the queries again they will both report "106 results found" regardless of whether  you search for `q=title:"twentieth century"` or `q=title:"20th century"`:
+If you run the queries again they will both report "106 results found" regardless of whether  you search for `q=title_txt_en:"twentieth century"` or `q=title_txt_en:"20th century"`:
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt_en:"twentieth+century"'
