@@ -14,7 +14,7 @@ $ java -version
   #
 ```
 
-If the JDK is installed on ouw machine we'll see the text indicating the version that we have (e.g. "11.0.2" above). If the version number is "11.x", "10.x", "9.x" or "1.8" we should be OK, otherwise, follow the steps below to install a recent version.
+If the JDK is installed on our machine we'll see the text indicating the version that we have (e.g. "11.0.2" above). If the version number is "11.x", "10.x", "9.x" or "1.8" we should be OK, otherwise, follow the steps below to install a recent version.
 
 If we don't have the JDK installed we'll see something like
 
