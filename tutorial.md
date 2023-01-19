@@ -20,9 +20,6 @@ The fact that Solr is a search engine means that there is a strong focus on spee
 Although Solr could technically be described as a NoSQL database (i.e. it allows us to store and retrieve data in a non-relational form) it is better to think of it as a search engine to emphasize the fact that it is better suited for text-centric and read-mostly environments [Solr in Action, p. 4].
 
 
-
-
-
 ### What is Lucene
 
 The core functionality that Solr makes available is provided by a Java library called Lucene. Lucene is [the brain behind](https://lucene.apache.org/) the "indexing and search technology, as well as spellchecking, hit highlighting and advanced analysis/tokenization capabilities" that we will see in this tutorial.
@@ -92,7 +89,7 @@ The parameter `-d` in the previous command tells Docker to run the container in 
 We can check that the new container is running with the following command:
 
 ```
-$ docker ps -f name=solr-container
+$ docker ps
 
   #
   # You'll see something like this...
@@ -176,16 +173,24 @@ File `books.json` contains a small sample data a set with information about a fe
 
 ```
 {
-  "id":"00008027",
-  "author_txt_en":"Patent, Dorothy Hinshaw.",
-  "authors_other_txts_en":["Muñoz, William,"],
-  "title_txt_en":"Horses /",
-  "responsibility_txt_en":"by Dorothy Hinshaw Patent ; photographs by William Muñoz.","publisher_place_str":"Minneapolis, Minn. :",
-  "publisher_name_str":"Lerner Publications,",
-  "publisher_date_str":"c2001.",
-  "subjects_txts_en":["Horses","Horses"],
-  "subjects_form_txts_en":["Juvenile literature"]
-}
+    "id": "00008027",
+    "author_txt_en": "Patent, Dorothy Hinshaw.",
+    "authors_other_txts_en": [
+      "Muñoz, William,"
+    ],
+    "title_txt_en": "Horses /",
+    "responsibility_txt_en": "by Dorothy Hinshaw Patent ; photographs by William Muñoz.",
+    "publisher_place_s": "Minneapolis, Minn. :",
+    "publisher_name_s": "Lerner Publications,",
+    "publisher_date_s": "c2001.",
+    "subjects_ss": [
+      "Horses",
+      "Horses"
+    ],
+    "subjects_form_ss": [
+      "Juvenile literature"
+    ]
+  },
 ```
 
 To import this data to our Solr we'll first *copy* the file to the Docker container
@@ -240,8 +245,8 @@ If you look at the content of the `books.json` file that we imported into our `b
 * **author_txt_en**: string for the main author (MARC 100a)
 * **authors_other_txts_en**: list of other authors (MARC 700a)
 * **title_txt_en**: title of the book (MARC 245ab)
-* **publisher_name_str**: publisher name (MARC 260b)
-* **subjects_txts_en**: an array of subjects (MARC 650a)
+* **publisher_name_s**: publisher name (MARC 260b)
+* **subjects_ss**: an array of subjects (MARC 650a)
 
 The suffix added to each field (e.g. `_txt_en`) is a hint for Solr to pick the appropriate field type for each field as it ingests the data. We will look closely into this in a later section.
 
@@ -267,7 +272,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&fl=id,title_txt_en'
 
 **Note:** When issuing the commands via cURL (as in the previous example) make sure that the fields are separated by a comma *without any spaces in between them*. In other words make sure the URL says `fl=id,title_txt_en` and not `fl=id,` `title_txt_en`. If the parameter includes spaces Solr will not return any results and give you a cryptic error message instead.
 
-Try adding and removing some other fields to this list, for example, `fl=id,title_txt_en,author_txt_en` or `fl=id,title_txt_en,author_txt_en,subjects_txts_en`
+Try adding and removing some other fields to this list, for example, `fl=id,title_txt_en,author_txt_en` or `fl=id,title_txt_en,author_txt_en,subjects_ss`
 
 
 ### Filtering the documents to fetch
@@ -324,10 +329,10 @@ these new books include the words "art" and "history" but they don't have to be 
 
 When searching multi-word keywords for a given field make sure the keywords are surrounded by quotes, for example make sure to use `q=title_txt_en:"art history"` and not `q=title_txt_en:art history`. The later will execute a search for "school" in the `title_txt_en` field and "teachers" in the `_text_` field.
 
-You can validate this by running the query and passing the `debugQuery` flag and seeing the `parsedquery` value. For example in the following command we surround both search terms in quotes:
+You can validate this by running the query and passing the `debug` flag and seeing the `parsedquery` value. For example in the following command we surround both search terms in quotes:
 
 ```
-$ curl -s 'http://localhost:8983/solr/bibdata/select?debugQuery=on&q=title_txt_en:"art+history"' | grep parsedquery
+$ curl -s 'http://localhost:8983/solr/bibdata/select?debug=all&q=title_txt_en:"art+history"' | grep parsedquery
 
   #
   # "parsedquery":"PhraseQuery(title_txt_en:\"art histori\")",
@@ -364,28 +369,22 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&fl=id
 
 When we issue a search, Solr is able to return facet information about the data in our core. This is a built-in feature of Solr and easy to use, we just need to include the `facet=on` and the `facet.field` parameter with the name of the field that we want to facet the information on.
 
-For example, to search for all documents with title "education" (`q=title_txt_en:education`) and retrieve facets (`facet=on`) based on the subjects (`facet.field=subjects_txts_en_str`) we'll use a query like this:
+For example, to search for all documents with title "education" (`q=title_txt_en:education`) and retrieve facets (`facet=on`) based on the subjects (`facet.field=subjects_ss`) we'll use a query like this:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&facet=on&facet.field=subjects_txts_en_str'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&facet=on&facet.field=subjects_ss'
 
   # response will include something like this
   #
   # "facet_counts":{
   #   "facet_fields":{
-  #     "subjects_txts_en_str":[
+  #     "subjects_ss":[
   #       "Education",58,
   #       "Educational change",16,
   #       "Multicultural education",15,
   #       "Education, Higher",14,
   #       "Education and state",13,
   # #
-```
-
-You might have noticed that we used the "string" version of the subjects (`subjects_txts_en_str`) rather than the "text" version of them (`subjects_txts_en`). This is because using the "text" version would have generated facets based on the *tokenized* version of the subjects rather than the original subjects. We will review tokenization in a later section but if you want to see the difference run this command using the text version (`subjects_txts_en`) and notice the facets returned:
-
-```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:education&facet=on&facet.field=subjects_txts_en'
 ```
 
 
@@ -400,13 +399,15 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=id:00007345'
   # "response":{"numFound":1,"start":0,"numFoundExact":true,"docs":[
   # {
   #   "id":"00007345",
-  #   "authorsOther_txts_en":["Giannakis, Georgios B."],
+  #   "authors_other_txts_en":["Giannakis, Georgios B."],
   #   "title_txt_en":"Signal processing advances in wireless and mobile communications /",
   #   "responsibility_txt_en":"edited by G.B. Giannakis ... [et al.].",
-  #   "publisher_txt_en":"Upper Saddle River, NJ :",
-  #   "subjects_txts_en":["Signal processing", "Wireless communication systems"],
-  #   "_version_":1755055519763005440}]
-  # }}
+  #   "publisher_place_s":"Upper Saddle River, NJ :",
+  #   "publisher_name_s":"Prentice Hall PTR,",
+  #   "publisher_date_s":"c2001.",
+  #   "subjects_ss":["Signal processing", "Wireless communication systems"],
+  #   "_version_":1755414312334131200
+  # }
   #
 ```
 
@@ -570,19 +571,21 @@ Notice that unlike a relational database, where only a handful field types are a
 
 ## Fields in our schema
 
-You might be wondering how did the fields like `id`, `title_txt_en`, `author_txt_en`, `subjects_txts_en`, and `subjects_txts_en_str` in our `bibdata` core were created if we never explicitly defined them.
+You might be wondering how did the fields like `id`, `title_txt_en`, `author_txt_en`, and `subjects_ss` in our `bibdata` core were created if we never explicitly defined them.
 
 Solr automatically created most of these fields when we imported the data from the `books.json` file. If you look at a few of the elements in the `books.json` file you'll recognize that they match *most* of the fields defined in our schema. Below is the data for one of the records in our sample data:
 
 ```
 {
-  "id":"00000018",
-  "author_txt_en":"Tarbell, H. S.",
-  "authors_other_txts_en":["Tarbell, Martha,"],
-  "title_txt_en":"The complete geography.",
-  "publisher_txt_en":"New York,",
-  "subjects_txts_en":["Geography"]
-}
+   "id":"00007345",
+   "authors_other_txts_en":["Giannakis, Georgios B."],
+   "title_txt_en":"Signal processing advances in wireless and mobile communications /",
+   "responsibility_txt_en":"edited by G.B. Giannakis ... [et al.].",
+   "publisher_place_s":"Upper Saddle River, NJ :",
+   "publisher_name_s":"Prentice Hall PTR,",
+   "publisher_date_s":"c2001.",
+   "subjects_ss":["Signal processing", "Wireless communication systems"],
+ }
 ```
 
 The process that Solr follows when a new document is ingested into Solr is more or less as follows:
@@ -591,7 +594,7 @@ The process that Solr follows when a new document is ingested into Solr is more 
 
 2. If there is no exact match in the schema then Solr will look at the **dynamicFields** definitions to see if the field can be handled with some predefined settings. This is what happened with the `title_txt_en` field. Because there is not `title_txt_en` definition in the schema Solr used the dynamic field definition for `*_txt_en` that indicated that the value should be indexed using the text in English (`text_en`) field definition.
 
-3. If no match is found in the dynamic fields either Solr will [guess what is the best type to use](https://bryanbende.com/development/2015/11/14/solr-schemas) based on the data for this field in the first document. This is what happened with the `subjects_txts_en` field (notice that this field ends with `_txts_en` rather than `_txt_en`). In this case, since there is no dynamic field definition to handle this ending, Solr guessed and created field `subjects_txts_en` as `text_general` (and additionally created a string version `subjects_txts_en_str` of the field). For production use Solr recommends to disable this automatic guessing, this is what the "WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use" was about when we first created our Solr core.
+3. If no match is found in the dynamic fields either Solr will [guess what is the best type to use](https://bryanbende.com/development/2015/11/14/solr-schemas) based on the data for this field in the first document. This is what happened with the `authors_other_txts_en` field (notice that this field ends with `_txts_en` rather than `_txt_en`). In this case, since there is no dynamic field definition to handle this ending, Solr guessed and created field `authors_other_txts_en` as `text_general`. For production use Solr recommends to disable this automatic guessing, this is what the "WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use" was about when we first created our Solr core.
 
 In the following sections we are going to drill down into some of specifics of the fields and dynamic field definitions that are configured in our Solr core.
 
@@ -920,21 +923,24 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 }' http://localhost:8983/solr/bibdata/schema
 ```
 
-We could also add another `copy-field` directive to copy the main author from a text field (`author_txt_en`) to a string field (`author_s`) so that we can sort search results by author. We'll skip that for now.
 
-
-### Customizing the subject field
-Another customization that we'll do is create a string representation of the `subjects_txts_en` field so that we can use subjects as facets (remember that facets require string fields).
-
-This string version of this field is something that we got for free when Solr automatically guessed the field type to use for it (remember that Solr created an additional `subjects_txts_en_str` for us). Now that we are handling this field explicitly with our `*_txts_en dynamicField` definition we need to explicitly ask Solr to create this extra field for us:
+### Customizing the subject field (optional)
+Another customization that we'll do is to aggregate all the subject fields (`subjects_ss`, `subjects_geo_ss`, `subjects_chrono`) into a new single field `subjects_all_txts_en` we'll make that field a text field so that we can search by subject easily. We'll do this via a copy field
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-copy-field":[
     {
-      "source":"subjects_txts_en",
-      "dest": "subjects_ss",
-      "maxChars": "100"
+      "source":"subjects_ss",
+      "dest": "subjects_all_txts_en"
+    },
+    {
+      "source":"subjects_geo_ss",
+      "dest": "subjects_all_txts_en"
+    },
+    {
+      "source":"subjects_chrono_ss",
+      "dest": "subjects_all_txts_en"
     }
   ]
 }' http://localhost:8983/solr/bibdata/schema
@@ -1119,17 +1125,17 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,author_txt_
 
 * Documents that do *not* have additional authors (`q=NOT authors_other_txts_en:*`) be aware that the `NOT` **must be in uppercase**.
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,authors_all_txts_en&q=NOT+authors_other_txts_en:*'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=*&q=NOT+authors_other_txts_en:*'
 ```
 
-* Documents where at least one of the subjects has a word that starts with "com" (`q=subjects_txts_en:com*`)
+* Documents where at least one of the subjects is about "communication" (`q=subjects_all_txts_en:communication`) -- in reality because this field is a Text in English field this query will return all documents where the `subjects_all_txts_en` has the word "commun", the stem of "communication", you can validate this in the debug output:
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=subjects_txts_en:com*'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_all_txts_en&q=subjects_all_txts_en:communication&debug=all'
 ```
 
-* Documents where title include "science" *and* at least one of the subjects is "women" (`q=title_txt_en:science AND subjects_txts_en:women` notice that both search conditions are indicated in the `q` parameter) Again, notice that the `AND` operator must be in uppercase.
+* Documents where title include "science" *and* at least one of the subjects is "women" (`q=title_txt_en:science AND subjects_all_txts_en:women` notice that both search conditions are indicated in the `q` parameter) Again, notice that the `AND` operator must be in uppercase.
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_txts_en&q=title_txt_en:science+AND+subjects_txts_en:women'
+$ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en,subjects_all_txts_en&q=title_txt_en:science+AND+subjects_all_txts_en:women'
 ```
 
 * Documents where title *includes* the word "history" but *does not include* the word "art" (`q=title_txt_en:history AND NOT title_txt_en:art`)
@@ -1266,9 +1272,9 @@ $ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.field=subje
   #
 ```
 
-You might have noticed that we are using the `string` representation of the subjects (`subjects_ss`) to generate the facets rather than the `text_en` version stored in the `subjects_txts_en` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subjects_txts_en` field is tokenized whereas the indexed version of `subjects_ss` is the entire string.
+IMPORTANT: You might have noticed that we are using the `string` representation of the subjects (`subjects_ss`) to generate the facets rather than the `text_en` version stored in the `subjects_all_txts_en` field. This is because, as the Solr Reference Guide indicates facets are calculated "based on indexed terms". The indexed version of the `subjects_all_txts_en` field is tokenized whereas the indexed version of `subjects_ss` is the entire string.
 
-You can indicate more than one `facet.field` in a query to Solr (e.g. `facet.field=publisher_s&facet.field=subjects_ss`) to get facets for more than one field.
+You can indicate more than one `facet.field` in a query to Solr (e.g. `facet.field=publisher_name_s&facet.field=subjects_ss`) to get facets for more than one field.
 
 There are several extra parameters that you can pass to Solr to customize how many facets are returned on result set. For example, if you want to list only the top 20 subjects in the facets rather than all of them you can indicate this with the following syntax: `f.subjects_ss.facet.limit=20`. You can also filter only get facets that have *at least* certain number of matches, for example only subjects that have at least 50 books `f.subjects_ss.facet.mincount=50` as shown the following example:
 
@@ -1280,26 +1286,26 @@ You can also facet **by multiple fields at once** this is called [Pivot Faceting
 
 Note: Unfortunately the `facet.pivot` parameter is not available via the Solr Admin web page, if you want to try this example you will have to do it via the command on the terminal.
 
-This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* (`facet.pivot=subjects_ss,publisher_name_str`) you could issue the following command:
+This parameter allows you to list the fields that should be used to facet the data, for example to facet the information *by subject and then by publisher* (`facet.pivot=subjects_ss,publisher_name_s`) you could issue the following command:
 
 ```
-$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_ss,publisher_name_str&facet.limit=5'
+$ curl 'http://localhost:8983/solr/bibdata/select?q=*&facet=on&facet.pivot=subjects_ss,publisher_name_s&facet.limit=5'
 
   #
   # response will include facets organized as follows:
   #
   # "facet_counts":{
   #   "facet_pivot":{
-  #     "subjects_ss,publisher_name_str":[{
+  #     "subjects_ss,publisher_name_s":[{
   #     "field":"subjects_ss",
   #       "value":"Women",
   #         "count":435,
   #         "pivot":[{
-  #           "field":"publisher_name_str",
+  #           "field":"publisher_name_s",
   #           "value":"Chelsea House Publishers,",
   #           "count":22},
   #           {
-  #           "field":"publisher_name_str",
+  #           "field":"publisher_name_s",
   #           "value":"Enslow Publishers,",
   #           "count":13},
   #           ...
@@ -1317,7 +1323,11 @@ Notice how the results for the subject "Women" (435 results) are broken down by 
 
 Another Solr feature is the ability to return a fragment of the document where the match was found for a given search term. This is called [highlighting](https://solr.apache.org/guide/solr/9_0/query-guide/highlighting.html).
 
-Let's say that we search for books where the one of the authors (`authors_all_txts_en`) or the title (`title_txt_en`) include the word "Washington". If we add an extra parameter to the query `hl=on` to enable highlighting the results will include an indicator of what part of the author or the title has the match.
+Let's say that we search for books where one of the authors or the title include the word "Washington". To do this we'll set our parameters
+* `q=washington`
+* `qf=title_txt_en authors_all_txts_en`
+* `defType=edismax` (the `qf` parameter does not work with the Standard parser so we explicitly select eDisMax)
+* `hl=on` (this is what enables hit highlightint)
 
 ```
 $ curl 'http://localhost:8983/solr/bibdata/select?defType=edismax&q=washington&qf=title_txt_en+authors_all_txts_en&hl=on'
