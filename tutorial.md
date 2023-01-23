@@ -925,7 +925,7 @@ $ curl -X POST -H 'Content-type:application/json' --data-binary '{
 
 
 ### Customizing the subject field (optional)
-Another customization that we'll do is to aggregate all the subject fields (`subjects_ss`, `subjects_geo_ss`, `subjects_chrono`) into a new single field `subjects_all_txts_en` we'll make that field a text field so that we can search by subject easily. We'll do this via a copy field
+Another customization that we'll do is to aggregate all the subject fields (`subjects_ss`, `subjects_geo_ss`, `subjects_chrono`) into a new single field `subjects_all_txts_en` and we'll make that field a text field so that we can search by subject easily. We'll do this via a copy field
 
 ```
 $ curl -X POST -H 'Content-type:application/json' --data-binary '{
