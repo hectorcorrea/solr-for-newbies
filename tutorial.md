@@ -40,7 +40,7 @@ In this diagram the *client application* could be a program written in Ruby or P
 
 To install Solr we are going to use a tool called Docker that allows us to download small virtual machines (called containers) with pre-installed software. In our case we'll download a container with Solr 9.1.0 installed on it and use that during the workshop.
 
-NOTE: You can also download and install the Solr binaries directly on your machine without using Docker. You'll need to have the Java Development Kit (JDK) for this to method to work. If you are interested in this approach take a look at [these instructions](https://github.com/hectorcorrea/solr-for-newbies/blob/code4lib-2023/install_solr_jdk.md) instead.
+**NOTE:** You can also download and install the Solr binaries directly on your machine without using Docker. You'll need to have the Java Development Kit (JDK) for this to method to work. If you are interested in this approach take a look at [these instructions](https://github.com/hectorcorrea/solr-for-newbies/blob/code4lib-2023/install_solr_jdk.md) instead.
 
 For the Docker installation let's start by going to https://www.docker.com/, download the "Docker Desktop", install it, and run it.
 
@@ -506,12 +506,12 @@ With an inverted index Solr would take each of the words in the title of our boo
 ```
 KEY         DOCUMENT ID
 ---------   -----------
-princeton	  1, 2
-owners	    1
-dogs	      1, 3
-guide	      1, 2
-tour	      2
-cats	      3
+princeton   1, 2
+owners      1
+dogs        1, 3
+guide       1, 2
+tour        2
+cats        3
 ```
 
 Notice that the inverted index allow us to do searches for individual *words within the title*. For example a search for the word "guide" immediately tell us that documents 1 and 2 are a match. Likewise a search for "tour" will tells that document 2 is a match.
