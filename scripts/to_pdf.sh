@@ -4,7 +4,7 @@
 # Convert the markdown file to HTML
 # https://pandoc.org/MANUAL.html
 #
-pandoc tutorial.md \
+pandoc ../tutorial.md \
 -f markdown \
 -t html -s -o tutorial.html \
 --toc \
@@ -26,7 +26,7 @@ wkhtmltopdf \
 --margin-right 15 \
 --dpi 120 \
 --enable-local-file-access \
-tutorial.html tutorial.pdf
+tutorial.html ../tutorial.pdf
 
 # Other settings that I tried
 #
@@ -38,3 +38,4 @@ tutorial.html tutorial.pdf
 # --page-size Letter \
 #
 
+rm tutorial.html
