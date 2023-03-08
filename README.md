@@ -10,4 +10,6 @@ File **slides.pdf** contains the slides used in the workshop to support the mate
 
 File **books.json** has the sample data that we will use during the workshop.
 
+File **install_solr_jdk.md** has instructions on how to install Solr directly on your machine (instead of using a Docker container).
+
 Folder `scripts/` has a few scripts that can be used to automate the steps of adding documents or fields to the Solr core used in the tutorial. These scrips just bundle the steps documented in tutorial.md.
