@@ -1785,3 +1785,5 @@ The steps to create the `books.json` file from the original MARC data are as fol
 
 ## Acknowledgements
 I would like to thank my former team at the Brown University Library for their support and recommendations as I prepared the initial version of this tutorial back in 2017 as well as those that attended the workshop at the Code4Lib conference in Washington, DC in 2018 and San Jose, CA in 2019. A special thanks goes to [Birkin Diana](https://github.com/birkin/) for helping me run the workshop in 2018 and 2019 and for taking the time to review the materials (multiple times!) and painstakingly testing each of the examples.
+
+Likewise, a big thanks to [Bess Sadler](https://github.com/bess), [Carolyn Cole](https://github.com/carolyncole), [Francis Kayiwa](https://github.com/kayiwa), and [James Griffin](https://github.com/jrgriffiniii) from the Princeton University Library for helping me run the workshop at Code4Lib 2023.
