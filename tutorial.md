@@ -1223,7 +1223,7 @@ If want to see why Solr ranked a result higher than another you can pass an addi
 $ curl 'http://localhost:8983/solr/bibdata/select?q=title_txt_en:west+authors_all_txts_en:washington&debug=all&debug.explain.structured=true'
 ```
 
-The result will include an `explain` node with a ton of information for each of the documents ranked. This information is rather complex but it has a wealth of details that could help us figure out why a particular document is ranked higher or lower than what we would expect. Take a look at [this blog post](https://library.brown.edu/DigitalTechnologies/understanding-scoring-of-documents-in-solr/) to get an idea on how to interpret this information.
+The result will include an `explain` node with a ton of information for each of the documents ranked. This information is rather complex but it has a wealth of details that could help us figure out why a particular document is ranked higher or lower than what we would expect. Take a look at [this blog post](https://library.brown.edu/create/digitaltechnologies/understanding-scoring-of-documents-in-solr/) to get an idea on how to interpret this information.
 
 
 ### Filtering with ranges
