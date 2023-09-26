@@ -1549,7 +1549,7 @@ $ curl 'http://localhost:8983/solr/bibdata/select?fl=id,title_txt_en&q=title_txt
   #
 ```
 
-To find more about synonyms take a look at this [blog post](https://library.brown.edu/DigitalTechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.
+To find more about synonyms take a look at this [blog post](https://library.brown.edu/create/digitaltechnologies/using-synonyms-in-solr/) where I talk about the different ways of adding synonyms, how to test them in the Solr Admin tool, and the differences between applying synonyms at index time versus query time.
 
 
 ## Core-specific configuration
